@@ -82,7 +82,7 @@ class FullCartPage extends StatelessWidget {
                     },
                   ),
                 ),
-                _buildCartSummary(context, cartState),
+                _buildCartSummary(context, subtotal, cartState.deliveryFee),
               ],
             ),
     );
@@ -317,12 +317,11 @@ class FullCartPage extends StatelessWidget {
   // تصميم ملخص الفاتورة والزر
   Widget _buildCartSummary(
     BuildContext context,
-    CartState cartState,
+    double subtotal,
+    double deliveryFee,
   ) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
-    final subtotal = cartState.subtotal;
-    final deliveryFee = cartState.deliveryFee;
     final total = subtotal + deliveryFee;
 
     return Container(
