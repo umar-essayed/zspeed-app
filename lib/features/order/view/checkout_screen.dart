@@ -909,10 +909,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildPaymentMethodSelector(CheckoutCubit cubit, CheckoutState state) {
-    final userType = context.read<AuthCubit>().userType;
-    final role = _parseRole(userType);
-    final canPayByCard = canInitiateCardPayment(role);
-
     return RadioGroup<PaymentMethodType>(
       groupValue: state.paymentMethod,
       onChanged: (value) {
@@ -937,21 +933,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            if (canPayByCard) ...[
-              Expanded(
-                child: _buildPaymentCardWrapper(
-                  isSelected: state.paymentMethod == PaymentMethodType.card,
-                  child: _buildHorizontalPaymentOption(
-                    cubit,
-                    state,
-                    PaymentMethodType.card,
-                    'Card',
-                    Icons.credit_card,
-                  ),
+            Expanded(
+              child: _buildPaymentCardWrapper(
+                isSelected: state.paymentMethod == PaymentMethodType.card,
+                child: _buildHorizontalPaymentOption(
+                  cubit,
+                  state,
+                  PaymentMethodType.card,
+                  'Card',
+                  Icons.credit_card,
                 ),
               ),
-              const SizedBox(width: 8),
-            ],
+            ),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildPaymentCardWrapper(
                 isSelected: state.paymentMethod == PaymentMethodType.wallet,
@@ -968,7 +962,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -1375,13 +1368,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Text(
                 (state.deliveryLat != 0.0 && state.deliveryLng != 0.0 && state.deliveryDistanceKm == null)
                     ? AppLocalizations.of(context)!.calculating
-                    : (state.deliveryDistanceKm == null
-                        ? AppLocalizations.of(
-                            context,
-                          )!.egpAmount(state.subtotal.toStringAsFixed(2))
-                        : AppLocalizations.of(
-                            context,
-                          )!.egpAmount(state.total.toStringAsFixed(2))),
+                    : AppLocalizations.of(
+                        context,
+                      )!.egpAmount(state.total.toStringAsFixed(2)),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -1897,8 +1886,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             paymentSuccess = true;
             transactionRef = res['invoiceId']?.toString();
           } else {
-            paymentSuccess = false;
-            errorMessage = res['message']?.toString() ?? 'Card charge was not approved';
+            final rawInv = res['invoiceId'];
+            final inv = rawInv is num ? rawInv.toInt() : (int.tryParse(rawInv?.toString() ?? '') ?? 0);
+            if (inv > 0) {
+              final statusCheck = await _paylinkDatasource.checkPaymentStatus(inv);
+              if (statusCheck['isPaid'] == true) {
+                paymentSuccess = true;
+                transactionRef = inv.toString();
+              } else {
+                paymentSuccess = false;
+                errorMessage = res['message']?.toString() ?? 'Card charge was not approved';
+              }
+            } else {
+              paymentSuccess = false;
+              errorMessage = res['message']?.toString() ?? 'Card charge was not approved';
+            }
           }
         } catch (e) {
           paymentSuccess = false;
@@ -1935,11 +1937,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             paymentSuccess = true;
             transactionRef = (result.invoiceId != 0 ? result.invoiceId : invoiceId).toString();
           } else {
-            paymentSuccess = false;
-            errorMessage = result?.message ??
-                (Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'تم إلغاء عملية الدفع أو لم تكتمل.'
-                    : 'Payment was cancelled or closed.');
+            // Verify with PayLink directly before reporting failure!
+            if (invoiceId > 0) {
+              final statusCheck = await _paylinkDatasource.checkPaymentStatus(invoiceId);
+              if (statusCheck['isPaid'] == true) {
+                paymentSuccess = true;
+                transactionRef = invoiceId.toString();
+              } else {
+                paymentSuccess = false;
+                errorMessage = result?.message ??
+                    (Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'تم إلغاء عملية الدفع أو لم تكتمل.'
+                        : 'Payment was cancelled or closed.');
+              }
+            } else {
+              paymentSuccess = false;
+              errorMessage = result?.message ??
+                  (Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'تم إلغاء عملية الدفع أو لم تكتمل.'
+                      : 'Payment was cancelled or closed.');
+            }
           }
         } catch (e) {
           paymentSuccess = false;

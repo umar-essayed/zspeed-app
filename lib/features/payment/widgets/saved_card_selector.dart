@@ -40,6 +40,10 @@ class SavedCardSelector extends StatelessWidget {
                 cards.firstWhere((c) => c.isDefault, orElse: () => cards.first);
             onCardSelected(defaultCard);
           });
+        } else if (cards.isEmpty && !useHostedCheckout && selectedCard == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            onHostedCheckoutChanged(true);
+          });
         }
 
         return Column(

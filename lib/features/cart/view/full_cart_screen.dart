@@ -82,7 +82,7 @@ class FullCartPage extends StatelessWidget {
                     },
                   ),
                 ),
-                _buildCartSummary(context, subtotal),
+                _buildCartSummary(context, cartState),
               ],
             ),
     );
@@ -317,9 +317,14 @@ class FullCartPage extends StatelessWidget {
   // تصميم ملخص الفاتورة والزر
   Widget _buildCartSummary(
     BuildContext context,
-    double subtotal,
+    CartState cartState,
   ) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final subtotal = cartState.subtotal;
+    final deliveryFee = cartState.deliveryFee;
+    final total = subtotal + deliveryFee;
+
     return Container(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomPadding),
       decoration: BoxDecoration(
@@ -342,8 +347,17 @@ class FullCartPage extends StatelessWidget {
               context,
             )!.egpAmount(subtotal.toStringAsFixed(2)),
           ),
+          if (deliveryFee > 0) ...[
+            const SizedBox(height: 8),
+            _summaryRow(
+              isAr ? 'رسوم التوصيل المقدرة' : 'Estimated Delivery Fee',
+              AppLocalizations.of(
+                context,
+              )!.egpAmount(deliveryFee.toStringAsFixed(2)),
+            ),
+          ],
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 15),
+            padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(),
           ),
           Row(
@@ -360,7 +374,7 @@ class FullCartPage extends StatelessWidget {
               Text(
                 AppLocalizations.of(
                   context,
-                )!.egpAmount(subtotal.toStringAsFixed(2)),
+                )!.egpAmount(total.toStringAsFixed(2)),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,

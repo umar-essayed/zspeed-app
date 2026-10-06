@@ -79,20 +79,23 @@ class _PaylinkWebviewPageState extends State<PaylinkWebviewPage> {
     if (isCustomScheme || isHttpReturn) {
       _hasPopped = true;
 
-      final successParam = uri.queryParameters['success'];
-      final invoiceStatus = uri.queryParameters['invoice_status'] ??
+      final successParam = uri.queryParameters['success']?.toLowerCase();
+      final invoiceStatus = (uri.queryParameters['invoice_status'] ??
           uri.queryParameters['status'] ??
-          (successParam == '1' ? 'PAID' : 'FAILED');
+          '').toUpperCase();
       final invoiceId = int.tryParse(uri.queryParameters['invoice_id'] ?? '') ??
           widget.expectedInvoiceId;
       final message = uri.queryParameters['message'] ?? 'Payment processed';
-      final isSuccess = successParam == '1' || invoiceStatus.toUpperCase() == 'PAID';
+      final isSuccess = successParam == '1' ||
+          successParam == 'true' ||
+          invoiceStatus == 'PAID' ||
+          invoiceStatus == 'COMPLETED';
 
       Navigator.of(context).pop(
         PaylinkWebviewResult(
           success: isSuccess,
           invoiceId: invoiceId,
-          status: invoiceStatus,
+          status: invoiceStatus.isNotEmpty ? invoiceStatus : (isSuccess ? 'PAID' : 'FAILED'),
           message: message,
         ),
       );

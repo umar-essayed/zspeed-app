@@ -66,6 +66,16 @@ class PaylinkDatasource {
     double? amount,
     String? orderTitle,
   }) async {
+    // For direct pre-payment flow without an existing order document, use direct init
+    if (orderId == null || amount != null) {
+      return _directInitCheckout(
+        orderId: orderId,
+        rideId: rideId,
+        amount: amount,
+        orderTitle: orderTitle,
+      );
+    }
+
     try {
       final callable = _functions.httpsCallable('paylinkInitCheckout');
       final response = await callable.call<Map<String, dynamic>>({
@@ -74,7 +84,7 @@ class PaylinkDatasource {
       });
       return Map<String, dynamic>.from(response.data);
     } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'not-found' || e.code == 'unavailable') {
+      if (e.code == 'not-found' || e.code == 'unavailable' || e.code == 'invalid-argument') {
         return _directInitCheckout(
           orderId: orderId,
           rideId: rideId,
@@ -218,6 +228,52 @@ class PaylinkDatasource {
     }
   }
 
+  /// Verify invoice status directly with PayLink official check-status endpoint
+  Future<Map<String, dynamic>> checkPaymentStatus(int invoiceId) async {
+    try {
+      final creds = await _getCredentials();
+      final publicToken = creds['publicToken']!;
+      final hashToken = creds['hashToken']!;
+
+      final idStr = invoiceId.toString();
+      final signature = _buildSignature([idStr], hashToken);
+
+      final payload = {
+        'token': publicToken,
+        'invoice_id': idStr,
+        'signature': signature,
+      };
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/integration/check-status'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final resJson = jsonDecode(response.body);
+        final data = _extractData(resJson);
+        final paidStatus = (data['paid_status'] ?? data['paidStatus'] ?? '')
+            .toString()
+            .toUpperCase();
+        final isPaid = paidStatus == 'PAID';
+
+        return {
+          'isPaid': isPaid,
+          'paidStatus': paidStatus,
+          'invoiceId': invoiceId,
+          'authCode': data['auth_code']?.toString(),
+        };
+      }
+    } catch (_) {}
+
+    return {
+      'isPaid': false,
+      'paidStatus': 'UNKNOWN',
+      'invoiceId': invoiceId,
+    };
+  }
+
   /// Charge a vaulted Card Token for an Order, Ride, or direct amount
   Future<Map<String, dynamic>> chargeSavedCard({
     required String cardId,
@@ -226,6 +282,17 @@ class PaylinkDatasource {
     double? amount,
     String? orderTitle,
   }) async {
+    // For direct pre-payment flow without an existing order document, use direct charge
+    if (orderId == null || amount != null) {
+      return _directChargeSavedCard(
+        cardId: cardId,
+        orderId: orderId,
+        rideId: rideId,
+        amount: amount,
+        orderTitle: orderTitle,
+      );
+    }
+
     try {
       final callable = _functions.httpsCallable('paylinkChargeSavedCard');
       final response = await callable.call<Map<String, dynamic>>({
@@ -236,7 +303,7 @@ class PaylinkDatasource {
       });
       return Map<String, dynamic>.from(response.data);
     } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'not-found' || e.code == 'unavailable') {
+      if (e.code == 'not-found' || e.code == 'unavailable' || e.code == 'invalid-argument') {
         return _directChargeSavedCard(
           cardId: cardId,
           orderId: orderId,
