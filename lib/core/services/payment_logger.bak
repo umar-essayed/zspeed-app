@@ -1,0 +1,102 @@
+import 'dart:convert';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart' show sha256;
+
+typedef PaymentEventName = String;
+
+class PaymentLogger {
+  static const Set<String> _allowlist = {
+    'name',
+    'orderId',
+    'attemptId',
+    'customerIdHash',
+    'amount',
+    'currency',
+    'maskedCardBrand',
+    'maskedCardLast4',
+    'resultCode',
+    'reasonCode',
+    'decision',
+    'resolvedBy',
+    'durationMs',
+    'triggeredFallbackQuery',
+    'resolvedStateTransition',
+    'emailHash',
+    'phoneHash',
+  };
+
+  static String hashPii(String value, String pepper) {
+    final bytes = utf8.encode(value + pepper);
+    return sha256.convert(bytes).toString();
+  }
+
+  static Map<String, dynamic> _sanitize(Map<String, dynamic> fields) {
+    final result = <String, dynamic>{};
+    for (final key in fields.keys) {
+      if (_allowlist.contains(key)) {
+        result[key] = fields[key];
+      }
+    }
+    return result;
+  }
+
+  static void logPaymentEvent(
+    PaymentEventName name, {
+    String? orderId,
+    String? attemptId,
+    String? customerIdHash,
+    double? amount,
+    String? currency,
+    String? maskedCardBrand,
+    String? maskedCardLast4,
+    String? resultCode,
+    String? reasonCode,
+    String? decision,
+    String? resolvedBy,
+    int? durationMs,
+    bool? triggeredFallbackQuery,
+    String? resolvedStateTransition,
+    String? emailHash,
+    String? phoneHash,
+    Map<String, dynamic>? extra,
+  }) {
+    final fields = <String, dynamic>{
+      if (orderId != null) 'orderId': orderId,
+      if (attemptId != null) 'attemptId': attemptId,
+      if (customerIdHash != null) 'customerIdHash': customerIdHash,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (maskedCardBrand != null) 'maskedCardBrand': maskedCardBrand,
+      if (maskedCardLast4 != null) 'maskedCardLast4': maskedCardLast4,
+      if (resultCode != null) 'resultCode': resultCode,
+      if (reasonCode != null) 'reasonCode': reasonCode,
+      if (decision != null) 'decision': decision,
+      if (resolvedBy != null) 'resolvedBy': resolvedBy,
+      if (durationMs != null) 'durationMs': durationMs,
+      if (triggeredFallbackQuery != null) 'triggeredFallbackQuery': triggeredFallbackQuery,
+      if (resolvedStateTransition != null) 'resolvedStateTransition': resolvedStateTransition,
+      if (emailHash != null) 'emailHash': emailHash,
+      if (phoneHash != null) 'phoneHash': phoneHash,
+      ...?extra,
+    };
+
+    final sanitized = _sanitize(fields);
+
+    if (kDebugMode) {
+      debugPrint('[PaymentEvent] ${jsonEncode(sanitized)}');
+    } else {
+      FirebaseAnalytics.instance.logEvent(
+        name: 'payment_event',
+        parameters: Map<String, Object>.from(sanitized),
+      );
+      FirebaseCrashlytics.instance.recordError(
+        Exception('Payment event: $name'),
+        StackTrace.current,
+        reason: 'payment_event',
+        fatal: false,
+      );
+    }
+  }
+}

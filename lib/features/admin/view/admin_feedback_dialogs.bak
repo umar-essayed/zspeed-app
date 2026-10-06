@@ -1,0 +1,39 @@
+import 'package:flutter/material.dart';
+
+class AdminFeedbackDialogs {
+  static void showSuccessDialog({
+    required BuildContext context,
+    required String title,
+    required String message,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color primaryOrange,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(
+            title,
+            style: TextStyle(color: textDark),
+          ),
+          content: Text(
+            message,
+            style: TextStyle(color: textMedium),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'OK',
+                style: TextStyle(color: primaryOrange),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

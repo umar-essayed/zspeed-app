@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+
+class PerformanceMetric {
+  final String label;
+  final String value;
+  final IconData? icon;
+  final String? trend; // "up" | "down"
+  final Color color;
+
+  PerformanceMetric({
+    required this.label,
+    required this.value,
+    this.icon,
+    this.trend,
+    required this.color,
+  });
+}
+
+class PerformanceStats extends StatelessWidget {
+  const PerformanceStats({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final List<PerformanceMetric> metrics = [
+      PerformanceMetric(
+        label: l10n.acceptanceRate,
+        value: "98%",
+        icon: Icons.trending_up,
+        color: Colors.green.shade600,
+        trend: "up",
+      ),
+      PerformanceMetric(
+        label: l10n.onTimeDeliveries,
+        value: "96%",
+        icon: Icons.local_activity,
+        color: Colors.green.shade600,
+        trend: "up",
+      ),
+      PerformanceMetric(
+        label: l10n.cancellationsLabel,
+        value: "2",
+        icon: Icons.trending_down,
+        color: Colors.orange.shade700,
+      ),
+      PerformanceMetric(
+        label: l10n.avgRating,
+        value: "4.9",
+        icon: Icons.star,
+        color: Colors.blue.shade600,
+      ),
+    ];
+
+    return Column(
+      children: metrics.map((metric) {
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Label + Icon
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    metric.label,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: metric.color.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      metric.icon,
+                      size: 20,
+                      color: metric.color,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // Value
+              Text(
+                metric.value.toString(),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}

@@ -1,0 +1,71 @@
+import 'package:flutter/material.dart';
+
+/// Displays the order icon, order ID, restaurant name, and thank-you message.
+class ReceiptHeaderCard extends StatelessWidget {
+  final String orderId;
+  final String restaurantName;
+
+  const ReceiptHeaderCard({
+    super.key,
+    required this.orderId,
+    required this.restaurantName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(40),
+              border: Border.all(color: Colors.orange.shade100, width: 2),
+            ),
+            child: Icon(Icons.receipt_long,
+                size: 40, color: Colors.orange.shade700),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Order #$orderId",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange.shade800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            restaurantName,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Thank you for your order!",
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
+    );
+  }
+}

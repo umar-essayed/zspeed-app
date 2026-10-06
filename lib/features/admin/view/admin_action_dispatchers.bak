@@ -1,0 +1,43 @@
+import 'package:flutter/material.dart';
+
+import 'package:z_speed/features/admin/model/admin_models.dart';
+
+class AdminActionDispatchers {
+  static void handleOrderAction({
+    required String action,
+    required AdminOrder order,
+    required BuildContext context,
+    required void Function(AdminOrder order, BuildContext context) onEdit,
+    required void Function(AdminOrder order, BuildContext context) onDelete,
+    required void Function(AdminOrder order, BuildContext context) onView,
+  }) {
+    switch (action) {
+      case 'edit':
+        onEdit(order, context);
+        break;
+      case 'delete':
+        onDelete(order, context);
+        break;
+      case 'view':
+        onView(order, context);
+        break;
+    }
+  }
+
+  static void handleUserAction({
+    required String action,
+    required AdminUser user,
+    required BuildContext context,
+    required void Function(AdminUser user, BuildContext context) onView,
+    required void Function(AdminUser user, BuildContext context) onChangeStatus,
+  }) {
+    switch (action) {
+      case 'view':
+        onView(user, context);
+        break;
+      case 'change_status':
+        onChangeStatus(user, context);
+        break;
+    }
+  }
+}

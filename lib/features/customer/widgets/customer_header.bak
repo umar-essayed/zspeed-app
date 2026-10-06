@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/core/widgets/logo.dart';
+import 'package:z_speed/features/notification/cubit/notification_cubit.dart';
+import 'package:z_speed/features/notification/cubit/notification_state.dart';
+import 'package:z_speed/features/notification/view/notification_list_page.dart';
+
+/// Slim top bar for the customer app — logo + profile/notification icons only.
+class CustomerHeader extends StatelessWidget {
+  final VoidCallback onProfilePressed;
+  final NotificationCubit? notificationCubit;
+
+  const CustomerHeader({
+    super.key,
+    required this.onProfilePressed,
+    this.notificationCubit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarBrightness: Theme.of(context).brightness,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const SpeedLogo(size: LogoSize.md),
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.person_outline,
+                        color: Theme.of(context).colorScheme.onSurface, size: 22),
+                    onPressed: onProfilePressed,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (notificationCubit != null)
+                  BlocProvider<NotificationCubit>.value(
+                    value: notificationCubit!,
+                    child: BlocBuilder<NotificationCubit, NotificationState>(
+                      builder: (context, state) => _bellButton(context, state),
+                    ),
+                  )
+                else
+                  _bellButtonNoState(context),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bellButton(BuildContext context, NotificationState state) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _bellContainer(
+          context,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider<NotificationCubit>.value(
+                  value: notificationCubit!,
+                  child: const NotificationListPage(),
+                ),
+              ),
+            );
+          },
+        ),
+        if (state.unreadCount > 0)
+          PositionedDirectional(
+            end: 4,
+            top: 4,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              child: Text(
+                state.unreadCount > 99 ? '99+' : '${state.unreadCount}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _bellButtonNoState(BuildContext context) {
+    return _bellContainer(context, onTap: () {});
+  }
+
+  Widget _bellContainer(BuildContext context, {required VoidCallback onTap}) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: IconButton(
+        icon: Icon(Icons.notifications_outlined,
+            color: Theme.of(context).colorScheme.onSurface, size: 22),
+        onPressed: onTap,
+      ),
+    );
+  }
+}

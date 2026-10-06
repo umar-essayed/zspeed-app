@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "exceljs": "^4.4.0",
+    "firebase-admin": "^14.0.0"
+  }
+}

@@ -1,0 +1,42 @@
+import 'package:latlong2/latlong.dart';
+
+/// Data model for an active delivery trip.
+class ActiveTrip {
+  final String id;
+  final String orderId;
+  final String restaurant;
+  final String customer;
+  final String pickupAddress;
+  final String deliveryAddress;
+  final double distance;
+  final int estimatedTime;
+  final int itemCount;
+  final double fare;
+  final String status;
+  final LatLng pickupLocation;
+  final LatLng deliveryLocation;
+  final LatLng driverLocation;
+  final String customerPhone;
+  final String restaurantPhone;
+  final List<String> items;
+
+  ActiveTrip({
+    required this.id,
+    required this.orderId,
+    required this.restaurant,
+    required this.customer,
+    required this.pickupAddress,
+    required this.deliveryAddress,
+    required this.distance,
+    required this.estimatedTime,
+    required this.itemCount,
+    required this.fare,
+    required this.status,
+    required this.pickupLocation,
+    required this.deliveryLocation,
+    required this.driverLocation,
+    required this.customerPhone,
+    required this.restaurantPhone,
+    this.items = const [],
+  });
+}

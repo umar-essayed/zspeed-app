@@ -1,0 +1,186 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/driver/widgets/trip_history_model.dart';
+
+/// Bottom sheet showing trip details with dark/light mode toggle.
+void showTripDetailsSheet(
+  BuildContext context,
+  Trip trip, {
+  required bool isDarkMode,
+  required ValueChanged<bool> onDarkModeChanged,
+}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: isDarkMode ? const Color(0xFF1F2937) : Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setStateSheet) {
+          const Color primaryColor = Color(0xFFF35535);
+          final Color textColor =
+              isDarkMode ? Colors.white : const Color(0xFF333333);
+          final Color subtextColor =
+              isDarkMode ? Colors.grey[400]! : const Color(0xFF666666);
+          final Color dividerColor =
+              isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
+
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: dividerColor,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(AppLocalizations.of(context)!.tripDetails,
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: textColor)),
+                    Row(
+                      children: [
+                        _ThemeToggle(
+                          isDarkMode: isDarkMode,
+                          primaryColor: primaryColor,
+                          subtextColor: subtextColor,
+                          // ignore: deprecated_member_use
+                          onChanged: (dark) {
+                            onDarkModeChanged(dark);
+                            setStateSheet(() {});
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(trip.id,
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryColor)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _detailRow("Date & Time", "${trip.date} at ${trip.time}",
+                    textColor, subtextColor),
+                Divider(height: 30, color: dividerColor),
+                _detailRow("Earnings", "EGP ${trip.earnings}", textColor,
+                    subtextColor),
+                Divider(height: 30, color: dividerColor),
+                _detailRow(
+                    "Rating", "${trip.rating}/5", textColor, subtextColor),
+                Divider(height: 30, color: dividerColor),
+                _detailRow("Distance", trip.distance, textColor, subtextColor),
+                Divider(height: 30, color: dividerColor),
+                _detailRow("Duration", trip.duration, textColor, subtextColor),
+                Divider(height: 30, color: dividerColor),
+                _detailRow(
+                    "Restaurant", trip.restaurant, textColor, subtextColor),
+                Divider(height: 30, color: dividerColor),
+                _detailRow("Customer", trip.customer, textColor, subtextColor),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(AppLocalizations.of(context)!.close,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+Widget _detailRow(
+    String label, String value, Color textColor, Color subtextColor) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(label, style: TextStyle(fontSize: 16, color: subtextColor)),
+      Text(value,
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w600, color: textColor)),
+    ],
+  );
+}
+
+class _ThemeToggle extends StatelessWidget {
+  const _ThemeToggle({
+    required this.isDarkMode,
+    required this.primaryColor,
+    required this.subtextColor,
+    required this.onChanged,
+  });
+
+  final bool isDarkMode;
+  final Color primaryColor;
+  final Color subtextColor;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          _modeButton(Icons.light_mode, !isDarkMode, () => onChanged(false)),
+          _modeButton(Icons.dark_mode, isDarkMode, () => onChanged(true)),
+        ],
+      ),
+    );
+  }
+
+  Widget _modeButton(IconData icon, bool active, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? primaryColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child:
+            Icon(icon, size: 16, color: active ? Colors.white : subtextColor),
+      ),
+    );
+  }
+}

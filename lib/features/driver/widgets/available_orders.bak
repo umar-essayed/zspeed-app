@@ -1,0 +1,447 @@
+import 'package:flutter/material.dart';
+
+class DriverAvailableOrder {
+  final String id;
+  final String restaurant;
+  final String customer;
+  final String pickupLocation;
+  final String deliveryDistance;
+  final double estimatedEarnings;
+  final int itemCount;
+  final int timeToPickup;
+
+  DriverAvailableOrder({
+    required this.id,
+    required this.restaurant,
+    required this.customer,
+    required this.pickupLocation,
+    required this.deliveryDistance,
+    required this.estimatedEarnings,
+    required this.itemCount,
+    required this.timeToPickup,
+  });
+}
+
+class AvailableOrders extends StatelessWidget {
+  final void Function(DriverAvailableOrder) onAcceptOrder;
+
+  const AvailableOrders({super.key, required this.onAcceptOrder});
+
+  void _showAcceptanceDialog(BuildContext context, DriverAvailableOrder order) {
+    // Show dialog/modal
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(20),
+          child: _buildAcceptanceModal(context, order),
+        );
+      },
+    );
+  }
+
+  Widget _buildAcceptanceModal(
+      BuildContext context, DriverAvailableOrder order) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Success Icon
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF35535).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: Color(0xFFF35535),
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Title
+            const Text(
+              "Order Accepted!",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+
+            // Order Details
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Order ID:",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      Text(
+                        order.id,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Restaurant:",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      Text(
+                        order.restaurant,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Est. Earnings:",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      Text(
+                        "EGP ${order.estimatedEarnings.toStringAsFixed(0)}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFF35535),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      side: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    child: const Text(
+                      "Close",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF333333),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Close the dialog first
+                      Navigator.of(context).pop();
+                      // Then call the original onAcceptOrder callback
+                      onAcceptOrder(order);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF35535),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: const Text(
+                      "View Details",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const Color primaryColor = Color(0xFFF35535);
+    const Color backgroundColor = Colors.white;
+    const Color textColor = Color(0xFF333333);
+    const Color subtextColor = Color(0xFF666666);
+
+    final List<DriverAvailableOrder> orders = [
+      DriverAvailableOrder(
+        id: "#WNL-001",
+        restaurant: "Pizza Palace",
+        customer: "Near Sycamore",
+        pickupLocation: "Downtown NAC",
+        deliveryDistance: "1.2 km",
+        estimatedEarnings: 35,
+        itemCount: 2,
+        timeToPickup: 5,
+      ),
+      DriverAvailableOrder(
+        id: "#WNL-002",
+        restaurant: "Burger King",
+        customer: "Downtown NAC",
+        pickupLocation: "Business Park",
+        deliveryDistance: "2.5 km",
+        estimatedEarnings: 50,
+        itemCount: 3,
+        timeToPickup: 8,
+      ),
+      DriverAvailableOrder(
+        id: "#WNL-003",
+        restaurant: "Elmasr Elgedida",
+        customer: "Residential Area",
+        pickupLocation: "South Bridge",
+        deliveryDistance: "1.8 km",
+        estimatedEarnings: 40,
+        itemCount: 2,
+        timeToPickup: 3,
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title
+        const Padding(
+          padding: EdgeInsetsDirectional.only(bottom: 12),
+          child: Text(
+            "Available Orders",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+        ),
+
+        // Orders List
+        Column(
+          children: orders.map((order) {
+            return Container(
+              margin: const EdgeInsetsDirectional.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.grey.shade200,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header: Order ID + Restaurant + Earnings
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              order.id,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              order.restaurant,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "EGP ${order.estimatedEarnings.toStringAsFixed(0)}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              "Est. earnings",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: subtextColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Order Details
+                    Column(
+                      children: [
+                        // Customer Location
+                        _buildDetailRow(
+                          icon: Icons.location_pin,
+                          text: order.customer,
+                          color: subtextColor,
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Time and Distance
+                        _buildDetailRow(
+                          icon: Icons.access_time,
+                          text:
+                              "${order.timeToPickup} min to pickup • ${order.deliveryDistance} away",
+                          color: subtextColor,
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Item Count
+                        _buildDetailRow(
+                          icon: Icons.inventory_2,
+                          text: "${order.itemCount} items",
+                          color: subtextColor,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Accept Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _showAcceptanceDialog(context, order),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: const Text(
+                          "Accept Order",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: color,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

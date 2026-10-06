@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/home/home.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+
+/// Bottom sheet that displays all items for a selected category.
+///
+/// Extracted from `home_page.dart` `_showAllItemsForSelectedCategory`.
+class HomeCategorySheet {
+  HomeCategorySheet._();
+
+  /// Shows a modal bottom sheet listing all [items] for [categoryName].
+  static void show({
+    required BuildContext context,
+    required String categoryName,
+    required List<FoodItem> items,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: SizedBox(
+            height: 420,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 20, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!
+                            .allCategoryNamed(categoryName),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: Color(0xFF888888)),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(item.image),
+                        ),
+                        title: Text(
+                          item.getLocalizedName(
+                              Localizations.localeOf(context).languageCode),
+                          style: const TextStyle(
+                            color: Color(0xFF333333),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          item.restaurant ??
+                              item.getLocalizedDescription(
+                                  Localizations.localeOf(context).languageCode),
+                          style: const TextStyle(
+                            color: Color(0xFF666666),
+                          ),
+                        ),
+                        trailing: Text(
+                          item.price,
+                          style: const TextStyle(
+                            color: Color(0xFFF35535),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

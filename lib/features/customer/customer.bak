@@ -1,0 +1,42 @@
+/// Barrel export for customer feature.
+/// Populated as modules are migrated in Phases 3-7.
+library;
+
+// Repository
+export 'repository/customer_restaurant_repository.dart';
+export 'repository/customer_restaurant_repository_impl.dart';
+
+// Cubits
+export 'cubit/restaurant_browse_cubit.dart';
+export 'cubit/restaurant_browse_state.dart';
+export 'cubit/restaurant_detail_cubit.dart';
+export 'cubit/restaurant_detail_state.dart';
+export 'cubit/item_detail_cubit.dart';
+export 'cubit/item_detail_state.dart';
+export 'cubit/customer_order_history_cubit.dart';
+export 'cubit/customer_order_history_state.dart';
+
+// Views
+export 'view/customer_order_history_screen.dart';
+export 'view/restaurant_browse_screen.dart';
+export 'view/restaurant_detail_screen.dart';
+export 'view/vendor_menu_page.dart';
+export 'view/item_detail_sheet.dart';
+export 'view/item_profile_page.dart';
+
+// Widgets
+export 'widgets/addon_group_selector.dart';
+export 'widgets/category_carousel.dart';
+export 'widgets/cuisine_filter_bar.dart';
+export 'widgets/customer_bottom_bar.dart';
+export 'widgets/customer_category_bar.dart';
+export 'widgets/customer_header.dart';
+export 'widgets/customer_menu_item_card.dart';
+export 'widgets/customer_restaurant_list.dart';
+export 'widgets/customer_sign_in_sheet.dart';
+export 'widgets/menu_section_tab_bar.dart';
+export 'widgets/quantity_selector.dart';
+export 'widgets/vendor_browse_card.dart';
+export 'widgets/restaurant_detail_header.dart';
+export 'widgets/restaurant_menu_header.dart';
+export 'widgets/restaurant_menu_item_row.dart';

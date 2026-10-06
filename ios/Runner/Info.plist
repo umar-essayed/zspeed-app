@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Z Speed</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Z Speed</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<!-- Firebase: Disable proxy since we handle APNs manually in AppDelegate -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+
+	<!-- Google Sign-In Client ID -->
+	<key>GIDClientID</key>
+	<string>1048229753879-rn5s9b34asg45ka1fh9u7iuo923v79a9.apps.googleusercontent.com</string>
+
+	<!-- URL Schemes -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<!-- Google Sign-In / Firebase Auth reCAPTCHA fallback (REVERSED_CLIENT_ID) -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>firebase-auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1048229753879-rn5s9b34asg45ka1fh9u7iuo923v79a9</string>
+			</array>
+		</dict>
+		<!-- Apple Sign-In -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.apple.signin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.zspeed.app</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- App Transport Security -->
+	<key>NSAllowsLocalNetworking</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
+	<!-- Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>location</string>
+		<string>remote-notification</string>
+	</array>
+
+	<!-- External App Queries -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlechromes</string>
+		<string>comgooglemaps</string>
+		<string>baidumap</string>
+		<string>iosamap</string>
+		<string>waze</string>
+		<string>yandexmaps</string>
+		<string>yandexnavi</string>
+		<string>citymapper</string>
+		<string>mapswithme</string>
+		<string>osmandmaps</string>
+		<string>gettaxi</string>
+		<string>uber</string>
+		<string>lyft</string>
+		<string>whatsapp</string>
+		<string>tel</string>
+		<string>mailto</string>
+	</array>
+
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+	<!-- Permissions -->
+	<key>NSCameraUsageDescription</key>
+	<string>Z Speed needs access to your camera to capture high-quality photos of your restaurant's logo, cover image, and menu items to display to customers.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Z Speed uses your location to find nearby restaurants, calculate delivery times, and track orders in real-time. Background location updates are used even when the app is minimized to keep drivers and customers synchronized.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Z Speed needs access to your location even when the app is in the background to provide accurate, real-time tracking for drivers and ensure reliable delivery updates for customers.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Z Speed needs your location to help you find nearby restaurants, set delivery addresses accurately, and provide real-time delivery tracking for your orders.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Z Speed needs microphone access to enable voice communication between customers and drivers for order coordination.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Z Speed needs permission to save generated order receipts or business-related images to your photo gallery for your records.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Z Speed needs access to your photo library to allow you to upload images of your restaurant, menu items, and business verification documents directly from your gallery.</string>
+
+	<!-- UI Configuration -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+</dict>
+</plist>

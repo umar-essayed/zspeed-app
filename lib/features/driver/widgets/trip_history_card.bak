@@ -1,0 +1,228 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/driver/widgets/trip_history_model.dart';
+
+/// Card widget for a single trip in the trip history list.
+class TripHistoryCard extends StatelessWidget {
+  const TripHistoryCard(
+      {super.key, required this.trip, required this.onViewDetails});
+
+  final Trip trip;
+  final VoidCallback onViewDetails;
+
+  static const Color _primaryColor = Color(0xFFF35535);
+  static const Color _textColor = Color(0xFF333333);
+  static const Color _subtextColor = Color(0xFF666666);
+  static const Color _borderColor = Color(0xFFE5E7EB);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2))
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onViewDetails,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                const SizedBox(height: 16),
+                _buildRouteInfo(context),
+                const SizedBox(height: 16),
+                _buildViewDetailsButton(context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: _primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(trip.id,
+                  style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: _primaryColor)),
+            ),
+            const SizedBox(height: 8),
+            Text(AppLocalizations.of(context)!.tripDateAt(trip.date, trip.time),
+                style: const TextStyle(fontSize: 13, color: _subtextColor)),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+                AppLocalizations.of(context)!
+                    .egpEarnings(trip.earnings.toString()),
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green)),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                ...List.generate(
+                    5,
+                    (i) => Icon(
+                          i < trip.rating ? Icons.star : Icons.star_border,
+                          size: 14,
+                          color: const Color(0xFFF59E0B),
+                        )),
+                const SizedBox(width: 4),
+                Text(trip.rating.toString(),
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: _subtextColor,
+                        fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRouteInfo(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+          color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8)),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _circleIcon(Icons.restaurant, _primaryColor),
+              const SizedBox(width: 12),
+              Expanded(
+                  child: _labelValue(AppLocalizations.of(context)!.restaurant,
+                      trip.restaurant)),
+              const Icon(Icons.arrow_forward, size: 16, color: _subtextColor),
+              const SizedBox(width: 12),
+              _circleIcon(Icons.person, Colors.blue),
+              const SizedBox(width: 12),
+              Expanded(
+                  child: _labelValue(
+                      AppLocalizations.of(context)!.customer, trip.customer)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                _badge(Icons.directions_car, trip.distance),
+                const SizedBox(width: 8),
+                _badge(Icons.timer, trip.duration)
+              ]),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                  border:
+                      Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Text(AppLocalizations.of(context)!.completed,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildViewDetailsButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: onViewDetails,
+        icon: const Icon(Icons.remove_red_eye_outlined,
+            size: 16, color: _primaryColor),
+        label: Text(AppLocalizations.of(context)!.viewDetails,
+            style: const TextStyle(
+                color: _primaryColor, fontWeight: FontWeight.w600)),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: _primaryColor,
+          side: const BorderSide(color: _primaryColor),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+    );
+  }
+
+  Widget _circleIcon(IconData icon, Color color) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+      child: Icon(icon, size: 16, color: color),
+    );
+  }
+
+  Widget _labelValue(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 11, color: _subtextColor)),
+        Text(value,
+            style: const TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w600, color: _textColor)),
+      ],
+    );
+  }
+
+  Widget _badge(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+          color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: _subtextColor),
+          const SizedBox(width: 6),
+          Text(text,
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: _textColor)),
+        ],
+      ),
+    );
+  }
+}

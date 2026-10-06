@@ -1,0 +1,159 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/driver/datasource/driver_firebase_datasource.dart';
+
+const _orange = Color(0xFFF35535);
+
+class AddPaymentMethodPage extends StatefulWidget {
+  final String? uid;
+  const AddPaymentMethodPage({super.key, this.uid});
+
+  @override
+  State<AddPaymentMethodPage> createState() => _AddPaymentMethodPageState();
+}
+
+class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _phoneCtrl = TextEditingController();
+  String _selectedMethod = 'instapay';
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _phoneCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final uid = widget.uid;
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.notSignedIn)));
+      return;
+    }
+
+    setState(() => _saving = true);
+    try {
+      await DriverFirebaseDatasource().updateDriverProfile(uid, {
+        'preferredPayoutMethod': _selectedMethod,
+        'payoutPhone': _phoneCtrl.text.trim(),
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context)!.paymentMethodSaved)));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.errorValue(e.toString()))));
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.addPaymentMethod),
+        backgroundColor: _orange,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.paymentMethodsTitle,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: Column(
+                  children: [
+                    RadioListTile<String>(
+                      title: Text(AppLocalizations.of(context)!.instapay),
+                      subtitle: Text(AppLocalizations.of(context)!
+                          .receivePaymentsViaInstapay),
+                      value: 'instapay',
+                      // ignore: deprecated_member_use
+                      groupValue: _selectedMethod,
+                      activeColor: _orange,
+                      // ignore: deprecated_member_use
+                      onChanged: (v) => setState(() => _selectedMethod = v!),
+                    ),
+                    const Divider(height: 1),
+                    RadioListTile<String>(
+                      title: Text(AppLocalizations.of(context)!.vodafoneCash),
+                      subtitle: Text(AppLocalizations.of(context)!
+                          .receivePaymentsViaVodafone),
+                      value: 'vodafoneCash',
+                      // ignore: deprecated_member_use
+                      groupValue: _selectedMethod,
+                      activeColor: _orange,
+                      // ignore: deprecated_member_use
+                      onChanged: (v) => setState(() => _selectedMethod = v!),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context)!.phoneNumber,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _phoneCtrl,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.registeredPhone,
+                  prefixIcon: const Icon(Icons.phone),
+                  border: const OutlineInputBorder(),
+                  hintText: '010XXXXXXXX',
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return AppLocalizations.of(context)!.phoneRequired;
+                  }
+                  if (v.trim().length < 8) {
+                    return AppLocalizations.of(context)!.enterValidPhone;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saving ? null : _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _saving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : Text(AppLocalizations.of(context)!.savePaymentMethod,
+                          style: const TextStyle(fontSize: 16)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

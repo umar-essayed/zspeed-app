@@ -1,0 +1,202 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/core/enums/order_enums.dart';
+import 'package:z_speed/features/order/model/order.dart';
+import 'package:intl/intl.dart';
+
+/// Card widget for a single order in the order history list.
+class OrderHistoryCard extends StatelessWidget {
+  const OrderHistoryCard({
+    super.key,
+    required this.order,
+    required this.primaryColor,
+    required this.orangeLight,
+  });
+
+  final Order order;
+  final Color primaryColor;
+  final Color orangeLight;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final dateFormat = DateFormat.yMMMd(Localizations.localeOf(context).toString()).add_jm();
+
+    return Container(
+      margin: const EdgeInsetsDirectional.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.08),
+              blurRadius: 15,
+              spreadRadius: 1,
+              offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('#${order.id.substring(0, 8).toUpperCase()}',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: primaryColor)),
+                        const SizedBox(height: 4),
+                        Text(dateFormat.format(order.createdAt),
+                            style: TextStyle(
+                                fontSize: 13, color: Colors.grey.shade600)),
+                      ],
+                    ),
+                    _statusBadge(context),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Delivery Address
+                Row(
+                  children: [
+                    Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        order.deliveryAddress,
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.grey.shade600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Payment Method
+                Row(
+                  children: [
+                    Icon(
+                      order.paymentMethod == PaymentMethodType.cash
+                          ? Icons.money
+                          : Icons.credit_card,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      order.paymentMethod.getLocalizedLabel(l10n),
+                      style:
+                          TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Footer Row
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                      color: orangeLight,
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(AppLocalizations.of(context)!.totalX,
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade600,
+                                  letterSpacing: 1)),
+                          const SizedBox(height: 4),
+                          Text(l10n.currencyEgp(order.total.toStringAsFixed(2)),
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: order.status == OrderStatus.delivered
+                                      ? primaryColor
+                                      : Colors.grey)),
+                        ],
+                      ),
+                      if (order.status == OrderStatus.delivered)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: primaryColor.withValues(alpha: 0.3),
+                                  blurRadius: 5,
+                                  spreadRadius: 1)
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.receipt_long,
+                                  size: 16, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.viewReceipt,
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statusBadge(BuildContext context) {
+    final completed = order.status == OrderStatus.delivered;
+    final cancelled = order.status == OrderStatus.cancelled;
+    final color = completed
+        ? Colors.green
+        : cancelled
+            ? Colors.red
+            : Colors.orange;
+    final icon = completed
+        ? Icons.check_circle
+        : cancelled
+            ? Icons.cancel
+            : Icons.pending;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(order.status.getLocalizedLabel(AppLocalizations.of(context)!).toUpperCase(),
+              style: TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.bold, color: color)),
+        ],
+      ),
+    );
+  }
+}

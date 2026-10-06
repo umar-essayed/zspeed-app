@@ -1,0 +1,776 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:z_speed/core/enums/measure_enums.dart';
+import 'package:z_speed/features/restaurant/model/addon_group.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/features/restaurant_owner/cubit/restaurant_menu_cubit.dart';
+import 'package:z_speed/features/restaurant_owner/cubit/restaurant_menu_state.dart';
+
+/// Editor for managing addon groups on a menu item.
+///
+/// Provides UI to:
+/// - View list of addon groups
+/// - Create/edit/delete groups
+/// - Manage options within each group
+/// - Configure group settings (required, selection type, min/max)
+class AddonGroupEditor extends StatefulWidget {
+  const AddonGroupEditor({
+    super.key,
+    required this.viewModel,
+    required this.restaurantId,
+    required this.sectionId,
+    required this.menuItemId,
+  });
+
+  final RestaurantMenuCubit viewModel;
+  final String restaurantId;
+  final String sectionId;
+  final String menuItemId;
+
+  @override
+  State<AddonGroupEditor> createState() => _AddonGroupEditorState();
+}
+
+class _AddonGroupEditorState extends State<AddonGroupEditor> {
+  static const Color _primaryOrange = Color(0xFFFF9800);
+  static const Color _lightOrange = Color(0xFFFFF3E0);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.manageAddons),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+      ),
+      body: BlocBuilder<RestaurantMenuCubit, RestaurantMenuState>(
+        bloc: widget.viewModel,
+        builder: (context, state) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final itemIndex =
+              state.allItems.indexWhere((i) => i.id == widget.menuItemId);
+          if (itemIndex == -1) {
+            return Center(
+                child: Text(AppLocalizations.of(context)!.itemNotFound));
+          }
+
+          final item = state.allItems[itemIndex];
+          final groups = item.addonGroups;
+
+          if (groups.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add_circle_outline,
+                      size: 80, color: _lightOrange),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context)!.noAddonGroupsYet,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppLocalizations.of(context)!.addGroupPrompt,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => _showAddGroupDialog(context),
+                    icon: const Icon(Icons.add),
+                    label: Text(AppLocalizations.of(context)!.addFirstGroup),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: groups.length,
+            itemBuilder: (context, index) {
+              final group = groups[index];
+              return _buildGroupCard(context, group);
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddGroupDialog(context),
+        backgroundColor: _primaryOrange,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildGroupCard(BuildContext context, AddonGroup group) {
+    return Card(
+      margin: const EdgeInsetsDirectional.only(bottom: 16),
+      elevation: 2,
+      child: ExpansionTile(
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                group.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            if (group.isRequired)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade300),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.required,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.red.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _lightOrange,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _primaryOrange),
+              ),
+              child: Text(
+                group.selectionType == AddonSelectionType.single
+                    ? AppLocalizations.of(context)!.single
+                    : AppLocalizations.of(context)!.multiple,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: _primaryOrange,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        subtitle: Text(
+          AppLocalizations.of(context)!.optionsCount(group.options.length),
+          style: const TextStyle(fontSize: 13),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit, color: _primaryOrange, size: 20),
+              onPressed: () => _showEditGroupDialog(context, group),
+              tooltip: AppLocalizations.of(context)!.editGroup,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+              onPressed: () => _confirmDeleteGroup(context, group),
+              tooltip: AppLocalizations.of(context)!.deleteGroup,
+            ),
+          ],
+        ),
+        children: [
+          if (group.options.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.noOptionsYet,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: () => _showAddOptionDialog(context, group),
+                    icon: const Icon(Icons.add),
+                    label: Text(AppLocalizations.of(context)!.addOption),
+                  ),
+                ],
+              ),
+            )
+          else
+            ...group.options
+                .map((option) => _buildOptionTile(context, group, option)),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: TextButton.icon(
+              onPressed: () => _showAddOptionDialog(context, group),
+              icon: const Icon(Icons.add),
+              label: Text(AppLocalizations.of(context)!.addOption),
+              style: TextButton.styleFrom(foregroundColor: _primaryOrange),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionTile(
+      BuildContext context, AddonGroup group, AddonOption option) {
+    return ListTile(
+      dense: true,
+      leading: Icon(
+        option.isAvailable ? Icons.check_circle : Icons.cancel,
+        color: option.isAvailable ? Colors.green : Colors.grey,
+        size: 20,
+      ),
+      title: Row(
+        children: [
+          Expanded(child: Text(option.name)),
+          if (option.isDefault)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.shade300),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.defaultLabel,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.blue.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
+      ),
+      subtitle: option.extraPrice > 0
+          ? Text(
+              AppLocalizations.of(context)!
+                  .extraPriceEgp(option.extraPrice.toStringAsFixed(2)),
+              style: const TextStyle(fontSize: 12))
+          : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: _primaryOrange, size: 18),
+            onPressed: () => _showEditOptionDialog(context, group, option),
+            tooltip: AppLocalizations.of(context)!.editOption,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red, size: 18),
+            onPressed: () => _confirmDeleteOption(context, group, option),
+            tooltip: AppLocalizations.of(context)!.deleteOption,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Dialogs ──────────────────────────────────────────────────────
+
+  void _showAddGroupDialog(BuildContext context) {
+    _showGroupFormDialog(context, null);
+  }
+
+  void _showEditGroupDialog(BuildContext context, AddonGroup group) {
+    _showGroupFormDialog(context, group);
+  }
+
+  void _showGroupFormDialog(BuildContext context, AddonGroup? existingGroup) {
+    final nameController =
+        TextEditingController(text: existingGroup?.name ?? '');
+    final nameArController =
+        TextEditingController(text: existingGroup?.nameAr ?? '');
+    AddonSelectionType selectionType =
+        existingGroup?.selectionType ?? AddonSelectionType.single;
+    bool isRequired = existingGroup?.isRequired ?? false;
+    int minSelections = existingGroup?.minSelections ?? 0;
+    int maxSelections = existingGroup?.maxSelections ?? 1;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(existingGroup == null
+              ? AppLocalizations.of(context)!.addAddonGroup
+              : AppLocalizations.of(context)!.editAddonGroup),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.groupNameRequired,
+                    hintText: AppLocalizations.of(context)!.groupNameHint,
+                    border: const OutlineInputBorder(),
+                  ),
+                  autofocus: existingGroup == null,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nameArController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.arabicNameOptional,
+                    hintText: AppLocalizations.of(context)!.arabicNameHint,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(AppLocalizations.of(context)!.selectionType,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                SegmentedButton<AddonSelectionType>(
+                  segments: [
+                    ButtonSegment(
+                      value: AddonSelectionType.single,
+                      label: Text(AppLocalizations.of(context)!.single),
+                      icon: const Icon(Icons.radio_button_checked, size: 16),
+                    ),
+                    ButtonSegment(
+                      value: AddonSelectionType.multi,
+                      label: Text(AppLocalizations.of(context)!.multiple),
+                      icon: const Icon(Icons.check_box, size: 16),
+                    ),
+                  ],
+                  selected: {selectionType},
+                  onSelectionChanged: (Set<AddonSelectionType> newSelection) {
+                    setState(() {
+                      selectionType = newSelection.first;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                CheckboxListTile(
+                  title: Text(AppLocalizations.of(context)!.required),
+                  subtitle:
+                      Text(AppLocalizations.of(context)!.customerMustSelectAn),
+                  value: isRequired,
+                  // ignore: deprecated_member_use
+                  onChanged: (value) =>
+                      setState(() => isRequired = value ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: _primaryOrange,
+                ),
+                if (selectionType == AddonSelectionType.multi) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context)!.minSelections,
+                            border: const OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          controller: TextEditingController(
+                              text: minSelections.toString()),
+                          // ignore: deprecated_member_use
+                          onChanged: (value) =>
+                              minSelections = int.tryParse(value) ?? 0,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context)!.maxSelections,
+                            border: const OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          controller: TextEditingController(
+                              text: maxSelections.toString()),
+                          // ignore: deprecated_member_use
+                          onChanged: (value) =>
+                              maxSelections = int.tryParse(value) ?? 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (nameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            AppLocalizations.of(context)!.groupNameIsRequired)),
+                  );
+                  return;
+                }
+
+                Navigator.pop(dialogContext);
+
+                final group = AddonGroup(
+                  id: existingGroup?.id ?? '',
+                  menuItemId: widget.menuItemId,
+                  name: nameController.text.trim(),
+                  nameAr: nameArController.text.trim().isEmpty
+                      ? null
+                      : nameArController.text.trim(),
+                  selectionType: selectionType,
+                  isRequired: isRequired,
+                  minSelections: minSelections,
+                  maxSelections: maxSelections,
+                  options: existingGroup?.options ?? [],
+                  sortOrder: existingGroup?.sortOrder ?? 0,
+                );
+
+                try {
+                  if (existingGroup == null) {
+                    await widget.viewModel.createAddonGroup(
+                        widget.sectionId, widget.menuItemId, group);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context)!
+                              .groupCreatedSuccessfully),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } else {
+                    await widget.viewModel.updateAddonGroup(
+                        widget.sectionId, widget.menuItemId, group);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context)!
+                              .groupUpdatedSuccessfully),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context)!
+                            .failedToSaveGroup(e.toString())),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryOrange,
+                  foregroundColor: Colors.white),
+              child: Text(existingGroup == null
+                  ? AppLocalizations.of(context)!.create
+                  : AppLocalizations.of(context)!.update),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddOptionDialog(BuildContext context, AddonGroup group) {
+    _showOptionFormDialog(context, group, null);
+  }
+
+  void _showEditOptionDialog(
+      BuildContext context, AddonGroup group, AddonOption option) {
+    _showOptionFormDialog(context, group, option);
+  }
+
+  void _showOptionFormDialog(
+      BuildContext context, AddonGroup group, AddonOption? existingOption) {
+    final nameController =
+        TextEditingController(text: existingOption?.name ?? '');
+    final nameArController =
+        TextEditingController(text: existingOption?.nameAr ?? '');
+    final priceController = TextEditingController(
+      text: existingOption?.extraPrice.toString() ?? '0',
+    );
+    bool isDefault = existingOption?.isDefault ?? false;
+    bool isAvailable = existingOption?.isAvailable ?? true;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(existingOption == null
+              ? AppLocalizations.of(context)!.addOptionLabel
+              : AppLocalizations.of(context)!.editOptionLabel),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.optionNameRequired,
+                    hintText: AppLocalizations.of(context)!.optionNameHint,
+                    border: const OutlineInputBorder(),
+                  ),
+                  autofocus: existingOption == null,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nameArController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.arabicNameOptional,
+                    hintText: AppLocalizations.of(context)!.arabicNameHint,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: priceController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.extraPriceEgpLabel,
+                    hintText: '0.00',
+                    border: const OutlineInputBorder(),
+                    prefixText: '+EGP ',
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: 16),
+                CheckboxListTile(
+                  title: Text(AppLocalizations.of(context)!.defaultSelection),
+                  subtitle: Text(
+                      AppLocalizations.of(context)!.preselectedForCustomer),
+                  value: isDefault,
+                  // ignore: deprecated_member_use
+                  onChanged: (value) =>
+                      setState(() => isDefault = value ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: _primaryOrange,
+                ),
+                CheckboxListTile(
+                  title: Text(AppLocalizations.of(context)!.available),
+                  subtitle:
+                      Text(AppLocalizations.of(context)!.customerCanSelectThis),
+                  value: isAvailable,
+                  // ignore: deprecated_member_use
+                  onChanged: (value) =>
+                      setState(() => isAvailable = value ?? true),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: _primaryOrange,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (nameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(AppLocalizations.of(context)!
+                            .optionNameIsRequired)),
+                  );
+                  return;
+                }
+
+                final extraPrice = double.tryParse(priceController.text) ?? 0.0;
+
+                Navigator.pop(dialogContext);
+
+                final newOption = AddonOption(
+                  id: existingOption?.id ??
+                      DateTime.now().millisecondsSinceEpoch.toString(),
+                  name: nameController.text.trim(),
+                  nameAr: nameArController.text.trim().isEmpty
+                      ? null
+                      : nameArController.text.trim(),
+                  extraPrice: extraPrice,
+                  isDefault: isDefault,
+                  isAvailable: isAvailable,
+                );
+
+                try {
+                  final List<AddonOption> updatedOptions = [...group.options];
+                  if (existingOption == null) {
+                    updatedOptions.add(newOption);
+                  } else {
+                    final index = updatedOptions
+                        .indexWhere((o) => o.id == existingOption.id);
+                    if (index != -1) {
+                      updatedOptions[index] = newOption;
+                    }
+                  }
+
+                  final updatedGroup = group.copyWith(options: updatedOptions);
+                  await widget.viewModel.updateAddonGroup(
+                      widget.sectionId, widget.menuItemId, updatedGroup);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(existingOption == null
+                            ? AppLocalizations.of(context)!.optionAdded
+                            : AppLocalizations.of(context)!.optionUpdated),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context)!
+                            .failedToSaveOption(e.toString())),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryOrange,
+                  foregroundColor: Colors.white),
+              child: Text(existingOption == null
+                  ? AppLocalizations.of(context)!.add
+                  : AppLocalizations.of(context)!.update),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteGroup(BuildContext context, AddonGroup group) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.deleteGroup),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(AppLocalizations.of(context)!.confirmDeleteGroup(group.name)),
+            const SizedBox(height: 8),
+            Text(
+              AppLocalizations.of(context)!
+                  .confirmDeleteGroupWarning(group.options.length),
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+
+              try {
+                await widget.viewModel.deleteAddonGroup(
+                    widget.sectionId, widget.menuItemId, group.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .groupDeletedSuccessfully),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .failedToDeleteGroup(e.toString())),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(AppLocalizations.of(context)!.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteOption(
+      BuildContext context, AddonGroup group, AddonOption option) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.deleteOption),
+        content: Text(
+            AppLocalizations.of(context)!.confirmDeleteOption(option.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+
+              try {
+                final updatedOptions =
+                    group.options.where((o) => o.id != option.id).toList();
+                final updatedGroup = group.copyWith(options: updatedOptions);
+                await widget.viewModel.updateAddonGroup(
+                    widget.sectionId, widget.menuItemId, updatedGroup);
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .optionDeletedSuccessfully),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .failedToDeleteOption(e.toString())),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(AppLocalizations.of(context)!.delete),
+          ),
+        ],
+      ),
+    );
+  }
+}

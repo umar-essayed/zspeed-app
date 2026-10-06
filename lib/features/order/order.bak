@@ -1,0 +1,12 @@
+/// Barrel export for order feature.
+/// Created in Phase 8.4.
+library;
+
+export 'model/order.dart';
+export 'model/order_item.dart';
+export 'model/tracking_step.dart';
+export 'datasource/order_firebase_datasource.dart';
+export 'repository/order_repository.dart';
+export 'repository/order_repository_impl.dart';
+export 'view/checkout_screen.dart';
+export 'view/order_tracking_screen.dart';

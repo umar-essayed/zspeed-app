@@ -1,0 +1,11 @@
+/// Barrel export for auth feature.
+/// Populated as modules are migrated in Phases 3-7.
+library;
+
+export 'model/user_model.dart';
+export 'datasource/auth_local_datasource.dart';
+export 'repository/auth_repository.dart';
+export 'repository/auth_repository_impl.dart';
+export 'widgets/login_header.dart';
+export 'widgets/login_glass_field.dart';
+export 'widgets/login_social_button.dart';

@@ -1,0 +1,371 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/core/enums/order_enums.dart';
+import 'package:z_speed/features/driver/cubit/driver_dashboard_cubit.dart';
+import 'package:z_speed/features/driver/cubit/driver_dashboard_state.dart';
+import 'package:z_speed/features/order/model/order.dart';
+import 'package:z_speed/features/driver/screens/driver_tracking_screen.dart';
+
+/// Active deliveries tab - shows orders currently being delivered.
+class DriverActiveTab extends StatelessWidget {
+  const DriverActiveTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: BlocBuilder<DriverDashboardCubit, DriverDashboardState>(
+        builder: (context, state) {
+          final activeOrders = state.activeOrders;
+
+          if (activeOrders.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: activeOrders.length,
+            itemBuilder: (context, index) {
+              final order = activeOrders[index];
+              return _buildOrderCard(context, state, order);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Builder(builder: (context) => Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.local_shipping_outlined,
+              size: 80, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context)!.noActiveDeliveries,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            AppLocalizations.of(context)!.acceptedOrdersWillAppear,
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
+    ));
+  }
+
+  Widget _buildOrderCard(
+    BuildContext context,
+    DriverDashboardState state,
+    Order order,
+  ) {
+    final statusColor = _getStatusColor(order.status);
+    final statusText = _getStatusText(context, order.status);
+    final canPickUp = order.status == OrderStatus.driverAssigned || order.status == OrderStatus.ready;
+    final canDeliver = order.status == OrderStatus.pickedUp;
+
+    return Container(
+      margin: const EdgeInsetsDirectional.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context)!.orderIdShort(order.id.substring(0, 8).toUpperCase()),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  statusText,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.phone, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                order.deliveryAddress,
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.directions_car, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                '${order.restaurantId} • ${''}',
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.shopping_bag, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                AppLocalizations.of(context)!.itemsCount2(order.items.length),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.payments, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.egpAmount(order.deliveryFee.toStringAsFixed(2).toString()), style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (canPickUp)
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider<
+                              DriverDashboardCubit>.value(
+                            value: context.read<DriverDashboardCubit>(),
+                            child: DriverTrackingScreen(order: order),
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.map, size: 18),
+                    label: Text(AppLocalizations.of(context)!.viewRouteMap),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: const BorderSide(color: Colors.blue),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: state.isBusy
+                        ? null
+                        : () async {
+                            final cubit = context.read<DriverDashboardCubit>();
+                            final navigator = Navigator.of(context);
+                            await cubit.markPickedUp(order.id);
+                            
+                            navigator.push(
+                              MaterialPageRoute(
+                                builder: (_) => BlocProvider<DriverDashboardCubit>.value(
+                                  value: cubit,
+                                  child: DriverTrackingScreen(
+                                    order: order.copyWith(status: OrderStatus.pickedUp),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                    icon: const Icon(Icons.check_circle, size: 18),
+                    label: Text(AppLocalizations.of(context)!.markAsPickedUp),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else if (canDeliver)
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider<
+                              DriverDashboardCubit>.value(
+                            value: context.read<DriverDashboardCubit>(),
+                            child: DriverTrackingScreen(order: order),
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.map, size: 18),
+                    label: Text(AppLocalizations.of(context)!.viewRouteMap),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.green,
+                      side: const BorderSide(color: Colors.green),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: state.isBusy
+                        ? null
+                        : () => _confirmDelivery(context, context.read<DriverDashboardCubit>(), order),
+                    icon: const Icon(Icons.done_all, size: 18),
+                    label: Text(AppLocalizations.of(context)!.markAsDelivered),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelivery(
+    BuildContext context,
+    DriverDashboardCubit cubit,
+    Order order,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.confirmDelivery),
+        content: Text(
+          AppLocalizations.of(context)!.confirmDeliveryProceed,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              cubit.markDelivered(order.id);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(AppLocalizations.of(context)!.confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return Colors.orange;
+      case OrderStatus.accepted:
+      case OrderStatus.preparing:
+        return Colors.amber.shade700;
+      case OrderStatus.ready:
+        return Colors.teal;
+      case OrderStatus.driverAssigned:
+        return Colors.blue.shade700;
+      case OrderStatus.pickedUp:
+        return Colors.purple;
+      case OrderStatus.delivered:
+        return Colors.green;
+      case OrderStatus.cancelled:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getStatusText(BuildContext context, OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return AppLocalizations.of(context)!.statusPending;
+      case OrderStatus.accepted:
+        return AppLocalizations.of(context)!.statusAccepted;
+      case OrderStatus.preparing:
+        return AppLocalizations.of(context)!.statusPreparing;
+      case OrderStatus.ready:
+        return AppLocalizations.of(context)!.statusReady;
+      case OrderStatus.driverAssigned:
+        return AppLocalizations.of(context)!.statusDriverAssigned;
+      case OrderStatus.pickedUp:
+        return AppLocalizations.of(context)!.statusPickedUp;
+      case OrderStatus.delivered:
+        return AppLocalizations.of(context)!.statusDelivered;
+      case OrderStatus.cancelled:
+        return AppLocalizations.of(context)!.statusCancelled;
+      default:
+        return status.name;
+    }
+  }
+}

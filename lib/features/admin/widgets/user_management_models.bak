@@ -1,0 +1,64 @@
+import 'package:flutter/material.dart';
+
+class UserManagementEntry {
+  final String id;
+  final String name;
+  final String email;
+  final String role;
+  String status;
+  final String joinDate;
+  final double? totalSpent;
+  final int? tripsCompleted;
+  final int? ordersServed;
+
+  UserManagementEntry({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.status,
+    required this.joinDate,
+    this.totalSpent,
+    this.tripsCompleted,
+    this.ordersServed,
+  });
+}
+
+Color statusColor(String status) {
+  switch (status) {
+    case "active":
+      return Colors.green.shade600;
+    case "suspended":
+      return Colors.orange.shade600;
+    case "banned":
+      return Colors.red.shade600;
+    default:
+      return Colors.grey.shade600;
+  }
+}
+
+Color roleColor(String role) {
+  switch (role) {
+    case "customer":
+      return Colors.blue.shade600;
+    case "driver":
+      return Colors.purple.shade600;
+    case "restaurant":
+      return Colors.green.shade600;
+    default:
+      return Colors.grey.shade600;
+  }
+}
+
+IconData roleIcon(String role) {
+  switch (role) {
+    case "customer":
+      return Icons.person;
+    case "driver":
+      return Icons.directions_car;
+    case "restaurant":
+      return Icons.store;
+    default:
+      return Icons.person;
+  }
+}

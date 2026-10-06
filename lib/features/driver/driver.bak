@@ -1,0 +1,56 @@
+/// Barrel export for driver feature.
+/// Populated as modules are migrated in Phases 3-7.
+library;
+
+// ========== OLD TRANSPORT/RIDE EXPORTS (Legacy) ==========
+// ride_sample_data.dart removed in Phase 8.10 - all hardcoded data deleted
+export 'model/ride_models.dart';
+export 'view/transport_active_tab.dart';
+export 'view/transport_book_tab.dart';
+export 'view/transport_call_screen.dart';
+export 'view/transport_chat_screen.dart';
+export 'view/transport_dialogs.dart';
+export 'view/transport_history_tab.dart';
+export 'view/transport_ride_details_sheet.dart';
+export 'widgets/transport_widgets.dart';
+export 'widgets/active_trip_map.dart';
+export 'widgets/available_orders.dart';
+export 'widgets/performance_stats.dart';
+export 'widgets/trip_history.dart';
+export 'view/available_orders_page.dart';
+
+// ========== NEW MULTI-DRIVER DELIVERY SYSTEM ==========
+
+// Models
+export 'model/delivery_request.dart';
+export 'model/order_driver.dart';
+export 'model/wallet_transaction.dart';
+export 'model/driver_profile.dart';
+
+// Datasource
+export 'datasource/driver_firebase_datasource.dart';
+
+// Repository
+export 'repository/driver_repository.dart';
+export 'repository/driver_repository_impl.dart';
+
+// Cubits
+export 'cubit/driver_dashboard_cubit.dart';
+export 'cubit/driver_dashboard_state.dart';
+export 'cubit/restaurant_driver_assignment_cubit.dart';
+export 'cubit/restaurant_driver_assignment_state.dart';
+export 'cubit/driver_application_cubit.dart';
+export 'cubit/driver_application_state.dart';
+
+// Screens - New Driver App (replaces transport screens)
+export 'screens/driver_main_screen.dart';
+export 'screens/tabs/driver_dashboard_tab.dart';
+export 'screens/tabs/driver_requests_tab.dart';
+export 'screens/tabs/driver_active_tab.dart';
+export 'screens/tabs/driver_history_tab.dart';
+
+// Screens - Vendor-facing driver assignment
+export 'screens/restaurant_driver_assignment_screen.dart';
+
+// Screens - Driver application form
+export 'view/driver_application_form.dart';

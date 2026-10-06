@@ -1,0 +1,272 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+/// Driver Info Section — displays driver details or placeholder if not assigned.
+///
+/// Phase 8.5: Accepts optional driver data.
+/// Phase 8.6: Will wire up real-time driver tracking.
+class DriverInfoSection extends StatelessWidget {
+  final String? driverName;
+  final double? rating;
+  final int? totalTrips;
+  final String? vehicleModel;
+  final String? vehiclePlate;
+  final String? phone;
+  final VoidCallback? onCall;
+  final VoidCallback? onMessage;
+  final VoidCallback? onLocation;
+
+  const DriverInfoSection({
+    super.key,
+    this.driverName,
+    this.rating,
+    this.totalTrips,
+    this.vehicleModel,
+    this.vehiclePlate,
+    this.phone,
+    this.onCall,
+    this.onMessage,
+    this.onLocation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasDriver = driverName != null && driverName!.isNotEmpty;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            // Section Header
+            Row(
+              children: [
+                Icon(Icons.person, color: Colors.orange.shade700, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  "Your Delivery Partner",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            if (!hasDriver)
+              // Placeholder when driver not assigned
+              Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.delivery_dining,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Driver not assigned yet',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'We\'ll assign a driver once your order is ready',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              // Driver info when assigned
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      // Driver Avatar
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.orange.shade200,
+                            width: 3,
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.orange.shade300,
+                              Colors.orange.shade500,
+                            ],
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(driverName!),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+
+                      // Driver Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              driverName!,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            if (rating != null && totalTrips != null)
+                              Row(
+                                children: [
+                                  Icon(Icons.star,
+                                      color: Colors.orange.shade600, size: 16),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      '${rating!.toStringAsFixed(1)} • $totalTrips trips',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            const SizedBox(height: 4),
+                            if (vehicleModel != null || vehiclePlate != null)
+                              Row(
+                                children: [
+                                  Icon(Icons.directions_car,
+                                      color: Colors.orange.shade600, size: 16),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      [vehicleModel, vehiclePlate]
+                                          .where(
+                                              (e) => e != null && e.isNotEmpty)
+                                          .join(' • '),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      // Call Button
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: onCall,
+                          icon: const Icon(Icons.phone, size: 18),
+                          label: Text(AppLocalizations.of(context)!.call),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade600,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // Message Button
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: onMessage,
+                          icon: const Icon(Icons.message, size: 18),
+                          label: Text(AppLocalizations.of(context)!.message),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.orange.shade700,
+                            side: BorderSide(
+                                color: Colors.orange.shade300, width: 2),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // Location Button
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: Colors.orange.shade200, width: 1),
+                        ),
+                        child: IconButton(
+                          onPressed: onLocation,
+                          icon: Icon(Icons.location_on,
+                              color: Colors.orange.shade700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, 1).toUpperCase();
+  }
+}

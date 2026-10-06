@@ -1,0 +1,80 @@
+import 'package:equatable/equatable.dart';
+
+enum PaymentAttemptStatus {
+  initiated,
+  pendingGateway,
+  succeeded,
+  declined,
+  failed,
+  cancelled,
+  expired,
+}
+
+class PaymentAttempt extends Equatable {
+  final String id;
+  final String orderId;
+  final String status;
+  final int amount;
+  final String currency;
+  final String? maskedCardBrand;
+  final String? maskedCardLast4;
+  final DateTime createdAt;
+  final DateTime? resolvedAt;
+
+  const PaymentAttempt({
+    required this.id,
+    required this.orderId,
+    required this.status,
+    required this.amount,
+    required this.currency,
+    this.maskedCardBrand,
+    this.maskedCardLast4,
+    required this.createdAt,
+    this.resolvedAt,
+  });
+
+  factory PaymentAttempt.fromJson(Map<String, dynamic> json) {
+    return PaymentAttempt(
+      id: json['id'] as String? ?? '',
+      orderId: json['orderId'] as String? ?? '',
+      status: json['status'] as String? ?? 'initiated',
+      amount: json['amount'] as int? ?? 0,
+      currency: json['currency'] as String? ?? 'EGP',
+      maskedCardBrand: json['maskedCardBrand'] as String?,
+      maskedCardLast4: json['maskedCardLast4'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      resolvedAt: json['resolvedAt'] != null
+          ? DateTime.parse(json['resolvedAt'] as String)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'orderId': orderId,
+      'status': status,
+      'amount': amount,
+      'currency': currency,
+      if (maskedCardBrand != null) 'maskedCardBrand': maskedCardBrand,
+      if (maskedCardLast4 != null) 'maskedCardLast4': maskedCardLast4,
+      'createdAt': createdAt.toIso8601String(),
+      if (resolvedAt != null) 'resolvedAt': resolvedAt!.toIso8601String(),
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        orderId,
+        status,
+        amount,
+        currency,
+        maskedCardBrand,
+        maskedCardLast4,
+        createdAt,
+        resolvedAt,
+      ];
+}

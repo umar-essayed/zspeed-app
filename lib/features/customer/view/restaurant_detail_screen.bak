@@ -1,0 +1,428 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/features/customer/cubit/restaurant_detail_cubit.dart';
+import 'package:z_speed/features/customer/cubit/restaurant_detail_state.dart';
+import 'package:z_speed/features/customer/widgets/restaurant_detail_header.dart';
+import 'package:z_speed/features/customer/widgets/menu_section_tab_bar.dart';
+import 'package:z_speed/features/customer/widgets/customer_menu_item_card.dart';
+import 'package:z_speed/features/customer/view/item_profile_page.dart';
+import 'package:z_speed/features/review/datasource/review_firebase_datasource.dart';
+import 'package:z_speed/features/review/model/review.dart';
+
+/// Restaurant detail screen showing menu organized by sections.
+class RestaurantDetailScreen extends StatelessWidget {
+  final String restaurantId;
+
+  const RestaurantDetailScreen({
+    super.key,
+    required this.restaurantId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => RestaurantDetailCubit(restaurantId: restaurantId),
+      child: const _RestaurantDetailContent(),
+    );
+  }
+}
+
+class _RestaurantDetailContent extends StatelessWidget {
+  const _RestaurantDetailContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<RestaurantDetailCubit>();
+    final state = context.watch<RestaurantDetailCubit>().state;
+
+    return Scaffold(
+      body: state.isLoading
+          ? const SafeArea(child: Center(child: CircularProgressIndicator()))
+          : state.error != null
+              ? SafeArea(child: _buildError(context, state, cubit))
+              : state.restaurant == null
+                  ? SafeArea(child: _buildNotFound(context))
+                  : _buildContent(context, state, cubit),
+    );
+  }
+
+  Widget _buildError(
+      BuildContext context, RestaurantDetailState state, RestaurantDetailCubit cubit) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(AppLocalizations.of(context)!.errorLoadingRestaurant),
+          const SizedBox(height: 8),
+          Text(
+            state.error!,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () => cubit.refresh(),
+            icon: const Icon(Icons.refresh),
+            label: Text(AppLocalizations.of(context)!.retry),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotFound(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.restaurant_outlined, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(AppLocalizations.of(context)!.restaurantNotFound),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.goBack),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(
+      BuildContext context, RestaurantDetailState state, RestaurantDetailCubit cubit) {
+    final restaurant = state.restaurant!;
+    final sections = state.sections;
+
+    return CustomScrollView(
+      slivers: [
+        // Restaurant Header
+        SliverToBoxAdapter(
+          child: RestaurantDetailHeader(restaurant: restaurant),
+        ),
+
+        // Section Tab Bar (Sticky)
+        if (sections.isNotEmpty)
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _SectionTabBarDelegate(
+              child: MenuSectionTabBar(
+                sections: sections,
+                selectedSectionId: state.selectedSectionId,
+                onSectionSelected: (sectionId) =>
+                    cubit.selectSection(sectionId),
+              ),
+            ),
+          ),
+
+        // Search Bar
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search menu items...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: state.searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => cubit.setSearchQuery(''),
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              // ignore: deprecated_member_use
+              onChanged: (query) => cubit.setSearchQuery(query),
+            ),
+          ),
+        ),
+
+        // Menu Sections and Items
+        if (sections.isEmpty)
+          SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Text(AppLocalizations.of(context)!.noMenuItemsAvailable),
+              ),
+            ),
+          )
+        else
+          ...sections
+              .where((section) =>
+                  state.searchQuery.isNotEmpty ||
+                  state.selectedSectionId == null ||
+                  section.id == state.selectedSectionId)
+              .map<List<Widget>>((section) {
+            final items = state.getFilteredItems(section.id);
+            if (items.isEmpty && state.searchQuery.isNotEmpty) {
+              return [const SliverToBoxAdapter(child: SizedBox.shrink())];
+            }
+
+            return [
+              // Section Header
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        section
+                            .getLocalizedName(
+                                Localizations.localeOf(context).languageCode)
+                            .toUpperCase(),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                      ),
+                      if (section.description != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          section.description!,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 2,
+                        width: 40,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Items Grid
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 250,
+                    childAspectRatio: 0.75,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = items[index];
+                      return CustomerMenuItemCard(
+                        item: item,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ItemProfilePage(
+                                item: item,
+                                restaurantId: restaurant.id,
+                                sectionId: section.id,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    childCount: items.length,
+                  ),
+                ),
+              ),
+            ];
+          }).expand<Widget>((element) => element),
+
+        // Reviews Section
+        SliverToBoxAdapter(
+          child: _RestaurantReviewsSection(restaurantId: restaurant.id),
+        ),
+
+        // Bottom Padding
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 32),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Reviews Section ───────────────────────────────────────────────────────────
+
+class _RestaurantReviewsSection extends StatefulWidget {
+  final String restaurantId;
+  const _RestaurantReviewsSection({required this.restaurantId});
+
+  @override
+  State<_RestaurantReviewsSection> createState() =>
+      _RestaurantReviewsSectionState();
+}
+
+class _RestaurantReviewsSectionState extends State<_RestaurantReviewsSection> {
+  late Future<List<Review>> _reviewsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reviewsFuture = ReviewFirebaseDatasource()
+        .fetchReviews(restaurantId: widget.restaurantId, limit: 10);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Review>>(
+      future: _reviewsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final reviews = snapshot.data ?? [];
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(height: 32),
+              Row(
+                children: [
+                  const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 22),
+                  const SizedBox(width: 6),
+                  Text(
+                    AppLocalizations.of(context)!.customerReviewsTitle,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (reviews.isNotEmpty)
+                    Text(
+                      '(${reviews.length})',
+                      style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (reviews.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: Text(
+                      AppLocalizations.of(context)!.noReviewsYet,
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                  ),
+                )
+              else
+                ...reviews.map((r) => _ReviewTile(review: r)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ReviewTile extends StatelessWidget {
+  final Review review;
+  const _ReviewTile({required this.review});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Stars
+                Row(
+                  children: List.generate(5, (i) {
+                    return Icon(
+                      i < review.rating.round()
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 16,
+                      color: const Color(0xFFFFC107),
+                    );
+                  }),
+                ),
+                const Spacer(),
+                Text(
+                  DateFormat('MMM d, yyyy').format(review.createdAt),
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+            if (review.comment != null && review.comment!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                review.comment!,
+                style: const TextStyle(fontSize: 13),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Delegate for sticky section tab bar.
+class _SectionTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _SectionTabBarDelegate({required this.child});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: overlapsContent
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: child,
+    );
+  }
+
+  @override
+  double get maxExtent => 56;
+
+  @override
+  double get minExtent => 56;
+
+  @override
+  bool shouldRebuild(covariant _SectionTabBarDelegate oldDelegate) {
+    return oldDelegate.child != child;
+  }
+}

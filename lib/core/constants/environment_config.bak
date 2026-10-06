@@ -1,0 +1,11 @@
+/// Environment configuration for upload service.
+///
+/// Cloudinary credentials (API key, secret) are stored server-side in
+/// Firebase Functions config and never exposed to the client.
+/// The client only needs the cloud name to build URLs for display.
+class EnvironmentConfig {
+  EnvironmentConfig._();
+
+  /// Returns the Cloudinary cloud name for URL construction.
+  static String getCloudName() => 'zspeed';
+}

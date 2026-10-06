@@ -1,0 +1,160 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+
+import 'package:z_speed/features/restaurant_owner/widgets/restaurant_form_styles.dart';
+import 'package:z_speed/features/restaurant_owner/widgets/restaurant_form_widgets.dart';
+
+/// Step 3: Contact Information
+///
+/// Collects: owner phone, owner email, password, confirm password, restaurant phone.
+class ContactInfoStep extends StatefulWidget {
+  final TextEditingController ownerPhoneController;
+  final TextEditingController ownerEmailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final TextEditingController restaurantPhoneController;
+  final GlobalKey<FormState> formKey;
+
+  const ContactInfoStep({
+    super.key,
+    required this.ownerPhoneController,
+    required this.ownerEmailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.restaurantPhoneController,
+    required this.formKey,
+  });
+
+  @override
+  State<ContactInfoStep> createState() => _ContactInfoStepState();
+}
+
+class _ContactInfoStepState extends State<ContactInfoStep> {
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Form(
+      key: widget.formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(RestaurantFormStyles.horizontalPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RestaurantFormSectionHeader(
+              title: l10n.contactInfoTitle,
+              subtitle: l10n.contactInfoSubtitle,
+              icon: Icons.contact_phone_outlined,
+            ),
+
+            // Owner Email
+            TextFormField(
+              controller: widget.ownerEmailController,
+              decoration: RestaurantFormStyles.inputDecoration(
+                label: l10n.ownerEmail,
+                hint: l10n.ownerEmailHint,
+                prefixIcon: Icons.email_outlined,
+              ),
+              keyboardType: TextInputType.emailAddress,
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return l10n.pleaseEnterYourEmail;
+                if (!RegExp(r'^[\w\.\-]+@[\w\.\-]+\.\w+$').hasMatch(v.trim())) {
+                  return l10n.pleaseEnterValidEmail;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: RestaurantFormStyles.verticalSpacing),
+
+            // Owner Phone
+            TextFormField(
+              controller: widget.ownerPhoneController,
+              decoration: RestaurantFormStyles.inputDecoration(
+                label: l10n.ownerPhone,
+                hint: l10n.ownerPhoneHint,
+                prefixIcon: Icons.phone_outlined,
+              ),
+              keyboardType: TextInputType.phone,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.fieldIsRequired(l10n.ownerPhone)
+                  : null,
+            ),
+            const SizedBox(height: RestaurantFormStyles.verticalSpacing),
+
+            // Password
+            TextFormField(
+              controller: widget.passwordController,
+              decoration: RestaurantFormStyles.inputDecoration(
+                label: l10n.password,
+                hint: l10n.passwordMinLength,
+                prefixIcon: Icons.lock_outlined,
+                suffix: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              obscureText: _obscurePassword,
+              validator: (v) {
+                if (v == null || v.isEmpty) return l10n.pleaseEnterYourPasswordValidation;
+                if (v.length < 6) return l10n.passwordMinLength;
+                return null;
+              },
+            ),
+            const SizedBox(height: RestaurantFormStyles.verticalSpacing),
+
+            // Confirm Password
+            TextFormField(
+              controller: widget.confirmPasswordController,
+              decoration: RestaurantFormStyles.inputDecoration(
+                label: l10n.confirmPassword,
+                hint: l10n.pleaseConfirmYourPassword,
+                prefixIcon: Icons.lock_outlined,
+                suffix: IconButton(
+                  icon: Icon(
+                    _obscureConfirm
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscureConfirm = !_obscureConfirm),
+                ),
+              ),
+              obscureText: _obscureConfirm,
+              validator: (v) {
+                if (v == null || v.isEmpty) return l10n.pleaseConfirmYourPassword;
+                if (v != widget.passwordController.text) {
+                  return l10n.passwordsDoNotMatch;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: RestaurantFormStyles.sectionSpacing),
+
+            // Restaurant Phone
+            TextFormField(
+              controller: widget.restaurantPhoneController,
+              decoration: RestaurantFormStyles.inputDecoration(
+                label: l10n.restaurantPhone,
+                hint: l10n.contactRestaurantPhoneHint,
+                prefixIcon: Icons.store_outlined,
+              ),
+              keyboardType: TextInputType.phone,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.contactRestaurantPhoneRequired
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

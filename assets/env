@@ -1,0 +1,30 @@
+# Z-SPEED Mobile App Environment Variables
+# ============================================
+
+# Firebase
+FIREBASE_PROJECT_ID=zspeed
+
+# LocationIQ (Maps & Geocoding)
+# Get your free key at https://locationiq.com/
+LOCATION_IQ_API_KEY=pk.cabc2758251f91cf97c74ab3b03afe67
+
+# Google Maps (Optional if using google_maps_flutter)
+GOOGLE_MAPS_API_KEY=
+
+# App Identity
+APP_NAME=Z-Speed
+APP_VERSION=1.0.22
+
+# ── Payments (testing / sandbox) ─────────────────────────────────
+# When enabled, the app will tell Cloud Functions to use CyberSource sandbox.
+PAYMENT_TEST_MODE=true
+# Values: sandbox | production
+# Values: sandbox | production
+CYBERSOURCE_ENV=sandbox
+# If true, allow card payment initiation for QA/test users even if their role isn't customer.
+PAYMENT_ALLOW_CARD_FOR_QA=false
+
+# Push Notifications VAPID Key for Web
+FCM_VAPID_KEY=BJXr-EUuoHin_NYDAMVE77lITp0moWepfLWIAz2jDXDX4a6SswdDDLtS_7jepACwM0rMGylvU8fdmqzSn74m5Qc
+
+

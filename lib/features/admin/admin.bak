@@ -1,0 +1,51 @@
+/// Barrel export for admin feature.
+/// Populated as modules are migrated in Phases 3-7.
+library;
+
+// ─── Datasource ───
+export 'datasource/admin_firebase_datasource.dart';
+
+// ─── Models ───
+export 'model/admin_dashboard_stats.dart';
+export 'model/admin_models.dart';
+export 'model/admin_theme.dart';
+
+// ─── Repository ───
+export 'repository/admin_repository.dart';
+export 'repository/admin_repository_impl.dart';
+
+// ─── Cubits ───
+export 'cubit/admin_analytics_cubit.dart';
+export 'cubit/admin_dashboard_cubit.dart';
+export 'cubit/admin_orders_cubit.dart';
+export 'cubit/admin_reports_cubit.dart';
+export 'cubit/admin_settings_cubit.dart';
+export 'cubit/admin_users_cubit.dart';
+export 'cubit/admin_vendors_cubit.dart';
+export 'cubit/admin_application_cubit.dart';
+
+// ─── Widgets ───
+export 'widgets/admin_dialogs.dart';
+export 'widgets/admin_nav_item.dart';
+export 'widgets/admin_shell.dart';
+export 'widgets/admin_sidebar_header.dart';
+export 'widgets/admin_top_bar.dart';
+export 'widgets/admin_user_profile.dart';
+export 'widgets/dispute_resolution.dart';
+export 'widgets/user_management.dart';
+
+// ─── Views ───
+export 'view/admin_action_dispatchers.dart';
+export 'view/admin_analytics_view.dart';
+export 'view/admin_dashboard_view.dart';
+export 'view/admin_feedback_dialogs.dart';
+export 'view/admin_order_dialogs.dart';
+export 'view/admin_orders_view.dart';
+export 'view/admin_report_dialogs.dart';
+export 'view/admin_reports_view.dart';
+export 'view/admin_settings_view.dart';
+export 'view/admin_user_dialogs.dart';
+export 'view/admin_users_view.dart';
+export 'view/admin_vendor_dialogs.dart';
+export 'view/admin_vendors_view.dart';
+export 'view/admin_view_mappers.dart';

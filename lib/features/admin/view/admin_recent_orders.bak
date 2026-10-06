@@ -1,0 +1,200 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/admin/model/admin_models.dart';
+import 'package:z_speed/features/admin/model/admin_theme.dart';
+import 'package:z_speed/features/admin/view/admin_view_mappers.dart';
+
+/// Recent orders section for the admin dashboard.
+class AdminRecentOrders extends StatelessWidget {
+  const AdminRecentOrders({
+    super.key,
+    required this.orders,
+    required this.onCreateOrder,
+    required this.onHandleOrderAction,
+  });
+
+  final List<AdminOrder> orders;
+  final VoidCallback onCreateOrder;
+  final void Function(String action, AdminOrder order, BuildContext context)
+      onHandleOrderAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AdminTheme.surfaceWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AdminTheme.borderColor, width: 1),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
+              spreadRadius: -5),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(AppLocalizations.of(context)!.recentOrders,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AdminTheme.textDark),
+                    overflow: TextOverflow.ellipsis),
+              ),
+              ElevatedButton.icon(
+                onPressed: onCreateOrder,
+                icon: const Icon(Icons.add, size: 14),
+                label: Text(AppLocalizations.of(context)!.newOrder),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AdminTheme.primaryOrange,
+                  foregroundColor: AdminTheme.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...orders.map((order) => _buildOrderRow(context, order)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrderRow(BuildContext context, AdminOrder order) {
+    final statusColor = resolveAdminOrderStatusColor(
+      status: order.status,
+      successGreen: AdminTheme.successGreen,
+      warningAmber: AdminTheme.warningAmber,
+      primaryOrange: AdminTheme.primaryOrange,
+      errorRed: AdminTheme.errorRed,
+    );
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AdminTheme.backgroundWhite,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AdminTheme.borderColor, width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                    color: statusColor.withValues(alpha: 0.2), width: 1),
+              ),
+              child: Center(
+                  child: Icon(Icons.shopping_bag_outlined,
+                      color: statusColor, size: 18)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(order.id,
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: AdminTheme.textDark)),
+                  Text('${order.customerName} • ${order.restaurantName}',
+                      style: TextStyle(
+                          fontSize: 11, color: AdminTheme.textLight)),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      Chip(
+                        label: Text(order.status.toString().split('.').last,
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: statusColor,
+                                fontWeight: FontWeight.w600)),
+                        backgroundColor: statusColor.withValues(alpha: 0.1),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                      ),
+                      Chip(
+                        label: Text('${order.items} items',
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: AdminTheme.textLight,
+                                fontWeight: FontWeight.w600)),
+                        backgroundColor:
+                            AdminTheme.textLight.withValues(alpha: 0.1),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(AppLocalizations.of(context)!.egpAmount(order.amount.toStringAsFixed(2).toString()), style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AdminTheme.textDark)),
+                Text(order.time,
+                    style: TextStyle(
+                        fontSize: 11, color: AdminTheme.textLight)),
+                const SizedBox(height: 6),
+                PopupMenuButton<String>(
+                  onSelected: (value) =>
+                      onHandleOrderAction(value, order, context),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                        value: 'edit',
+                        child: Row(children: [
+                          Icon(Icons.edit,
+                              color: AdminTheme.primaryOrange, size: 16),
+                          const SizedBox(width: 6),
+                          Text(AppLocalizations.of(context)!.edit, style: const TextStyle(fontSize: 12)),
+                        ])),
+                    PopupMenuItem(
+                        value: 'delete',
+                        child: Row(children: [
+                          Icon(Icons.delete,
+                              color: AdminTheme.errorRed, size: 16),
+                          const SizedBox(width: 6),
+                          Text(AppLocalizations.of(context)!.delete, style: const TextStyle(fontSize: 12)),
+                        ])),
+                    PopupMenuItem(
+                        value: 'view',
+                        child: Row(children: [
+                          Icon(Icons.receipt,
+                              color: AdminTheme.infoBlue, size: 16),
+                          const SizedBox(width: 6),
+                          Text(AppLocalizations.of(context)!.viewDetails, style: const TextStyle(fontSize: 12)),
+                        ])),
+                  ],
+                  child: Icon(Icons.more_vert,
+                      color: AdminTheme.textLight, size: 18),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+
+class QuantitySelector extends StatefulWidget {
+  final int initialValue;
+  final int minValue;
+  final int maxValue;
+  final ValueChanged<int> onChanged;
+
+  const QuantitySelector({
+    super.key,
+    this.initialValue = 1,
+    this.minValue = 1,
+    this.maxValue = 20,
+    required this.onChanged,
+  });
+
+  @override
+  State<QuantitySelector> createState() => _QuantitySelectorState();
+}
+
+class _QuantitySelectorState extends State<QuantitySelector> {
+  late int _currentValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentValue = widget.initialValue;
+  }
+
+  void _increment() {
+    if (_currentValue < widget.maxValue) {
+      setState(() {
+        _currentValue++;
+      });
+      widget.onChanged(_currentValue);
+    }
+  }
+
+  void _decrement() {
+    if (_currentValue > widget.minValue) {
+      setState(() {
+        _currentValue--;
+      });
+      widget.onChanged(_currentValue);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Minus button
+          IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: _decrement,
+            color: const Color.fromARGB(255, 231, 37, 24),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          // Quantity Text
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Text(
+              '$_currentValue',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          // Plus button
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _increment,
+            color: Colors.red,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
+    );
+  }
+}

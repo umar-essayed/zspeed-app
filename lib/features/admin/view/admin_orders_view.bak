@@ -1,0 +1,627 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:z_speed/features/admin/model/admin_models.dart';
+import 'package:z_speed/features/admin/model/admin_theme.dart';
+import 'package:z_speed/features/admin/view/admin_view_mappers.dart';
+import 'package:z_speed/features/admin/cubit/admin_orders_cubit.dart';
+import 'package:z_speed/features/admin/cubit/admin_orders_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/features/admin/widgets/admin_dialogs.dart';
+import 'package:z_speed/core/errors/failure_localization_ext.dart';
+
+/// Order-management view for the admin panel.
+///
+// ignore: unintended_html_in_doc_comment
+/// Now uses Consumer<AdminOrdersViewModel> to fetch live data from Firestore.
+/// Filtering is managed by the ViewModel.
+class AdminOrdersView extends StatelessWidget {
+  const AdminOrdersView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AdminOrdersCubit, AdminOrdersState>(
+      builder: (context, state) {
+        // Loading state
+        if (state.isBusy) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: AdminTheme.primaryOrange,
+            ),
+          );
+        }
+
+        // Error state
+        if (state.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AdminTheme.errorRed,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  state.failure?.getLocalizedMessage(context) ??
+                      'An error occurred',
+                  style: TextStyle(
+                    color: AdminTheme.textDark,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () =>
+                      context.read<AdminOrdersCubit>().loadOrders(),
+                  icon: const Icon(Icons.refresh),
+                  label: Text(AppLocalizations.of(context)!.retry),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AdminTheme.primaryOrange,
+                    foregroundColor: AdminTheme.white,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Success state - render orders list
+        return _OrdersContent(
+          orders: state.filteredAdminOrders,
+          currentStatusFilter: state.statusFilter,
+          onFilterChanged: context.read<AdminOrdersCubit>().setStatusFilter,
+          onUpdateStatus: context.read<AdminOrdersCubit>().updateOrderStatus,
+          onCancelOrder: context.read<AdminOrdersCubit>().cancelOrder,
+          dateRange: state.dateRange,
+          onDateRangeChanged: context.read<AdminOrdersCubit>().setDateRange,
+          hasMore: state.hasMore,
+          isLoadingMore: state.isLoadingMore,
+          onLoadMore: () =>
+              context.read<AdminOrdersCubit>().loadOrders(isLoadMore: true),
+        );
+      },
+    );
+  }
+}
+
+/// Internal widget to render the orders list when data is loaded.
+class _OrdersContent extends StatelessWidget {
+  const _OrdersContent({
+    required this.orders,
+    required this.currentStatusFilter,
+    required this.onFilterChanged,
+    required this.onUpdateStatus,
+    required this.onCancelOrder,
+    required this.dateRange,
+    required this.onDateRangeChanged,
+    required this.hasMore,
+    required this.isLoadingMore,
+    required this.onLoadMore,
+  });
+
+  final List<AdminOrder> orders;
+  final OrderStatus? currentStatusFilter;
+  final void Function(OrderStatus?) onFilterChanged;
+  final Future<void> Function(String orderId, OrderStatus status)
+      onUpdateStatus;
+  final Future<void> Function(String orderId) onCancelOrder;
+  final DateTimeRange? dateRange;
+  final void Function(DateTimeRange?) onDateRangeChanged;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final VoidCallback onLoadMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                AppLocalizations.of(context)!.orderManagementTitle,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AdminTheme.textDark,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () =>
+                  AdminDialogs.showComingSoon(context, 'Create Order'),
+              icon: const Icon(Icons.add, size: 16),
+              label: Text(AppLocalizations.of(context)!.createOrder),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AdminTheme.primaryOrange,
+                foregroundColor: AdminTheme.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AdminTheme.surfaceWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AdminTheme.borderColor, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+                spreadRadius: -5,
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      AppLocalizations.of(context)!.allOrdersLabel,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AdminTheme.textDark,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildDateRangeButton(context),
+                      const SizedBox(width: 8),
+                      _buildFilterDropdown(),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ...orders.map((order) {
+                final statusColor = resolveAdminOrderStatusColor(
+                  status: order.status,
+                  successGreen: AdminTheme.successGreen,
+                  warningAmber: AdminTheme.warningAmber,
+                  primaryOrange: AdminTheme.primaryOrange,
+                  errorRed: AdminTheme.errorRed,
+                );
+
+                return Container(
+                  margin: const EdgeInsetsDirectional.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AdminTheme.backgroundWhite,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AdminTheme.borderColor, width: 1),
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 600;
+                      if (isMobile) {
+                        return _buildMobileOrderCard(
+                            order, statusColor, context);
+                      } else {
+                        return _buildDesktopOrderRow(
+                            order, statusColor, context);
+                      }
+                    },
+                  ),
+                );
+              }),
+              if (hasMore && orders.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: isLoadingMore
+                      ? const CircularProgressIndicator()
+                      : TextButton(
+                          onPressed: onLoadMore,
+                          style: TextButton.styleFrom(
+                            foregroundColor: AdminTheme.primaryOrange,
+                          ),
+                          child: Text(AppLocalizations.of(context)!.loadMore),
+                        ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Filter dropdown ────────────────────────────────────────────────
+
+  Widget _buildDateRangeButton(BuildContext context) {
+    final hasRange = dateRange != null;
+    final label = hasRange
+        ? '${_fmtDate(dateRange!.start)} – ${_fmtDate(dateRange!.end)}'
+        : AppLocalizations.of(context)!.dateRangeLabel;
+
+    return OutlinedButton.icon(
+      onPressed: () => _pickDateRange(context),
+      icon: Icon(
+        hasRange ? Icons.date_range : Icons.calendar_today,
+        size: 14,
+        color: hasRange ? AdminTheme.primaryOrange : AdminTheme.textMedium,
+      ),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: hasRange ? AdminTheme.primaryOrange : AdminTheme.textMedium,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        side: BorderSide(
+          color: hasRange ? AdminTheme.primaryOrange : AdminTheme.borderColor,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  Future<void> _pickDateRange(BuildContext context) async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 2),
+      lastDate: now,
+      initialDateRange: dateRange ??
+          DateTimeRange(
+            start: now.subtract(const Duration(days: 30)),
+            end: now,
+          ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: AdminTheme.primaryOrange,
+                ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      onDateRangeChanged(picked);
+    }
+  }
+
+  static String _fmtDate(DateTime dt) => '${dt.month}/${dt.day}/${dt.year}';
+
+  Widget _buildFilterDropdown() {
+    // Convert OrderStatus? to String for dropdown
+    final String filterValue = currentStatusFilter == null
+        ? 'All Status'
+        : _statusToString(currentStatusFilter!);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AdminTheme.backgroundWhite,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AdminTheme.borderColor, width: 1),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: filterValue,
+          isDense: true,
+          icon: Icon(Icons.expand_more, color: AdminTheme.textMedium, size: 18),
+          items: [
+            'All Status',
+            'Pending',
+            'In Progress',
+            'Delivered',
+            'Cancelled'
+          ]
+              .map((status) => DropdownMenuItem<String>(
+                    value: status,
+                    child: Text(
+                      status,
+                      style:
+                          TextStyle(fontSize: 12, color: AdminTheme.textDark),
+                    ),
+                  ))
+              .toList(),
+          // ignore: deprecated_member_use
+          onChanged: (value) {
+            if (value != null) {
+              onFilterChanged(_stringToStatus(value));
+            }
+          },
+          style: TextStyle(fontSize: 12, color: AdminTheme.textDark),
+          dropdownColor: AdminTheme.white,
+          iconEnabledColor: AdminTheme.textMedium,
+          focusColor: AdminTheme.primaryOrange.withValues(alpha: 0.1),
+        ),
+      ),
+    );
+  }
+
+  // ── Mobile card layout ─────────────────────────────────────────────
+
+  Widget _buildMobileOrderCard(
+      AdminOrder order, Color statusColor, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          order.id,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: AdminTheme.textDark,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          AppLocalizations.of(context)!
+              .customerValue(order.customerName.toString()),
+          style: TextStyle(fontSize: 12, color: AdminTheme.textMedium),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          AppLocalizations.of(context)!
+              .restaurantValue(order.restaurantName.toString()),
+          style: TextStyle(fontSize: 12, color: AdminTheme.textMedium),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              AppLocalizations.of(context)!
+                  .egpAmount(order.amount.toStringAsFixed(2).toString()),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: AdminTheme.textDark,
+              ),
+            ),
+            Chip(
+              label: Text(
+                order.status.toString().split('.').last,
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                ),
+              ),
+              backgroundColor: statusColor.withValues(alpha: 0.1),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              icon: Icon(Icons.edit, color: AdminTheme.primaryOrange, size: 16),
+              onPressed: () async {
+                final newStatus = await AdminDialogs.pickOrderStatus(context,
+                    currentStatus: order.status);
+                if (newStatus != null && context.mounted) {
+                  await onUpdateStatus(order.id, newStatus);
+                }
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.delete, color: AdminTheme.errorRed, size: 16),
+              onPressed: () async {
+                final confirmed = await AdminDialogs.confirmDelete(context,
+                    itemType: 'Order', itemName: order.id);
+                if (confirmed && context.mounted) {
+                  await onCancelOrder(order.id);
+                }
+              },
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'view') {
+                  AdminDialogs.showComingSoon(context, 'Order Details');
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                return [
+                  PopupMenuItem(
+                    value: 'view',
+                    child: Row(
+                      children: [
+                        Icon(Icons.receipt,
+                            color: AdminTheme.infoBlue, size: 16),
+                        const SizedBox(width: 6),
+                        Text(AppLocalizations.of(context)!.viewDetails,
+                            style: const TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ];
+              },
+              child:
+                  Icon(Icons.more_vert, color: AdminTheme.textLight, size: 18),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // ── Desktop row layout ─────────────────────────────────────────────
+
+  Widget _buildDesktopOrderRow(
+      AdminOrder order, Color statusColor, BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                order.id,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: AdminTheme.textDark,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                AppLocalizations.of(context)!
+                    .customerValue(order.customerName.toString()),
+                style: TextStyle(fontSize: 12, color: AdminTheme.textMedium),
+              ),
+              Text(
+                AppLocalizations.of(context)!
+                    .restaurantValue(order.restaurantName.toString()),
+                style: TextStyle(fontSize: 12, color: AdminTheme.textMedium),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          children: [
+            Text(
+              AppLocalizations.of(context)!
+                  .egpAmount(order.amount.toStringAsFixed(2).toString()),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: AdminTheme.textDark,
+              ),
+            ),
+            Text(
+              '${order.items} items',
+              style: TextStyle(fontSize: 11, color: AdminTheme.textLight),
+            ),
+          ],
+        ),
+        const SizedBox(width: 16),
+        Chip(
+          label: Text(
+            order.status.toString().split('.').last,
+            style: TextStyle(
+              color: statusColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
+          ),
+          backgroundColor: statusColor.withValues(alpha: 0.1),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        ),
+        const SizedBox(width: 16),
+        PopupMenuButton<String>(
+          onSelected: (value) async {
+            switch (value) {
+              case 'edit':
+                final newStatus = await AdminDialogs.pickOrderStatus(context,
+                    currentStatus: order.status);
+                if (newStatus != null && context.mounted) {
+                  await onUpdateStatus(order.id, newStatus);
+                }
+              case 'delete':
+                final confirmed = await AdminDialogs.confirmDelete(context,
+                    itemType: 'Order', itemName: order.id);
+                if (confirmed && context.mounted) {
+                  await onCancelOrder(order.id);
+                }
+              case 'view':
+                AdminDialogs.showComingSoon(context, 'Order Details');
+            }
+          },
+          itemBuilder: (BuildContext context) {
+            return [
+              PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, color: AdminTheme.primaryOrange, size: 16),
+                    const SizedBox(width: 6),
+                    Text(AppLocalizations.of(context)!.edit,
+                        style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, color: AdminTheme.errorRed, size: 16),
+                    const SizedBox(width: 6),
+                    Text(AppLocalizations.of(context)!.delete,
+                        style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'view',
+                child: Row(
+                  children: [
+                    Icon(Icons.receipt, color: AdminTheme.infoBlue, size: 16),
+                    const SizedBox(width: 6),
+                    Text(AppLocalizations.of(context)!.viewDetails,
+                        style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ];
+          },
+          child: Icon(Icons.more_vert, color: AdminTheme.textLight, size: 18),
+        ),
+      ],
+    );
+  }
+
+  // ── Helper methods for filter conversion ──────────────────────────
+
+  String _statusToString(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return 'Pending';
+      case OrderStatus.preparing:
+        return 'In Progress';
+      case OrderStatus.delivered:
+        return 'Delivered';
+      case OrderStatus.cancelled:
+        return 'Cancelled';
+      default:
+        return 'All Status';
+    }
+  }
+
+  OrderStatus? _stringToStatus(String value) {
+    switch (value) {
+      case 'Pending':
+        return OrderStatus.pending;
+      case 'In Progress':
+        return OrderStatus.preparing;
+      case 'Delivered':
+        return OrderStatus.delivered;
+      case 'Cancelled':
+        return OrderStatus.cancelled;
+      default:
+        return null; // All Status
+    }
+  }
+}

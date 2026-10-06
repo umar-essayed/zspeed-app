@@ -1,0 +1,287 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+import 'package:z_speed/features/admin/model/admin_models.dart';
+
+class AdminVendorDialogs {
+  static void showAddVendorDialog({
+    required BuildContext context,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(AdminVendor vendor) onVendorAdded,
+    required void Function(String title, String message) onSuccess,
+    required String nextVendorId,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String name = '';
+        String category = '';
+        double rating = 4.0;
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.addVendor,
+              style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.name,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  onChanged: (value) => name = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.categoryLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  onChanged: (value) => category = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.ratingLabel15,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) => rating = double.tryParse(value) ?? 4.0,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel,
+                  style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (name.isNotEmpty && category.isNotEmpty) {
+                  onVendorAdded(
+                    AdminVendor(
+                      id: nextVendorId,
+                      name: name,
+                      category: category,
+                      status: RestaurantStatus.active,
+                      rating: rating,
+                      ordersToday: 0,
+                      totalRevenue: 0,
+                    ),
+                  );
+                  Navigator.pop(context);
+                  onSuccess('Vendor Added',
+                      'New vendor has been added successfully!');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.add,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showEditVendorDialog({
+    required BuildContext context,
+    required AdminVendor vendor,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(AdminVendor vendor) onVendorUpdated,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String name = vendor.name;
+        String category = vendor.category;
+        RestaurantStatus selectedStatus = vendor.status;
+        double rating = vendor.rating;
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.editDetails,
+              style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.name,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  controller: TextEditingController(text: name),
+                  onChanged: (value) => name = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.categoryLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  controller: TextEditingController(text: category),
+                  onChanged: (value) => category = value,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<RestaurantStatus>(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.status,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  initialValue: selectedStatus,
+                  items: RestaurantStatus.values
+                      .map(
+                        (status) => DropdownMenuItem(
+                          value: status,
+                          child: Text(
+                            status.toString().split('.').last,
+                            style: TextStyle(color: textDark, fontSize: 12),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) selectedStatus = value;
+                  },
+                  style: const TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.ratingLabel15,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  controller: TextEditingController(text: rating.toString()),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) =>
+                      rating = double.tryParse(value) ?? vendor.rating,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel,
+                  style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onVendorUpdated(
+                  AdminVendor(
+                    id: vendor.id,
+                    name: name,
+                    category: category,
+                    status: selectedStatus,
+                    rating: rating,
+                    ordersToday: vendor.ordersToday,
+                    totalRevenue: vendor.totalRevenue,
+                    vendorType: vendor.vendorType,
+                  ),
+                );
+                Navigator.pop(context);
+                onSuccess(
+                    'Vendor Updated', 'Vendor information has been updated!');
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.saveChanges,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showDeleteVendorDialog({
+    required BuildContext context,
+    required AdminVendor vendor,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color errorRed,
+    required void Function(String id) onDelete,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.delete,
+              style: TextStyle(color: textDark)),
+          content: Text(
+            '${AppLocalizations.of(context)!.confirm} ${AppLocalizations.of(context)!.delete} ${vendor.name}?',
+            style: TextStyle(color: textMedium),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel,
+                  style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onDelete(vendor.id);
+                Navigator.pop(context);
+                onSuccess(
+                    'Vendor Deleted', 'Vendor has been deleted successfully!');
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: errorRed, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.delete,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

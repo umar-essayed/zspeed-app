@@ -1,0 +1,193 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:z_speed/features/order/cubit/checkout_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/features/auth/cubit/auth_cubit.dart';
+import 'package:z_speed/features/cart/cubit/cart_cubit.dart';
+import 'package:z_speed/features/cart/widgets/cart_sidebar_widget.dart';
+import 'package:z_speed/features/customer/cubit/restaurant_browse_cubit.dart';
+import 'package:z_speed/features/customer/view/customer_order_history_screen.dart';
+import 'package:z_speed/features/customer/view/restaurant_browse_screen.dart';
+import 'package:z_speed/features/customer/widgets/customer_bottom_bar.dart';
+import 'package:z_speed/features/customer/widgets/customer_header.dart';
+import 'package:z_speed/features/customer/widgets/customer_sign_in_sheet.dart';
+import 'package:z_speed/features/order/view/checkout_screen.dart';
+import 'package:z_speed/pages/full_cart_page.dart';
+
+class CustomerApp extends StatefulWidget {
+  const CustomerApp({super.key});
+
+  @override
+  State<CustomerApp> createState() => _CustomerAppState();
+}
+
+class _CustomerAppState extends State<CustomerApp> {
+  String view = "browse";
+  late String selectedAddress;
+  late List<String> addresses;
+  DateTime? _lastPressedAt;
+  final ValueNotifier<bool> _isScrollingNotifier = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    _isScrollingNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initAddresses();
+  }
+
+  void _initAddresses() {
+    final user = context.read<AuthCubit>().state.user;
+    final userAddress = user?.address;
+    if (userAddress != null && userAddress.isNotEmpty) {
+      addresses = [userAddress];
+      selectedAddress = userAddress;
+    } else {
+      addresses = ['Set your delivery address'];
+      selectedAddress = 'Set your delivery address';
+    }
+  }
+
+  CartCubit get _cartCubit => context.watch<CartCubit>();
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final now = DateTime.now();
+        final isFirstPress = _lastPressedAt == null || now.difference(_lastPressedAt!) > const Duration(seconds: 2);
+
+        if (isFirstPress) {
+          _lastPressedAt = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'اضغط مرة أخرى للخروج من التطبيق'
+                    : 'Press back again to exit',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+              ),
+              backgroundColor: const Color(0xFFF35535),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          // Double click detected, gracefully exit application on Android
+          await SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        extendBody: true,
+        body: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification is ScrollStartNotification) {
+              if (!_isScrollingNotifier.value) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _isScrollingNotifier.value = true;
+                });
+              }
+            } else if (notification is ScrollEndNotification) {
+              if (_isScrollingNotifier.value) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _isScrollingNotifier.value = false;
+                });
+              }
+            }
+            return false;
+          },
+          child: SafeArea(
+            bottom: false,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Row(
+                  children: [
+                    // Main Content
+                    Expanded(
+                      child: Column(
+                        children: [
+                          CustomerHeader(
+                            onProfilePressed: () =>
+                                CustomerSignInSheet.show(context),
+                          ),
+    
+                          // Main Content Area
+                          Expanded(
+                            child: Container(
+                              color: Colors.white,
+                              child: view == "browse"
+                                  ? BlocProvider(
+                                      create: (_) => RestaurantBrowseCubit(),
+                                      child: const RestaurantBrowseScreen(),
+                                    )
+                                  : _buildTrackingView(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+    
+                    // Cart Sidebar
+                    if (view == "browse" && constraints.maxWidth > 700)
+                      CartSidebarWidget(
+                        sidebarWidth: constraints.maxWidth * 0.32,
+                        onCheckout: _proceedToCheckout,
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+        bottomNavigationBar: ValueListenableBuilder<bool>(
+          valueListenable: _isScrollingNotifier,
+          builder: (context, isScrolling, _) => CustomerBottomBar(
+            isScrolling: isScrolling,
+            activeView: view,
+            cartItemCount: _cartCubit.state.items.length,
+            onHome: () {},
+            onCart: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FullCartPage(),
+                ),
+              );
+            },
+            onBrowse: () => setState(() => view = "browse"),
+            onTrack: () => setState(() => view = "tracking"),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTrackingView() {
+    return const CustomerOrderHistoryScreen();
+  }
+
+  void _proceedToCheckout() {
+    if (_cartCubit.state.items.isEmpty) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider<CheckoutCubit>(
+          create: (ctx) => CheckoutCubit(
+            cartCubit: ctx.read<CartCubit>(),
+            authCubit: ctx.read<AuthCubit>(),
+          ),
+          child: const CheckoutScreen(),
+        ),
+      ),
+    );
+  }
+}

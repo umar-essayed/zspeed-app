@@ -1,0 +1,42 @@
+/// Barrel export for restaurant owner feature.
+library;
+
+// Views
+export 'view/restaurant_overview_screen.dart';
+export 'view/restaurant_orders_screen.dart';
+export 'view/restaurant_settings_screen.dart';
+export 'view/restaurant_settings_dialogs.dart';
+export 'view/restaurant_settings_widgets.dart';
+
+// Screens - Driver/Delivery Management
+export 'screens/delivery_fee_settings_screen.dart';
+
+// Cubits
+export 'cubit/restaurant_dashboard_cubit.dart';
+export 'cubit/restaurant_dashboard_state.dart';
+export 'cubit/restaurant_orders_cubit.dart';
+export 'cubit/restaurant_orders_state.dart';
+export 'cubit/restaurant_menu_cubit.dart';
+export 'cubit/restaurant_menu_state.dart';
+export 'cubit/restaurant_profile_cubit.dart';
+export 'cubit/restaurant_profile_state.dart';
+export 'cubit/restaurant_analytics_cubit.dart';
+export 'cubit/restaurant_analytics_state.dart';
+export 'cubit/restaurant_application_cubit.dart';
+export 'cubit/restaurant_application_state.dart';
+
+// Widgets - Menu
+export 'widgets/menu_manager.dart';
+export 'widgets/menu_item_card.dart';
+export 'widgets/menu_stat_card.dart';
+export 'widgets/add_edit_item_dialog.dart';
+export 'widgets/addon_group_editor.dart';
+
+// Widgets - Orders (still hardcoded, wired in Phase 8.4)
+export 'widgets/order_history.dart';
+export 'widgets/order_history_card.dart';
+
+// Note: Vendor-facing driver assignment and fee settings screens
+// are exported from features/driver/driver.dart:
+//   - restaurant_driver_assignment_screen.dart
+//   - delivery_fee_settings_screen.dart

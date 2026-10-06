@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Z Speed – Deliver Anything, Instantly | زد سبيد</title>
+    <meta
+      name="description"
+      content="Z Speed is your all-in-one super-app for food, pharmacy, transport and more. Download now for iOS and Android."
+    />
+    <meta property="og:title" content="Z Speed – Deliver Anything, Instantly" />
+    <meta
+      property="og:description"
+      content="Order food, medicine, groceries and more delivered to your door in minutes."
+    />
+    <meta property="og:image" content="images/icon.png" />
+    <meta name="theme-color" content="#F35535" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="images/icon.png" type="image/png" />
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-container">
+        <a href="#" class="nav-logo">
+          <img src="images/icon.png" alt="Z Speed Logo" class="logo-img" />
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a
+            href="#features"
+            class="nav-link"
+            data-en="Features"
+            data-ar="المميزات"
+            >Features</a
+          >
+          <a
+            href="#services"
+            class="nav-link"
+            data-en="Services"
+            data-ar="الخدمات"
+            >Services</a
+          >
+          <a
+            href="#how-it-works"
+            class="nav-link"
+            data-en="How It Works"
+            data-ar="كيف يعمل"
+            >How It Works</a
+          >
+          <a
+            href="#download"
+            class="nav-link"
+            data-en="Download"
+            data-ar="تحميل"
+            >Download</a
+          >
+          <a
+            href="./vendor/"
+            class="nav-link login-btn"
+            data-en="Merchant Login"
+            data-ar="دخول التجار"
+            >Merchant Login</a
+          >
+        </div>
+        <div class="nav-controls">
+          <button class="lang-btn" id="langBtn" aria-label="Switch language">
+            <span class="lang-icon">🌐</span>
+            <span class="lang-label" id="langLabel">عربي</span>
+          </button>
+          <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
+            <span class="theme-icon" id="themeIcon">☀️</span>
+          </button>
+          <button class="hamburger" id="hamburger" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <canvas id="particleCanvas"></canvas>
+
+      <div class="hero-content">
+        <div class="hero-badge animate-fade-up" style="animation-delay: 0.1s">
+          <span class="badge-dot"></span>
+          <span
+            data-en="Available on iOS &amp; Android"
+            data-ar="متوفر على iOS و Android"
+            >Available on iOS &amp; Android</span
+          >
+        </div>
+        <h1 class="hero-title animate-fade-up" style="animation-delay: 0.2s">
+          <span
+            class="gradient-text"
+            data-en="Deliver Anything,"
+            data-ar="توصيل كل شيء،"
+            >Deliver Anything,</span
+          >
+          <br />
+          <span data-en="Instantly." data-ar="فوراً.">Instantly.</span>
+        </h1>
+        <p
+          class="hero-subtitle animate-fade-up"
+          style="animation-delay: 0.35s"
+          data-en="Food, pharmacy, groceries, transport and more — all in one super-app, delivered to your door in minutes."
+          data-ar="طعام، صيدلية، بقالة، مواصلات والمزيد — كل شيء في تطبيق واحد، يصل إلى بابك في دقائق."
+        >
+          Food, pharmacy, groceries, transport and more — all in one super-app,
+          delivered to your door in minutes.
+        </p>
+        <div class="hero-cta animate-fade-up" style="animation-delay: 0.5s">
+          <a href="#download" class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path
+                d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.39.07 2.34.74 3.15.8 1.19-.24 2.35-.93 3.62-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.39-1.32 2.76-2.65 3.99M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+              />
+            </svg>
+            <span data-en="App Store" data-ar="متجر آبل">App Store</span>
+          </a>
+          <a href="#download" class="btn-secondary">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path
+                d="M3.18 23.76c.33.18.7.2 1.06.04l13.2-7.4-2.88-2.88-11.38 10.24zm15.3-8.58L5.28.55C4.94.33 4.56.32 4.22.5L15.6 11.88l2.88-2.7zm2.1-6.5l-2.45-1.38-3.22 3.22 3.22 3.22 2.47-1.38c.7-.4.7-1.3-.02-1.68zm-16.34-6.4L15.6 11.88 2.45.5C2.1.33 1.72.37 1.4.55 1.07.75.9 1.1.9 1.52v20.96c0 .42.17.77.5.97.32.18.7.2 1.04.04L16.48 11.88 4.24 2.28z"
+              />
+            </svg>
+            <span data-en="Google Play" data-ar="متجر جوجل">Google Play</span>
+          </a>
+        </div>
+        <div class="hero-stats animate-fade-up" style="animation-delay: 0.65s">
+          <div class="stat">
+            <span class="stat-num">50K+</span>
+            <span class="stat-label" data-en="Downloads" data-ar="تحميل"
+              >Downloads</span
+            >
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-num">4.8★</span>
+            <span class="stat-label" data-en="Rating" data-ar="التقييم"
+              >Rating</span
+            >
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-num">7+</span>
+            <span class="stat-label" data-en="Services" data-ar="خدمة"
+              >Services</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-phone animate-float">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <img
+              src="images/hero.jpg"
+              alt="App Screenshot"
+              class="phone-img"
+              loading="eager"
+            />
+            <div class="phone-overlay">
+              <div class="phone-badge">
+                <img
+                  src="images/icon.png"
+                  alt="Z Speed"
+                  class="phone-badge-icon"
+                />
+                <div>
+                  <div
+                    class="phone-badge-name"
+                    data-en="Z Speed"
+                    data-ar="زد سبيد"
+                  >
+                    Z Speed
+                  </div>
+                  <div
+                    class="phone-badge-sub"
+                    data-en="New order nearby!"
+                    data-ar="طلب جديد بالقرب!"
+                  >
+                    New order nearby!
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chip chip-1 animate-chip" style="animation-delay: 1s">
+          <span>🍔</span><span data-en="Food" data-ar="طعام">Food</span>
+        </div>
+        <!-- <div class="chip chip-2 animate-chip" style="animation-delay: 1.3s">
+          <span>💊</span><span data-en="Pharmacy" data-ar="صيدلية">Pharmacy</span>
+        </div> -->
+        <div class="chip chip-3 animate-chip" style="animation-delay: 1.6s">
+          <span>🚗</span
+          ><span data-en="Transport" data-ar="مواصلات">Transport</span>
+        </div>
+        <div class="chip chip-4 animate-chip" style="animation-delay: 1.9s">
+          <span>🛒</span><span data-en="Market" data-ar="سوق">Market</span>
+        </div>
+        <div class="chip chip-5 animate-chip" style="animation-delay: 2.2s">
+          <span>🥩</span><span data-en="Meat" data-ar="لحوم">Meat</span>
+        </div>
+        <div class="chip chip-6 animate-chip" style="animation-delay: 2.5s">
+          <span>🤝</span
+          ><span data-en="Buy &amp; Sell" data-ar="بيع واشتري"
+            >Buy &amp; Sell</span
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- BRANDS STRIP -->
+    <section class="brands-strip">
+      <p
+        class="brands-label"
+        data-en="Trusted by leading brands"
+        data-ar="موثوق من كبرى العلامات التجارية"
+      >
+        Trusted by leading brands
+      </p>
+      <div class="brands-track">
+        <div class="brands-slide">
+          <span class="brand-name">KFC</span><span class="brand-sep">·</span>
+          <span class="brand-name">Pizza Hut</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">Cook Door</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">FORNO 99</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">PEACOCK</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">Bulika</span><span class="brand-sep">·</span>
+          <span class="brand-name">Al-Sharqawi</span
+          ><span class="brand-sep">·</span>
+        </div>
+        <div class="brands-slide" aria-hidden="true">
+          <span class="brand-name">KFC</span><span class="brand-sep">·</span>
+          <span class="brand-name">Pizza Hut</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">Cook Door</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">FORNO 99</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">PEACOCK</span
+          ><span class="brand-sep">·</span>
+          <span class="brand-name">Bulika</span><span class="brand-sep">·</span>
+          <span class="brand-name">Al-Sharqawi</span
+          ><span class="brand-sep">·</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+      <div class="section-container">
+        <div class="section-header reveal">
+          <span
+            class="section-tag"
+            data-en="Why Z Speed"
+            data-ar="لماذا زد سبيد"
+            >Why Z Speed</span
+          >
+          <h2
+            data-en="Everything You Need, One App"
+            data-ar="كل ما تحتاجه، في تطبيق واحد"
+          >
+            Everything You Need, One App
+          </h2>
+          <p
+            data-en="Experience a new standard of convenience with lightning-fast delivery and premium service at your fingertips."
+            data-ar="اختبر معياراً جديداً من الراحة مع توصيل فائق السرعة وخدمة متميزة في متناول يدك."
+          >
+            Experience a new standard of convenience with lightning-fast
+            delivery and premium service at your fingertips.
+          </p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card reveal" style="--delay: 0s">
+            <div class="feature-icon">⚡</div>
+            <h3 data-en="Lightning Fast" data-ar="سرعة البرق">
+              Lightning Fast
+            </h3>
+            <p
+              data-en="Real-time tracking with optimized driver dispatch gets your order there faster than ever."
+              data-ar="التتبع اللحظي مع توزيع ذكي للسائقين يوصل طلبك أسرع من أي وقت مضى."
+            >
+              Real-time tracking with optimized driver dispatch gets your order
+              there faster than ever.
+            </p>
+          </div>
+          <div class="feature-card reveal" style="--delay: 0.1s">
+            <div class="feature-icon">🛡️</div>
+            <h3 data-en="Secure Payments" data-ar="مدفوعات آمنة">
+              Secure Payments
+            </h3>
+            <p
+              data-en="Multiple payment methods, encrypted transactions, and a trusted digital wallet built right in."
+              data-ar="طرق دفع متعددة، معاملات مشفرة، ومحفظة رقمية موثوقة مدمجة بالكامل."
+            >
+              Multiple payment methods, encrypted transactions, and a trusted
+              digital wallet built right in.
+            </p>
+          </div>
+          <div class="feature-card reveal" style="--delay: 0.2s">
+            <div class="feature-icon">📍</div>
+            <h3 data-en="Live Tracking" data-ar="تتبع مباشر">Live Tracking</h3>
+            <p
+              data-en="Watch your driver on an interactive map in real-time, from pick-up to doorstep delivery."
+              data-ar="راقب سائقك على خريطة تفاعلية في الوقت الفعلي، من الاستلام حتى باب منزلك."
+            >
+              Watch your driver on an interactive map in real-time, from pick-up
+              to doorstep delivery.
+            </p>
+          </div>
+          <!-- <div class="feature-card reveal" style="--delay: 0.3s">
+            <div class="feature-icon">💬</div>
+            <h3 data-en="Pharmacy Chat" data-ar="محادثة الصيدلية">
+              Pharmacy Chat
+            </h3>
+            <p
+              data-en="Upload your prescription and chat directly with a pharmacist. Medicine delivered to you."
+              data-ar="ارفع وصفتك وتحدث مباشرة مع صيدلاني. أدويتك تصل إليك."
+            >
+              Upload your prescription and chat directly with a pharmacist.
+              Medicine delivered to you.
+            </p>
+          </div> -->
+          <div class="feature-card reveal" style="--delay: 0.4s">
+            <div class="feature-icon">🌙</div>
+            <h3 data-en="24/7 Service" data-ar="خدمة 24/7">24/7 Service</h3>
+            <p
+              data-en="We never sleep. Order anytime of the day or night and we'll be there for you."
+              data-ar="لا ننام أبداً. اطلب في أي وقت من الليل أو النهار وسنكون هنا من أجلك."
+            >
+              We never sleep. Order anytime of the day or night and we'll be
+              there for you.
+            </p>
+          </div>
+          <div class="feature-card reveal" style="--delay: 0.5s">
+            <div class="feature-icon">⭐</div>
+            <h3 data-en="Rate &amp; Review" data-ar="قيّم وراجع">
+              Rate &amp; Review
+            </h3>
+            <p
+              data-en="Share your experience, rate drivers and restaurants to help your community make better choices."
+              data-ar="شارك تجربتك، قيّم السائقين والمطاعم لمساعدة مجتمعك على اتخاذ خيارات أفضل."
+            >
+              Share your experience, rate drivers and restaurants to help your
+              community make better choices.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="services" id="services">
+      <div class="section-container">
+        <div class="section-header reveal">
+          <span class="section-tag" data-en="Our Services" data-ar="خدماتنا"
+            >Our Services</span
+          >
+          <h2
+            data-en="One App, Endless Possibilities"
+            data-ar="تطبيق واحد، إمكانيات لا نهاية لها"
+          >
+            One App, Endless Possibilities
+          </h2>
+        </div>
+        <div class="services-grid">
+          <div class="service-card reveal" style="--delay: 0s">
+            <div class="service-img-wrap">
+              <img
+                src="images/gourmet_dining.jpg"
+                alt="Gourmet Dining"
+                loading="lazy"
+              />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">🍽️</span>
+              <h3 data-en="Gourmet Dining" data-ar="مطاعم راقية">
+                Gourmet Dining
+              </h3>
+              <p
+                data-en="Premium restaurants delivered"
+                data-ar="مطاعم فاخرة توصّل إليك"
+              >
+                Premium restaurants delivered
+              </p>
+            </div>
+          </div>
+          <!-- <div class="service-card reveal" style="--delay: 0.1s">
+            <div class="service-img-wrap">
+              <img src="images/pharmacy.jpg" alt="Pharmacy" loading="lazy" />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">💊</span>
+              <h3 data-en="Pharmacy" data-ar="صيدلية">Pharmacy</h3>
+              <p
+                data-en="Prescriptions &amp; medicine fast"
+                data-ar="وصفات وأدوية بسرعة"
+              >
+                Prescriptions &amp; medicine fast
+              </p>
+            </div>
+          </div> -->
+          <div class="service-card reveal" style="--delay: 0.2s">
+            <div class="service-img-wrap">
+              <img
+                src="images/freshMarket.jpg"
+                alt="Fresh Market"
+                loading="lazy"
+              />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">🛒</span>
+              <h3 data-en="Fresh Market" data-ar="السوق الطازج">
+                Fresh Market
+              </h3>
+              <p
+                data-en="Groceries &amp; fresh produce"
+                data-ar="بقالة ومنتجات طازجة"
+              >
+                Groceries &amp; fresh produce
+              </p>
+            </div>
+          </div>
+          <div class="service-card reveal" style="--delay: 0.3s">
+            <div class="service-img-wrap">
+              <img src="images/transport.jpg" alt="Transport" loading="lazy" />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">🚗</span>
+              <h3 data-en="Transport" data-ar="مواصلات">Transport</h3>
+              <p
+                data-en="Rides anytime, anywhere"
+                data-ar="رحلات في أي وقت وأي مكان"
+              >
+                Rides anytime, anywhere
+              </p>
+            </div>
+          </div>
+          <div class="service-card reveal" style="--delay: 0.4s">
+            <div class="service-img-wrap">
+              <img
+                src="images/bookstores.jpg"
+                alt="Bookstores"
+                loading="lazy"
+              />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">📚</span>
+              <h3 data-en="Bookstores" data-ar="مكتبات">Bookstores</h3>
+              <p
+                data-en="Books &amp; stationery delivered"
+                data-ar="كتب وأدوات مكتبية توصّل"
+              >
+                Books &amp; stationery delivered
+              </p>
+            </div>
+          </div>
+          <div class="service-card reveal" style="--delay: 0.5s">
+            <div class="service-img-wrap">
+              <img src="images/furniture.jpg" alt="Furniture" loading="lazy" />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">🛋️</span>
+              <h3 data-en="Furniture" data-ar="أثاث">Furniture</h3>
+              <p
+                data-en="Home essentials &amp; décor"
+                data-ar="أساسيات المنزل والديكور"
+              >
+                Home essentials &amp; décor
+              </p>
+            </div>
+          </div>
+          <div class="service-card reveal" style="--delay: 0s">
+            <div class="service-img-wrap">
+              <img
+                src="images/meats.jpg"
+                alt="Meat &amp; Proteins"
+                loading="lazy"
+              />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">🥩</span>
+              <h3 data-en="Meat &amp; Proteins" data-ar="لحوم وبروتينات">
+                Meat &amp; Proteins
+              </h3>
+              <p
+                data-en="Fresh meat, poultry, fish and protein products"
+                data-ar="لحوم طازجة، دواجن، أسماك ومنتجات بروتينية"
+              >
+                Fresh meat, poultry, fish and protein products
+              </p>
+            </div>
+          </div>
+          <div class="service-card reveal" style="--delay: 0.1s">
+            <div class="service-img-wrap">
+              <img
+                src="images/clothes.jpg"
+                alt="Clothing &amp; Fashion"
+                loading="lazy"
+              />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">👕</span>
+              <h3 data-en="Clothing &amp; Fashion" data-ar="ملابس">
+                Clothing &amp; Fashion
+              </h3>
+              <p
+                data-en="Men, women, kids clothing and fashion products"
+                data-ar="ملابس رجالية، نسائية، أطفال ومستلزمات الموضة"
+              >
+                Men, women, kids clothing and fashion products
+              </p>
+            </div>
+          </div>
+          <div class="service-card reveal" style="--delay: 0.2s">
+            <div class="service-img-wrap">
+              <img
+                src="images/sellbuy.jpg"
+                alt="Buy &amp; Sell"
+                loading="lazy"
+              />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">🤝</span>
+              <h3 data-en="Buy &amp; Sell" data-ar="بيع واشتري">
+                Buy &amp; Sell
+              </h3>
+              <p
+                data-en="Marketplace for buying and selling new and used goods"
+                data-ar="سوق متكامل لبيع وشراء السلع الجديدة والمستعملة"
+              >
+                Marketplace for buying and selling new and used goods
+              </p>
+            </div>
+          </div>
+          <div class="service-card reveal" style="--delay: 0.3s">
+            <div class="service-img-wrap">
+              <img
+                src="images/electronics.jpg"
+                alt="Electronics"
+                loading="lazy"
+              />
+              <div class="service-overlay"></div>
+            </div>
+            <div class="service-content">
+              <span class="service-icon">💻</span>
+              <h3 data-en="Electronics" data-ar="أجهزة إلكترونية">
+                Electronics
+              </h3>
+              <p
+                data-en="Smartphones, computers, screens and home appliances"
+                data-ar="هواتف ذكية، حواسيب، شاشات وأجهزة منزلية"
+              >
+                Smartphones, computers, screens and home appliances
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-it-works" id="how-it-works">
+      <div class="section-container">
+        <div class="section-header reveal">
+          <span
+            class="section-tag"
+            data-en="Simple Process"
+            data-ar="عملية بسيطة"
+            >Simple Process</span
+          >
+          <h2 data-en="Order in 3 Easy Steps" data-ar="اطلب في 3 خطوات سهلة">
+            Order in 3 Easy Steps
+          </h2>
+        </div>
+        <div class="steps-wrapper">
+          <div class="steps-line"></div>
+          <div class="steps-grid">
+            <div class="step reveal" style="--delay: 0s">
+              <div class="step-number">01</div>
+              <div class="step-icon">📱</div>
+              <h3 data-en="Download the App" data-ar="حمّل التطبيق">
+                Download the App
+              </h3>
+              <p
+                data-en="Get Z Speed free from App Store or Google Play in seconds."
+                data-ar="احصل على زد سبيد مجاناً من متجر آبل أو جوجل بلاي في ثوانٍ."
+              >
+                Get Z Speed free from App Store or Google Play in seconds.
+              </p>
+            </div>
+            <div class="step reveal" style="--delay: 0.15s">
+              <div class="step-number">02</div>
+              <div class="step-icon">🔍</div>
+              <h3 data-en="Browse &amp; Choose" data-ar="تصفح واختر">
+                Browse &amp; Choose
+              </h3>
+              <p
+                data-en="Explore restaurants, pharmacies, markets and more. Pick what you love."
+                data-ar="استعرض المطاعم والصيدليات والأسواق والمزيد. اختر ما يعجبك."
+              >
+                Explore restaurants, pharmacies, markets and more. Pick what you
+                love.
+              </p>
+            </div>
+            <div class="step reveal" style="--delay: 0.3s">
+              <div class="step-number">03</div>
+              <div class="step-icon">🚀</div>
+              <h3 data-en="Fast Delivery" data-ar="توصيل سريع">
+                Fast Delivery
+              </h3>
+              <p
+                data-en="Track your order live as our driver races to your door."
+                data-ar="تابع طلبك مباشرة بينما يسارع سائقنا إلى بابك."
+              >
+                Track your order live as our driver races to your door.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats-section" id="stats">
+      <div class="stats-bg-orb"></div>
+      <div class="section-container">
+        <div class="stats-counters reveal">
+          <div class="counter-item">
+            <span class="counter-num" data-target="50000" data-suffix="+"
+              >0</span
+            >
+            <span
+              class="counter-label"
+              data-en="Happy Users"
+              data-ar="مستخدم سعيد"
+              >Happy Users</span
+            >
+          </div>
+          <div class="counter-item">
+            <span class="counter-num" data-target="200" data-suffix="+">0</span>
+            <span
+              class="counter-label"
+              data-en="Restaurant Partners"
+              data-ar="شريك مطعم"
+              >Restaurant Partners</span
+            >
+          </div>
+          <div class="counter-item">
+            <span class="counter-num" data-target="1000" data-suffix="+"
+              >0</span
+            >
+            <span
+              class="counter-label"
+              data-en="Deliveries Daily"
+              data-ar="توصيلة يومياً"
+              >Deliveries Daily</span
+            >
+          </div>
+          <div class="counter-item">
+            <span class="counter-num" data-target="98" data-suffix="%">0</span>
+            <span
+              class="counter-label"
+              data-en="Satisfaction Rate"
+              data-ar="نسبة الرضا"
+              >Satisfaction Rate</span
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOWNLOAD CTA -->
+    <section class="download-section" id="download">
+      <div class="download-bg"></div>
+      <div class="section-container">
+        <div class="download-content reveal">
+          <div class="download-text">
+            <span
+              class="section-tag"
+              data-en="Get Started Today"
+              data-ar="ابدأ اليوم"
+              >Get Started Today</span
+            >
+            <h2 data-en="Download Z Speed Now" data-ar="حمّل زد سبيد الآن">
+              Download Z Speed Now
+            </h2>
+            <p
+              data-en="Join thousands of users who already enjoy the fastest, most convenient delivery experience in the region."
+              data-ar="انضم إلى آلاف المستخدمين الذين يستمتعون بأسرع وأكثر تجربة توصيل مريحة في المنطقة."
+            >
+              Join thousands of users who already enjoy the fastest, most
+              convenient delivery experience in the region.
+            </p>
+            <div class="download-btns">
+              <a
+                href="https://apps.apple.com/us/app/zspeed/id6761904689"
+                class="store-btn"
+                id="appStoreBtn"
+              >
+                <div class="store-icon">
+                  <svg viewBox="0 0 24 24" fill="white" width="28" height="28">
+                    <path
+                      d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.39.07 2.34.74 3.15.8 1.19-.24 2.35-.93 3.62-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.39-1.32 2.76-2.65 3.99M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+                    />
+                  </svg>
+                </div>
+                <div class="store-text">
+                  <small data-en="Download on the" data-ar="حمّل من"
+                    >Download on the</small
+                  >
+                  <strong data-en="App Store" data-ar="متجر آبل"
+                    >App Store</strong
+                  >
+                </div>
+              </a>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.zspeed.app"
+                class="store-btn"
+                id="playStoreBtn"
+              >
+                <div class="store-icon">
+                  <svg viewBox="0 0 24 24" fill="white" width="28" height="28">
+                    <path
+                      d="M3.18 23.76c.33.18.7.2 1.06.04l13.2-7.4-2.88-2.88-11.38 10.24zm15.3-8.58L5.28.55C4.94.33 4.56.32 4.22.5L15.6 11.88l2.88-2.7zm2.1-6.5l-2.45-1.38-3.22 3.22 3.22 3.22 2.47-1.38c.7-.4.7-1.3-.02-1.68zm-16.34-6.4L15.6 11.88 2.45.5C2.1.33 1.72.37 1.4.55 1.07.75.9 1.1.9 1.52v20.96c0 .42.17.77.5.97.32.18.7.2 1.04.04L16.48 11.88 4.24 2.28z"
+                    />
+                  </svg>
+                </div>
+                <div class="store-text">
+                  <small data-en="Get it on" data-ar="احصل عليه من"
+                    >Get it on</small
+                  >
+                  <strong data-en="Google Play" data-ar="متجر جوجل"
+                    >Google Play</strong
+                  >
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="download-phone animate-float-slow">
+            <div class="phone-frame phone-frame-sm">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img
+                  src="images/gourmet_dining.jpg"
+                  alt="App"
+                  class="phone-img"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="section-container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <img src="images/icon.png" alt="Z Speed" class="footer-logo" />
+            <p
+              data-en="Delivering excellence, one order at a time. Your city's most trusted super-app."
+              data-ar="نوصّل التميز، طلباً تلو الآخر. التطبيق المتكامل الأكثر موثوقية في مدينتك."
+            >
+              Delivering excellence, one order at a time. Your city's most
+              trusted super-app.
+            </p>
+            <div class="footer-social">
+              <a href="#" class="social-link" aria-label="Facebook">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  width="18"
+                  height="18"
+                >
+                  <path
+                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                  />
+                </svg>
+              </a>
+              <a href="#" class="social-link" aria-label="X / Twitter">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  width="18"
+                  height="18"
+                >
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                  />
+                </svg>
+              </a>
+              <a href="#" class="social-link" aria-label="Instagram">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  width="18"
+                  height="18"
+                >
+                  <path
+                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+          <div class="footer-links-col">
+            <h4 data-en="Company" data-ar="الشركة">Company</h4>
+            <ul>
+              <li>
+                <a href="#" data-en="About Us" data-ar="من نحن">About Us</a>
+              </li>
+              <li><a href="#" data-en="Careers" data-ar="وظائف">Careers</a></li>
+              <li><a href="#" data-en="Press" data-ar="الصحافة">Press</a></li>
+              <li><a href="#" data-en="Blog" data-ar="المدونة">Blog</a></li>
+            </ul>
+          </div>
+          <div class="footer-links-col">
+            <h4 data-en="Services" data-ar="الخدمات">Services</h4>
+            <ul>
+              <li>
+                <a href="#" data-en="Food Delivery" data-ar="توصيل طعام"
+                  >Food Delivery</a
+                >
+              </li>
+              <!-- <li>
+                <a href="#" data-en="Pharmacy" data-ar="صيدلية">Pharmacy</a>
+              </li> -->
+              <li>
+                <a href="#" data-en="Transport" data-ar="مواصلات">Transport</a>
+              </li>
+              <li>
+                <a href="#" data-en="Fresh Market" data-ar="السوق الطازج"
+                  >Fresh Market</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  data-en="Meat &amp; Proteins"
+                  data-ar="لحوم وبروتينات"
+                  >Meat &amp; Proteins</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  data-en="Clothing &amp; Fashion"
+                  data-ar="ملابس وموضة"
+                  >Clothing &amp; Fashion</a
+                >
+              </li>
+              <li>
+                <a href="#" data-en="Buy &amp; Sell" data-ar="بيع واشتري"
+                  >Buy &amp; Sell</a
+                >
+              </li>
+              <li>
+                <a href="#" data-en="Electronics" data-ar="أجهزة إلكترونية"
+                  >Electronics</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="footer-links-col">
+            <h4 data-en="Legal" data-ar="قانوني">Legal</h4>
+            <ul>
+              <li>
+                <a href="#" data-en="Privacy Policy" data-ar="سياسة الخصوصية"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a href="#" data-en="Terms of Service" data-ar="شروط الخدمة"
+                  >Terms of Service</a
+                >
+              </li>
+              <li>
+                <a href="#" data-en="Cookie Policy" data-ar="سياسة الكوكيز"
+                  >Cookie Policy</a
+                >
+              </li>
+              <li>
+                <a href="#" data-en="Contact Us" data-ar="اتصل بنا"
+                  >Contact Us</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p
+            data-en="© 2026 Z Speed. All rights reserved."
+            data-ar="© 2026 زد سبيد. جميع الحقوق محفوظة."
+          >
+            © 2025 Z Speed. All rights reserved.
+          </p>
+          <span
+            data-en="Made with ❤️ for our community"
+            data-ar="صُنع بـ ❤️ لمجتمعنا"
+            >Made with ❤️ for our community</span
+          >
+        </div>
+      </div>
+    </footer>
+
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
+      </svg>
+    </button>
+
+    <script src="script.js"></script>
+  </body>
+</html>

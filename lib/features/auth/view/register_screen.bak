@@ -1,0 +1,489 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/features/auth/cubit/auth_cubit.dart';
+import 'package:z_speed/features/auth/model/user_model.dart';
+import 'package:z_speed/features/auth/widgets/login_glass_field.dart';
+import 'package:z_speed/features/auth/widgets/login_button.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+
+/// Full-screen signup page styled to match [LoginPage].
+///
+/// Hooks into [AuthCubit] — no raw Firebase calls here.
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isLoading = false;
+  bool _agreedToTerms = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (!_agreedToTerms) {
+      _showError('You must agree to the Terms of Service to continue.');
+      return;
+    }
+    setState(() => _isLoading = true);
+
+    try {
+      final cubit = context.read<AuthCubit>();
+      final newUser = AppUser(
+        id: '',
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        type: UserType.customer,
+      );
+      await cubit.register(newUser);
+
+      if (!mounted) return;
+
+      if (cubit.state.hasError || cubit.state.user == null) {
+        setState(() => _isLoading = false);
+        _showError(
+          cubit.state.failure?.message ?? 'Registration failed',
+        );
+        return;
+      }
+
+      // AuthWrapper handles navigation on success.
+      if (mounted) setState(() => _isLoading = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      _showError(e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  void _showTermsDialog() {
+    bool agreed = _agreedToTerms;
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('Terms of Service', style: TextStyle(color: Colors.black)),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildTermItem('Age Requirement', 'You must be at least 18 years old to use our services.'),
+                  _buildTermItem('Service Area', 'Currently available only in selected Egyptian cities.'),
+                  _buildTermItem('Payment Terms', 'All payments must be completed before or during the ride.'),
+                  _buildTermItem('Cancellation Policy', 'Free cancellation within 5 minutes of booking.'),
+                  _buildTermItem('Safety Guidelines', 'Both drivers and riders must follow safety protocols.'),
+                  const SizedBox(height: 8),
+                  CheckboxListTile(
+                    title: const Text('I agree to the Terms of Service', style: TextStyle(color: Colors.black)),
+                    value: agreed,
+                    onChanged: (v) => setDialogState(() => agreed = v ?? false),
+                    activeColor: const Color(0xFFFFB74D),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: !agreed ? null : () {
+                  setState(() => _agreedToTerms = true);
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFB74D),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                ),
+                child: const Text('Accept & Continue'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTermItem(String title, String description) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+          const SizedBox(height: 4),
+          Text(description, style: const TextStyle(color: Colors.black54, fontSize: 14)),
+          const Divider(height: 16, color: Colors.grey),
+        ],
+      ),
+    );
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: const Color(0xFFE53E3E),
+        behavior: SnackBarBehavior.floating,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: false,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background
+          Image.asset(
+            'assets/images/restaurant_bg.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.35, 0.65, 1.0],
+                  colors: [
+                    Colors.black.withValues(alpha: 0.75),
+                    Colors.black.withValues(alpha: 0.45),
+                    Colors.black.withValues(alpha: 0.45),
+                    Colors.black.withValues(alpha: 0.80),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Content
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+
+                  // Back button + title row
+                  Row(
+                    children: [
+                      _GlassIconButton(
+                        icon: Icons.arrow_back_rounded,
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l.createAccount,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            Text(
+                              l.joinOurDeliveryService,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withValues(alpha: 0.65),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Glass card
+                  _GlassCard(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Full name
+                          LoginGlassField(
+                            controller: _nameController,
+                            labelText: 'Full Name',
+                            hintText: 'John Doe',
+                            prefixIcon: Icons.person_outline_rounded,
+                            keyboardType: TextInputType.name,
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Full name is required';
+                              }
+                              if (v.trim().length < 2) {
+                                return 'Name must be at least 2 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Email
+                          LoginGlassField(
+                            controller: _emailController,
+                            labelText: l.emailAddress,
+                            hintText: l.emailHint,
+                            prefixIcon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) {
+                                return l.pleaseEnterYourEmail;
+                              }
+                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                  .hasMatch(v)) {
+                                return l.pleaseEnterValidEmail;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Password
+                          LoginGlassField(
+                            controller: _passwordController,
+                            labelText: l.password,
+                            hintText: l.enterYourPassword,
+                            prefixIcon: Icons.lock_outline,
+                            obscureText: !_isPasswordVisible,
+                            suffixIcon: IconButton(
+                              onPressed: () => setState(
+                                () => _isPasswordVisible = !_isPasswordVisible,
+                              ),
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility_rounded
+                                    : Icons.visibility_off_rounded,
+                                color: Colors.white.withValues(alpha: 0.65),
+                                size: 20,
+                              ),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) {
+                                return l.pleaseEnterYourPasswordValidation;
+                              }
+                              if (v.length < 6) return l.passwordMinLength;
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Confirm password
+                          LoginGlassField(
+                            controller: _confirmController,
+                            labelText: l.confirmPassword,
+                            hintText: l.confirmPassword,
+                            prefixIcon: Icons.lock_outline,
+                            obscureText: !_isPasswordVisible,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) {
+                                return l.pleaseConfirmYourPassword;
+                              }
+                              if (v != _passwordController.text) {
+                                return l.passwordsDoNotMatch;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Terms of Service checkbox
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Checkbox(
+                                value: _agreedToTerms,
+                                onChanged: (v) =>
+                                    setState(() => _agreedToTerms = v ?? false),
+                                activeColor: const Color(0xFFFFB74D),
+                                checkColor: Colors.black,
+                                side: const BorderSide(color: Colors.white54),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: _showTermsDialog,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color:
+                                            Colors.white.withValues(alpha: 0.75),
+                                      ),
+                                      children: const [
+                                        TextSpan(text: 'I agree to the '),
+                                        TextSpan(
+                                          text: 'Terms of Service',
+                                          style: TextStyle(
+                                            color: Color(0xFFFFB74D),
+                                            fontWeight: FontWeight.w700,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          LoginButton(
+                            isLoading: _isLoading,
+                            isSignUp: true,
+                            onPressed: _submit,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Already have account
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                l.alreadyHaveAnAccount,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  fontSize: 14,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: const Text(
+                                  'Sign In',
+                                  style: TextStyle(
+                                    color: Color(0xFFFFB74D),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Reusable glass card ──────────────────────────────────────────────────────
+
+class _GlassCard extends StatelessWidget {
+  const _GlassCard({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.22),
+              width: 1.5,
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Glass icon button ────────────────────────────────────────────────────────
+
+class _GlassIconButton extends StatelessWidget {
+  const _GlassIconButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Material(
+          color: Colors.white.withValues(alpha: 0.12),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "1048229753879",
+    "firebase_url": "https://zspeed-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "zspeed",
+    "storage_bucket": "zspeed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048229753879:android:6ae82e08e1359987295852",
+        "android_client_info": {
+          "package_name": "com.zspeed.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1048229753879-fedvv79aevie1m38vnhlijj4ecs6ovoe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zspeed.app",
+            "certificate_hash": "07ece6c0c783b71fb2df861fdf4c17a66c23f2f3"
+          }
+        },
+        {
+          "client_id": "1048229753879-fp10pmtiac6oimbut0e9dqhluom7s4mk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zspeed.app",
+            "certificate_hash": "c55d43c2b089c87be0f157c52e79d636352d1463"
+          }
+        },
+        {
+          "client_id": "1048229753879-jurkf7qkfani52md5uv26oh4kgv35k15.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvj9PtLPUn34yed46BEItxOxuBydoT8Z0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1048229753879-jurkf7qkfani52md5uv26oh4kgv35k15.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1048229753879-rn5s9b34asg45ka1fh9u7iuo923v79a9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zspeed.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

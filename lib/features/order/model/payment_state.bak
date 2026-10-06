@@ -1,0 +1,48 @@
+enum PaymentState {
+  unpaid,
+  pendingGateway,
+  paid,
+  failed,
+  cancelled,
+  lockedForCooldown,
+}
+
+extension PaymentStateExtension on PaymentState {
+  String get value {
+    switch (this) {
+      case PaymentState.unpaid:
+        return 'unpaid';
+      case PaymentState.pendingGateway:
+        return 'pending_gateway';
+      case PaymentState.paid:
+        return 'paid';
+      case PaymentState.failed:
+        return 'failed';
+      case PaymentState.cancelled:
+        return 'cancelled';
+      case PaymentState.lockedForCooldown:
+        return 'locked_for_cooldown';
+    }
+  }
+
+  bool get isPaid => this == PaymentState.paid;
+}
+
+PaymentState paymentStateFromString(String value) {
+  switch (value) {
+    case 'unpaid':
+      return PaymentState.unpaid;
+    case 'pending_gateway':
+      return PaymentState.pendingGateway;
+    case 'paid':
+      return PaymentState.paid;
+    case 'failed':
+      return PaymentState.failed;
+    case 'cancelled':
+      return PaymentState.cancelled;
+    case 'locked_for_cooldown':
+      return PaymentState.lockedForCooldown;
+    default:
+      return PaymentState.unpaid;
+  }
+}

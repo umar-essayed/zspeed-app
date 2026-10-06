@@ -1,0 +1,481 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────
+    function isAuth() { return request.auth != null; }
+    function isOwner(uid) { return isAuth() && request.auth.uid == uid; }
+    function getUserRecord() {
+      let path = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(path) ? get(path) : null;
+    }
+    function getUserType() {
+      let userRec = getUserRecord();
+      return userRec != null ? userRec.data.type : null;
+    }
+    function isNotBanned() {
+      let u = getUserRecord();
+      let isBlockedInBlacklist = exists(/databases/$(database)/documents/blacklists/$( 'uid_' + request.auth.uid ));
+      return !isBlockedInBlacklist && (u == null || !('status' in u.data) || !(u.data.status in ['banned', 'suspended']));
+    }
+    function isAdmin() { return isAuth() && (getUserType() == 'admin' || getUserType() == 'superAdmin'); }
+    function isSuperAdmin() { return isAuth() && getUserType() == 'superAdmin'; }
+    function isVendor() {
+      let t = getUserType();
+      return isAuth() && (t == 'vendor' || t == 'restaurant' || t == 'bookstore' || t == 'supermarket' || t == 'pharmacy' || t == 'homeFurnishing');
+    }
+    function isDriver() { return isAuth() && getUserType() == 'driver'; }
+    function isVendorOwner(vendorId) {
+      let path = /databases/$(database)/documents/vendors/$(vendorId);
+      return isVendor() && (
+        (resource != null && 'ownerId' in resource.data && resource.data.ownerId == request.auth.uid) ||
+        (exists(path) && get(path).data.ownerId == request.auth.uid)
+      );
+    }
+    function orderVendorId(data) {
+      return data.get('vendorId', data.get('restaurantId', ''));
+    }
+    function isOrderVendorOwner(data) {
+      return (
+        ('restaurantId' in data && isVendorOwner(data.restaurantId)) ||
+        ('vendorId' in data && isVendorOwner(data.vendorId))
+      );
+    }
+
+    // ── Field Validation Functions (Phase 8.10) ──────────
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+        'customerId', 'status', 'subtotal',
+        'deliveryFee', 'tax', 'total', 'deliveryAddress', 'paymentMethod'
+      ])
+      && data.customerId is string
+      && (
+        ('restaurantId' in data && data.restaurantId is string && data.restaurantId != '') ||
+        ('vendorId' in data && data.vendorId is string && data.vendorId != '')
+      )
+      && data.subtotal is number && data.subtotal >= 0
+      && data.deliveryFee is number && data.deliveryFee >= 0
+      && data.tax is number && data.tax >= 0
+      && data.total is number && data.total > 0
+      && data.status in ['pending', 'pending_payment', 'searching', 'unassigned', 'accepted', 'preparing', 'ready',
+         'driverAssigned', 'pickedUp', 'onTheWay', 'delivered', 'cancelled', 'refunded']
+      && data.paymentMethod in ['cash', 'card', 'wallet'];
+    }
+
+    function isValidPayment(data) {
+      return data.keys().hasAll(['orderId', 'customerId', 'method', 'status', 'amount'])
+      && data.orderId is string
+      && data.customerId is string
+      && data.method in ['cash', 'card', 'wallet']
+      && data.status in ['pending', 'pending_gateway', 'completed', 'failed', 'refunded']
+      && data.amount is number && data.amount > 0;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['orderId', 'customerId', 'vendorId', 'rating', 'createdAt'])
+      && data.customerId is string
+      && data.orderId is string
+      && data.vendorId is string
+      && data.rating is number && data.rating >= 1 && data.rating <= 5
+      && (!('comment' in data) || (data.comment is string && data.comment.size() <= 500));
+    }
+
+    // ── Users ────────────────────────────────────────────
+    match /users/{userId} {
+      allow get: if isAuth();
+      allow list: if isAuth() || resource.data.phone != null;
+      allow create: if isOwner(userId) || isAdmin();
+      allow update: if (isOwner(userId) && isNotBanned()) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /usedPromoCodes/{codeId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      match /savedCards/{cardId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+        allow create, update: if false; // Cloud Functions Admin SDK only
+      }
+    }
+
+    // ── Vendors ──────────────────────────────────────────
+    match /vendors/{vendorId} {
+      allow read: if true;  // public menu browsing
+      allow create: if isVendor() || isAdmin();
+      allow update: if isAdmin() ||
+        (isVendor() && resource.data.ownerId == request.auth.uid) ||
+        // Customers can only update rating aggregate fields after submitting a review
+        (isAuth() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating', 'ratingCount'])) ||
+        // Drivers marking order delivered update walletBalance and totalEarnings
+        (isDriver() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['walletBalance', 'totalEarnings', 'updatedAt']));
+      allow delete: if isAdmin();
+
+      // Menu Sections
+      match /menuSections/{sectionId} {
+        allow read: if true;
+        allow write: if isAdmin() || isVendorOwner(vendorId);
+
+        // Menu Items
+        match /items/{itemId} {
+          allow read: if true;
+          allow write: if isAdmin() || isVendorOwner(vendorId);
+
+          // Addon Groups
+          match /addonGroups/{groupId} {
+            allow read: if true;
+            allow write: if isAdmin() || isVendorOwner(vendorId);
+          }
+        }
+      }
+
+      // Reviews
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isAuth() && isValidReview(request.resource.data);
+        allow update, delete: if isOwner(resource.data.customerId) || isAdmin();
+      }
+    }
+
+    // ── Orders ───────────────────────────────────────────
+    match /orders/{orderId} {
+      allow create: if isAuth() && isNotBanned() && isValidOrder(request.resource.data);
+      allow read: if isAdmin() ||
+        isOwner(resource.data.customerId) ||
+        isOwner(resource.data.get('driverId', '')) ||
+        (isDriver() && request.auth.uid in resource.data.get('driverIds', [])) ||
+        isOrderVendorOwner(resource.data) ||
+        // Drivers can read unassigned/pending rides to see available ride requests.
+        // Uses both user.type field (isDriver) AND driverProfiles document existence
+        // as a fallback, in case the type field is missing or incorrectly set.
+        ((isDriver() || exists(/databases/$(database)/documents/driverProfiles/$(request.auth.uid))) &&
+         resource.data.status in ['pending', 'searching', 'unassigned']);
+      
+      // Phase 3.3: Strict RBAC transitions.
+      // - Customers cannot manipulate order fields after creation (Read-Only projection).
+      // - Vendors can update (e.g. mark as preparing/ready).
+      // - Drivers can update status/metadata fields if they are the assigned driver.
+      allow update: if isAdmin() ||
+        isOrderVendorOwner(resource.data) ||
+        (isOwner(resource.data.customerId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancellationReason', 'cancelReason', 'cancelledBy', 'cancelledAt', 'updatedAt']) && request.resource.data.status == 'cancelled') ||
+        // Drivers can update their own order's status/metadata fields.
+        // Three cases:
+        //   1. Already the assigned driverId on the order (normal status updates)
+        //   2. Already in driverIds array (auto-dispatch)
+        //   3. Self-assigning for the first time — setting driverId to their own UID (accept flow)
+        (isDriver() &&
+         (isOwner(resource.data.get('driverId', '')) ||
+          request.auth.uid in resource.data.get('driverIds', []) ||
+          isOwner(request.resource.data.get('driverId', ''))) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'driverId', 'driverIds', 'driverAssignedAt', 'pickedUpAt', 'deliveredAt', 'updatedAt', 'paymentStatus']));
+      allow delete: if isAdmin();
+
+      match /orderDrivers/{driverId} {
+        allow read: if isAuth();
+        allow write: if isAdmin() || isOwner(driverId) || isOrderVendorOwner(get(/databases/$(database)/documents/orders/$(orderId)).data);
+      }
+
+      match /items/{itemId} {
+        // Tightened in Phase 8.10: scoped to order participants only
+        allow read: if isAdmin() ||
+          isOwner(get(/databases/$(database)/documents/orders/$(orderId)).data.customerId) ||
+          isOwner(get(/databases/$(database)/documents/orders/$(orderId)).data.driverId) ||
+          isOrderVendorOwner(get(/databases/$(database)/documents/orders/$(orderId)).data);
+        
+        // During atomic creation, the parent order might not "exist" yet, use getAfter
+        allow create: if isAuth() && isOwner(getAfter(/databases/$(database)/documents/orders/$(orderId)).data.customerId);
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ── Collection Group Queries ─────────────────────────
+    match /{path=**}/items/{itemId} {
+      allow read: if true;
+    }
+
+    // ── Carts ────────────────────────────────────────────
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId) && isNotBanned();
+
+      match /items/{itemId} {
+        allow read, write: if isOwner(userId) && isNotBanned();
+      }
+    }
+
+    // ── Driver Profiles ──────────────────────────────────
+    match /driverProfiles/{userId} {
+      allow read: if isAuth();
+      allow create: if isOwner(userId) || isAdmin();
+      allow update: if (
+        // Case 1: Owner (driver) updates their own profile (cannot change limit/lock status)
+        (isOwner(userId) && 
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['earningsLimit', 'isLimitLocked']) &&
+         // Driver cannot go online or busy if locked
+         (!(resource.data.get('isLimitLocked', false) == true || 
+            (resource.data.get('earningsLimit', 0.0) > 0.0 && resource.data.get('walletBalance', 0.0) >= resource.data.get('earningsLimit', 0.0))) || 
+          (request.resource.data.status != 'online' && request.resource.data.status != 'busy')))
+         
+        // Case 2: Admin or Superadmin can update
+        || (isAdmin() && (
+          // Only Superadmin can change earningsLimit
+          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['earningsLimit']) || isSuperAdmin())
+        ))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── Payments ─────────────────────────────────────────
+    match /payments/{paymentId} {
+      allow read: if isAdmin() || isOwner(resource.data.customerId);
+      allow create: if isAuth() && isNotBanned() && isValidPayment(request.resource.data);
+      // Admin can update anything.
+      // The payment owner (customer) may update ONLY the three fields written
+      // by updatePaymentStatus() after card processing, and ONLY to valid
+      // terminal statuses so they cannot re-open or refund themselves.
+      allow update: if isAdmin() ||
+        (isAuth() && isNotBanned() && isOwner(resource.data.customerId) &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['status', 'transactionId', 'completedAt']) &&
+         request.resource.data.status in ['completed', 'failed']);
+      allow delete: if false;
+    }
+
+    // ── Applications (existing) ──────────────────────────
+    match /applications/{appId} {
+      allow create: if isAuth();
+      allow read: if isAdmin() || isOwner(resource.data.userId);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Driver Applications ──────────────────────────────
+    match /driver_applications/{appId} {
+      allow create: if isAuth() && isOwner(request.resource.data.userId);
+      allow read: if isAdmin() || (isAuth() && isOwner(resource.data.userId));
+      allow update: if isAdmin() || (isAuth() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId));
+      allow delete: if isAdmin();
+    }
+
+    // ── Vendor Applications ──────────────────────────────
+    match /vendor_applications/{appId} {
+      allow create: if isAuth() && isOwner(request.resource.data.userId);
+      allow read: if isAdmin() || (isAuth() && isOwner(resource.data.userId));
+      allow update: if isAdmin() || (isAuth() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId));
+      allow delete: if isAdmin();
+    }
+
+    // ── Stories ──────────────────────────────────────────
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if isVendor() 
+        && request.resource.data.vendorId != null 
+        && isVendorOwner(request.resource.data.vendorId);
+      allow delete: if isAdmin() 
+        || (isVendor() && resource.data.vendorId != null && isVendorOwner(resource.data.vendorId));
+      allow update: if isAdmin() 
+        || (isVendor() && resource.data.vendorId != null && isVendorOwner(resource.data.vendorId))
+        || (isAuth() 
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy']));
+    }
+
+    // ── Cuisine Types ───────────────────────────────────
+    match /cuisineTypes/{typeId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── Vendor Sections (Supermarket / Pharmacy) ─────────
+    match /vendorSections/{sectionId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── Promo Codes (Phase 8.10) ─────────────────────────
+    match /promoCodes/{promoCode} {
+      allow read: if isAuth();
+      allow create: if isAdmin() || (isDriver() && isOwner(request.resource.data.driverId));
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Promo Code Usage (Phase 8.10) ────────────────────
+    match /promoCodeUsage/{usageId} {
+      allow create: if isAuth() && request.resource.data.customerId == request.auth.uid;
+      allow read: if isAdmin() || isOwner(resource.data.customerId);
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Notifications (Phase 8.10) ───────────────────────
+    match /notifications/{notificationId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if false;  // Only via Cloud Functions admin SDK
+      allow update: if isOwner(resource.data.userId);  // Mark as read
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ── Delivery Requests (top-level, Phase 3.3) ─────────
+    match /deliveryRequests/{requestId} {
+      allow read: if isAuth() && (
+        isAdmin() ||
+        (isDriver() && request.auth.uid == resource.data.get('driverId', '')) ||
+        (get(/databases/$(database)/documents/orders/$(resource.data.orderId)).data.customerId == request.auth.uid) ||
+        isVendorOwner(get(/databases/$(database)/documents/orders/$(resource.data.orderId)).data.vendorId)
+      );
+      
+      allow create: if isAdmin() || 
+        (('vendorId' in request.resource.data && isVendorOwner(request.resource.data.vendorId)) ||
+         ('orderId' in request.resource.data && isVendorOwner(get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.vendorId)));
+      
+      allow update: if isAdmin() ||
+        (isDriver() && isOwner(resource.data.get('driverId', '')) && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'rejectionReason'])) ||
+        ((('vendorId' in resource.data && isVendorOwner(resource.data.vendorId)) ||
+          ('orderId' in resource.data && isVendorOwner(get(/databases/$(database)/documents/orders/$(resource.data.orderId)).data.vendorId))) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'orderId', 'driverId']));
+          
+      allow delete: if isAdmin();
+    }
+
+    // ── Phase 0 Additional Rules ─────────────────────────
+    match /sys_settings/{docId} {
+      allow read: if docId == 'app_settings' || isAuth();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['driverEarningsLimit']) || isSuperAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── Blacklists / Blocked Identifiers ────────────────
+    match /blacklists/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /driverWalletTransactions/{txId} {
+      allow read: if isAuth() && (isAdmin() || isOwner(resource.data.driverId));
+      allow create: if isAdmin() || (isDriver() && isOwner(request.resource.data.driverId));
+      allow update: if isAdmin() ||
+        (isDriver() && isOwner(resource.data.driverId) &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['confirmedByDriver', 'confirmedAt', 'status', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    // ── Vendor Wallet Transactions ───────────────────
+    match /restaurantWalletTransactions/{txId} {
+      allow read: if isAdmin() || isVendorOwner(resource.data.restaurantId);
+      allow create: if isAdmin() || isDriver();
+      allow update: if isAdmin() ||
+        (isVendorOwner(resource.data.restaurantId) &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['confirmedByOwner', 'confirmedAt', 'status', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    match /vendorWalletTransactions/{txId} {
+      allow read: if isAdmin() || isVendorOwner(resource.data.vendorId);
+      allow create: if isAdmin() || isDriver();
+      allow update: if isAdmin() ||
+        (isVendorOwner(resource.data.vendorId) &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['confirmedByOwner', 'confirmedAt', 'status', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    // ── Debug Logs ───────────────────────────────────────
+    match /debug_logs/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // ── Audit Logs ───────────────────────────────────────
+    match /auditLogs/{logId} {
+      allow create, read: if isAdmin();
+    }
+
+    // ── System Configs ────────────────────────────────────
+    match /configs/{docId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Chats & Messages ──────────────────────────────────
+    match /chats/{chatId} {
+      allow read, write: if isAuth() && (
+        resource.data.customerId == request.auth.uid ||
+        isVendorOwner(resource.data.vendorId) ||
+        isAdmin()
+      );
+
+      match /messages/{messageId} {
+        allow read, write: if isAuth() && (
+          get(/databases/$(database)/documents/chats/$(chatId)).data.customerId == request.auth.uid ||
+          isVendorOwner(get(/databases/$(database)/documents/chats/$(chatId)).data.vendorId) ||
+          isAdmin()
+        );
+      }
+    }
+
+    // ── Support Chats & Messages ──────────────────────────
+    match /support_chats/{chatId} {
+      allow read, write: if isAuth() && (chatId == request.auth.uid || isAdmin());
+
+      match /messages/{messageId} {
+        allow read, write: if isAuth() && (chatId == request.auth.uid || isAdmin());
+      }
+    }
+
+    // ── Prescription Requests ──────────────────────────────
+    match /prescription_requests/{requestId} {
+      allow create: if isAuth() && isNotBanned() && request.resource.data.customerId == request.auth.uid;
+      allow read, update: if isAuth() && (
+        (resource.data.customerId == request.auth.uid && isNotBanned()) ||
+        isVendorOwner(resource.data.vendorId) ||
+        isAdmin()
+      );
+    }
+
+    // ── Rides ─────────────────────────────────────────────
+    match /rides/{rideId} {
+      allow read: if isAuth() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.driverId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuth() && isNotBanned() && request.resource.data.customerId == request.auth.uid;
+      allow update: if isAuth() && (
+        (resource.data.customerId == request.auth.uid && isNotBanned()) ||
+        resource.data.driverId == request.auth.uid ||
+        isDriver() ||
+        isAdmin()
+      );
+    }
+
+    // ── Backend & Administrative Collections ─────────────
+    match /ledger/{entryDocId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Refund Queue ──
+    match /refund_queue/{refundId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /mail/{mailId} {
+      allow read, write: if false; // Cloud Functions Admin SDK only
+    }
+
+    match /rateLimits/{docId} {
+      allow read, write: if false; // Cloud Functions Admin SDK only
+    }
+
+    // ── Payment Audit Logs ──
+    match /payment_audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Cloud Functions Admin SDK only
+    }
+
+    // ── Default Deny ─────────────────────────────────────
+    // All other collections are implicitly denied
+    // (no match = no access)
+  }
+}

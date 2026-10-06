@@ -1,0 +1,841 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/core/enums/driver_enums.dart';
+import 'package:z_speed/features/driver/model/driver_profile.dart';
+import 'package:z_speed/features/driver/model/order_driver.dart';
+import 'package:z_speed/features/driver/cubit/restaurant_driver_assignment_cubit.dart';
+import 'package:z_speed/features/driver/cubit/restaurant_driver_assignment_state.dart';
+import 'package:z_speed/features/order/model/order.dart';
+import 'package:z_speed/features/restaurant/model/restaurant.dart';
+
+/// Vendor screen for assigning multiple drivers to a multi-item order.
+///
+/// Features:
+/// - Order summary with total distance and delivery fee
+/// - Available drivers list (sorted by distance, rating, acceptance rate)
+/// - Driver assignment with item selection
+/// - Assigned drivers section showing status and items
+/// - Real-time updates via streams
+class RestaurantDriverAssignmentScreen extends StatefulWidget {
+  final String orderId;
+  final Order order;
+  final Restaurant restaurant;
+
+  const RestaurantDriverAssignmentScreen({
+    super.key,
+    required this.orderId,
+    required this.order,
+    required this.restaurant,
+  });
+
+  @override
+  State<RestaurantDriverAssignmentScreen> createState() =>
+      _RestaurantDriverAssignmentScreenState();
+}
+
+class _RestaurantDriverAssignmentScreenState
+    extends State<RestaurantDriverAssignmentScreen> {
+  late RestaurantDriverAssignmentCubit _cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = RestaurantDriverAssignmentCubit(
+      repository: context.read(),
+    );
+    _cubit.init(widget.orderId, widget.order, widget.restaurant);
+  }
+
+  @override
+  void dispose() {
+    _cubit.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<RestaurantDriverAssignmentCubit>.value(
+      value: _cubit,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F5),
+        appBar: _buildAppBar(context),
+        body: BlocBuilder<RestaurantDriverAssignmentCubit,
+            RestaurantDriverAssignmentState>(
+          builder: (context, state) {
+            final cubit = context.read<RestaurantDriverAssignmentCubit>();
+            if (state.isBusy) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state.failure != null) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.failure!.message,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildOrderSummary(cubit),
+                  const SizedBox(height: 20),
+                  _buildDeliveryFeeCard(cubit),
+                  const SizedBox(height: 20),
+                  _buildAssignedDriversSection(cubit),
+                  const SizedBox(height: 20),
+                  _buildAvailableDriversSection(cubit),
+                  const SizedBox(height: 80),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Text(
+        AppLocalizations.of(context)!.assignDrivers,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      backgroundColor: Colors.deepOrange,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.pop(context),
+      ),
+    );
+  }
+
+  /// Order summary card showing order details and distance to customer.
+  Widget _buildOrderSummary(RestaurantDriverAssignmentCubit cubit) {
+    final order = cubit.state.order!;
+    final distance = cubit.getDistanceToCustomer();
+    final withinRadius = cubit.isWithinDeliveryRadius();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!
+                    .orderIdShort(order.id.substring(0, 8).toUpperCase()),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (!withinRadius)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning, size: 14, color: Colors.red.shade700),
+                      const SizedBox(width: 4),
+                      Text(
+                        AppLocalizations.of(context)!.outOfRange,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.red.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Colors.grey),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  order.deliveryAddress,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ),
+            ],
+          ),
+          ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.directions, size: 16, color: Colors.grey),
+                const SizedBox(width: 8),
+                Text(
+                  AppLocalizations.of(context)!
+                      .kmFromRestaurant(distance.toStringAsFixed(2)),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.multipleItems,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+              Text(
+                'EGP${order.total.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Delivery fee breakdown card.
+  Widget _buildDeliveryFeeCard(RestaurantDriverAssignmentCubit cubit) {
+    final feePerDriver = cubit.deliveryFeePerDriver;
+    final totalFee = cubit.totalDeliveryFee;
+    final driverCount = cubit.assignedDriverCount;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.payments, size: 20, color: Colors.orange.shade800),
+              const SizedBox(width: 8),
+              Text(
+                AppLocalizations.of(context)!.deliveryFee,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange.shade900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.perDriver,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+              Text(
+                'EGP${feePerDriver.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          if (driverCount > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.totalDriversCount(driverCount),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                Text(
+                  'EGP${totalFee.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade900,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Section showing drivers already assigned to this order.
+  Widget _buildAssignedDriversSection(RestaurantDriverAssignmentCubit cubit) {
+    final assignedDrivers = cubit.assignedDrivers;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.assignedDriversSection,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.deepOrange.shade50,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${assignedDrivers.length}',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange.shade700,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (assignedDrivers.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.person_off, size: 48, color: Colors.grey.shade400),
+                  const SizedBox(height: 12),
+                  Text(
+                    AppLocalizations.of(context)!.noDriversAssigned,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ...assignedDrivers.map((od) => _buildAssignedDriverCard(cubit, od)),
+      ],
+    );
+  }
+
+  /// Card for a single assigned driver.
+  Widget _buildAssignedDriverCard(
+    RestaurantDriverAssignmentCubit cubit,
+    OrderDriver orderDriver,
+  ) {
+    final statusColor = _getDriverStatusColor(orderDriver.status);
+    final statusText = _getDriverStatusText(orderDriver.status);
+
+    return Container(
+      margin: const EdgeInsetsDirectional.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      orderDriver.driverName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${orderDriver.vehicleModel} • ${orderDriver.licensePlate}',
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  statusText,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.shopping_bag, size: 16, color: Colors.grey),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context)!
+                      .itemsAssigned(orderDriver.assignedItems.length),
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+              ),
+              Text(
+                'EGP${orderDriver.deliveryFee.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ],
+          ),
+          if (orderDriver.status == DriverAssignmentStatus.rejected &&
+              orderDriver.rejectionReason != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline,
+                      size: 16, color: Colors.red.shade700),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      orderDriver.rejectionReason!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.red.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (orderDriver.status == DriverAssignmentStatus.pending ||
+                  orderDriver.status == DriverAssignmentStatus.rejected)
+                TextButton.icon(
+                  onPressed: () => _confirmRemoveDriver(cubit, orderDriver),
+                  icon: const Icon(Icons.close, size: 16),
+                  label: Text(AppLocalizations.of(context)!.remove),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Section showing available drivers to assign.
+  Widget _buildAvailableDriversSection(RestaurantDriverAssignmentCubit cubit) {
+    final availableDrivers = cubit.availableDrivers;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.availableDriversSection,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          AppLocalizations.of(context)!.sortedByDistance,
+          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 12),
+        if (availableDrivers.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.people_outline,
+                      size: 48, color: Colors.grey.shade400),
+                  const SizedBox(height: 12),
+                  Text(
+                    AppLocalizations.of(context)!.noAvailableDrivers,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ...availableDrivers
+              .map((driver) => _buildAvailableDriverCard(cubit, driver)),
+      ],
+    );
+  }
+
+  /// Card for a single available driver.
+  Widget _buildAvailableDriverCard(
+    RestaurantDriverAssignmentCubit cubit,
+    DriverProfile driver,
+  ) {
+    final isAssigned = cubit.isDriverAssigned(driver.userId);
+    final distance = cubit.getDistanceToDriver(driver);
+
+    return Container(
+      margin: const EdgeInsetsDirectional.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isAssigned ? Colors.grey.shade100 : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isAssigned ? Colors.grey.shade400 : Colors.grey.shade300,
+        ),
+        boxShadow: [
+          if (!isAssigned)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.deepOrange.shade100,
+                child: Icon(
+                  Icons.person,
+                  color: Colors.deepOrange.shade700,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      driver.userId, // Would be driver's name in production
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isAssigned ? Colors.grey : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${driver.vehicleModel} • ${driver.licensePlate}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isAssigned ? Colors.grey.shade600 : Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildDriverStat(
+                Icons.star,
+                driver.rating.toStringAsFixed(1),
+                Colors.amber,
+                isAssigned,
+              ),
+              _buildDriverStat(
+                Icons.check_circle,
+                '${driver.acceptanceRate.toStringAsFixed(0)}%',
+                Colors.green,
+                isAssigned,
+              ),
+              if (distance != null)
+                _buildDriverStat(
+                  Icons.directions,
+                  '${distance.toStringAsFixed(1)} km',
+                  Colors.blue,
+                  isAssigned,
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (!isAssigned)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _showItemSelectionDialog(cubit, driver),
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(AppLocalizations.of(context)!.assignToOrder),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            )
+          else
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.alreadyAssigned,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDriverStat(
+      IconData icon, String value, Color color, bool isGrayed) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: isGrayed ? Colors.grey.shade500 : color,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: isGrayed ? Colors.grey.shade600 : Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Show dialog for confirming driver assignment.
+  void _showItemSelectionDialog(
+    RestaurantDriverAssignmentCubit cubit,
+    DriverProfile driver,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!
+            .assignDriverId(driver.userId.toString())),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.assignDriverQuestion,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              AppLocalizations.of(context)!.assignDriverNote,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Assign with empty list (driver handles entire order)
+              cubit.assignDriver(driver, []);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepOrange,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(AppLocalizations.of(context)!.assign),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Confirm removal of a driver.
+  void _confirmRemoveDriver(
+    RestaurantDriverAssignmentCubit cubit,
+    OrderDriver orderDriver,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.removeDriver),
+        content: Text(
+          AppLocalizations.of(context)!
+              .removeDriverConfirm(orderDriver.driverName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              cubit.removeDriver(orderDriver.driverUserId);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(AppLocalizations.of(context)!.remove),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getDriverStatusColor(DriverAssignmentStatus status) {
+    switch (status) {
+      case DriverAssignmentStatus.pending:
+        return Colors.orange;
+      case DriverAssignmentStatus.accepted:
+        return Colors.green;
+      case DriverAssignmentStatus.rejected:
+        return Colors.red;
+      case DriverAssignmentStatus.cancelled:
+        return Colors.grey;
+      case DriverAssignmentStatus.pickedUp:
+        return Colors.blue;
+      case DriverAssignmentStatus.delivered:
+        return Colors.teal;
+    }
+  }
+
+  String _getDriverStatusText(DriverAssignmentStatus status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status) {
+      case DriverAssignmentStatus.pending:
+        return l10n.statusPending;
+      case DriverAssignmentStatus.accepted:
+        return l10n.statusAccepted;
+      case DriverAssignmentStatus.rejected:
+        return l10n.statusRejected;
+      case DriverAssignmentStatus.cancelled:
+        return l10n.statusCancelled;
+      case DriverAssignmentStatus.pickedUp:
+        return l10n.statusPickedUp;
+      case DriverAssignmentStatus.delivered:
+        return l10n.statusDelivered;
+    }
+  }
+}

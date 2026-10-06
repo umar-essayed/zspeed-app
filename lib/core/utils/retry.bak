@@ -1,0 +1,54 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+
+/// Retry Utility (Phase 8.10)
+///
+/// Generic retry logic with exponential backoff for transient failures.
+///
+/// Features:
+/// - Exponential backoff (1s, 2s, 4s, 8s, ...)
+/// - Configurable max attempts
+/// - Custom retry predicates
+/// - Defaults to retrying on SocketException and TimeoutException
+///
+/// Usage:
+/// ```dart
+/// final result = await retryAsync(
+///   action: () => fetchDataFromAPI(),
+///   maxAttempts: 3,
+///   initialDelay: Duration(seconds: 1),
+/// );
+/// ```
+Future<T> retryAsync<T>({
+  required Future<T> Function() action,
+  int maxAttempts = 3,
+  Duration initialDelay = const Duration(seconds: 1),
+  bool Function(Exception)? shouldRetry,
+}) async {
+  final retryPredicate = shouldRetry ?? _defaultRetryPredicate;
+
+  for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await action();
+    } on Exception catch (e) {
+      // Last attempt or non-retryable error → rethrow
+      if (attempt == maxAttempts || !retryPredicate(e)) {
+        rethrow;
+      }
+
+      // Exponential backoff: 1s, 2s, 4s, 8s, ...
+      final delay = initialDelay * pow(2, attempt - 1);
+      await Future.delayed(delay);
+    }
+  }
+
+  // Should never reach here, but Dart analyzer requires this
+  throw StateError(
+      'retryAsync exceeded maxAttempts without returning or rethrowing');
+}
+
+/// Default retry predicate: retry on network and timeout errors.
+bool _defaultRetryPredicate(Exception e) {
+  return e is SocketException || e is TimeoutException;
+}

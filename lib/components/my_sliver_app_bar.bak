@@ -1,0 +1,63 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+class RestaurantsPage extends StatelessWidget {
+  const RestaurantsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: true,
+            snap: false,
+            expandedHeight: 180,
+            backgroundColor: Colors.deepOrange,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text(
+                "Speed Restaurants",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.deepOrange, Colors.red],
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
+                  ),
+                ),
+              ),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+            actions: const [
+              Padding(
+                padding: EdgeInsetsDirectional.only(end: 12),
+                child: Icon(Icons.shopping_cart, color: Colors.white),
+              )
+            ],
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                return ListTile(
+                  leading: const Icon(Icons.restaurant_menu,
+                      color: Colors.deepOrange),
+                  title: Text(AppLocalizations.of(context)!.restaurantIndex((index + 1).toString())),
+                );
+              },
+              childCount: 20,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

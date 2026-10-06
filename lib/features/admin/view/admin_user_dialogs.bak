@@ -1,0 +1,419 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+import 'package:z_speed/features/admin/model/admin_models.dart';
+
+class AdminUserDialogs {
+  static void showAddUserDialog({
+    required BuildContext context,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(AdminUser user) onUserAdded,
+    required void Function(String title, String message) onSuccess,
+    required String nextUserId,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String name = '';
+        String email = '';
+        String phone = '';
+        UserType selectedRole = UserType.customer;
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.addNewUser, style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.fullNameLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => name = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.emailLabel2,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => email = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.phoneLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => phone = value,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<UserType>(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.roleLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  initialValue: selectedRole,
+                  items: UserType.values
+                      .map(
+                        (role) => DropdownMenuItem(
+                          value: role,
+                          child: Text(
+                            role.toString().split('.').last,
+                            style: TextStyle(color: textDark, fontSize: 12),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) {
+                    if (value != null) selectedRole = value;
+                  },
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (name.isNotEmpty && email.isNotEmpty) {
+                  onUserAdded(
+                    AdminUser(
+                      id: nextUserId,
+                      name: name,
+                      email: email,
+                      role: selectedRole,
+                      status: UserStatus.active,
+                      phone: phone,
+                      joinDate: DateTime.now().toString().split(' ')[0],
+                    ),
+                  );
+                  Navigator.pop(context);
+                  onSuccess(
+                      'User Added', 'New user has been added successfully!');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.addUser,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showEditUserDialog({
+    required BuildContext context,
+    required AdminUser user,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(AdminUser user) onUserUpdated,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String name = user.name;
+        String email = user.email;
+        UserStatus selectedStatus = user.status;
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.editUser, style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.fullNameLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  controller: TextEditingController(text: name),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => name = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.emailLabel2,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  controller: TextEditingController(text: email),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => email = value,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<UserStatus>(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.statusLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  initialValue: selectedStatus,
+                  items: UserStatus.values
+                      .map(
+                        (status) => DropdownMenuItem(
+                          value: status,
+                          child: Text(
+                            status.toString().split('.').last,
+                            style: TextStyle(color: textDark, fontSize: 12),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) {
+                    if (value != null) selectedStatus = value;
+                  },
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onUserUpdated(
+                  AdminUser(
+                    id: user.id,
+                    name: name,
+                    email: email,
+                    role: user.role,
+                    status: selectedStatus,
+                    phone: user.phone,
+                    joinDate: user.joinDate,
+                  ),
+                );
+                Navigator.pop(context);
+                onSuccess('User Updated', 'User information has been updated!');
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.saveChanges,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showDeleteUserDialog({
+    required BuildContext context,
+    required AdminUser user,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color errorRed,
+    required void Function(String id) onDelete,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.deleteUser, style: TextStyle(color: textDark)),
+          content: Text(
+            AppLocalizations.of(context)!.deleteUserConfirm(user.name),
+            style: TextStyle(color: textMedium),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onDelete(user.id);
+                Navigator.pop(context);
+                onSuccess(
+                    'User Deleted', 'User has been deleted successfully!');
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: errorRed, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.delete,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showUserDetailsDialog({
+    required BuildContext context,
+    required AdminUser user,
+    required Color white,
+    required Color textDark,
+    required Color primaryOrange,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.userDetails, style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(AppLocalizations.of(context)!.nameValue(user.name.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 6),
+                Text(AppLocalizations.of(context)!.emailValue(user.email.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 6),
+                Text(AppLocalizations.of(context)!.phoneValue(user.phone.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 6),
+                Text(AppLocalizations.of(context)!.roleValue(user.role.toString().split('.').last.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 6),
+                Text(AppLocalizations.of(context)!.statusValue(user.status.toString().split('.').last.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 6),
+                Text(AppLocalizations.of(context)!.joinDateValue(user.joinDate.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.close, style: TextStyle(color: primaryOrange)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showChangeStatusDialog({
+    required BuildContext context,
+    required AdminUser user,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(AdminUser user) onUserUpdated,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        UserStatus selectedStatus = user.status;
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.changeUserStatus, style: TextStyle(color: textDark)),
+          content: DropdownButtonFormField<UserStatus>(
+            decoration: InputDecoration(
+              labelText: 'Status',
+              labelStyle: TextStyle(color: textMedium),
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: borderColor)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: primaryOrange)),
+            ),
+            initialValue: selectedStatus,
+            items: UserStatus.values
+                .map(
+                  (status) => DropdownMenuItem(
+                    value: status,
+                    child: Text(
+                      status.toString().split('.').last,
+                      style: TextStyle(color: textDark, fontSize: 12),
+                    ),
+                  ),
+                )
+                .toList(),
+            // ignore: deprecated_member_use
+            onChanged: (value) {
+              if (value != null) selectedStatus = value;
+            },
+            style: const TextStyle(fontSize: 12),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onUserUpdated(
+                  AdminUser(
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    status: selectedStatus,
+                    phone: user.phone,
+                    joinDate: user.joinDate,
+                  ),
+                );
+                Navigator.pop(context);
+                onSuccess('Status Updated', 'User status has been updated!');
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.updateStatus,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

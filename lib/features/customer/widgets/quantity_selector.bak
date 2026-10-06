@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/core/enums/measure_enums.dart';
+
+/// Widget for selecting item quantity based on measure type (piece or weight).
+class QuantitySelector extends StatelessWidget {
+  final double quantity;
+  final double minQuantity;
+  final double? maxQuantity;
+  final MeasureType measureType;
+  final double? measureStep;
+  final void Function(double newQuantity) onChanged;
+
+  const QuantitySelector({
+    super.key,
+    required this.quantity,
+    required this.minQuantity,
+    this.maxQuantity,
+    required this.measureType,
+    this.measureStep,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          // Decrease Button
+          IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: _canDecrease() ? _handleDecrease : null,
+            color: Theme.of(context).primaryColor,
+            style: IconButton.styleFrom(
+              backgroundColor: _canDecrease()
+                  ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                  : Colors.grey[200],
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          // Quantity Display
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _formatQuantity(quantity),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _getMeasureUnitLabel(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          // Increase Button
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _canIncrease() ? _handleIncrease : null,
+            color: Theme.of(context).primaryColor,
+            style: IconButton.styleFrom(
+              backgroundColor: _canIncrease()
+                  ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                  : Colors.grey[200],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _canDecrease() {
+    return quantity > minQuantity;
+  }
+
+  bool _canIncrease() {
+    if (maxQuantity == null) return true;
+    return quantity < maxQuantity!;
+  }
+
+  void _handleDecrease() {
+    final step = _getEffectiveStep();
+    final newQuantity =
+        (quantity - step).clamp(minQuantity, maxQuantity ?? double.infinity);
+    onChanged(newQuantity);
+  }
+
+  void _handleIncrease() {
+    final step = _getEffectiveStep();
+    final newQuantity = quantity + step;
+    if (maxQuantity != null && newQuantity > maxQuantity!) {
+      return;
+    }
+    onChanged(newQuantity);
+  }
+
+  double _getEffectiveStep() {
+    if (measureType == MeasureType.piece) {
+      return 1.0;
+    } else {
+      return measureStep ?? 0.1;
+    }
+  }
+
+  String _formatQuantity(double qty) {
+    if (measureType == MeasureType.piece) {
+      return qty.toInt().toString();
+    } else {
+      return qty.toStringAsFixed(2);
+    }
+  }
+
+  String _getMeasureUnitLabel() {
+    switch (measureType) {
+      case MeasureType.piece:
+        return quantity == 1 ? 'piece' : 'pieces';
+      case MeasureType.gram:
+        return 'grams';
+      case MeasureType.kilogram:
+        return 'kg';
+      case MeasureType.liter:
+        return 'L';
+      default:
+        return '';
+    }
+  }
+}

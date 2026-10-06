@@ -1,0 +1,157 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/core/enums/order_enums.dart';
+import 'package:z_speed/features/auth/model/user_model.dart';
+import 'package:z_speed/features/order/model/order.dart';
+import 'package:z_speed/features/order/view/order_tracking_screen.dart';
+import 'package:z_speed/features/notification/cubit/notification_cubit.dart';
+
+class FloatingOrderRadar extends StatefulWidget {
+  final AppUser currentUser;
+
+  const FloatingOrderRadar({super.key, required this.currentUser});
+
+  @override
+  State<FloatingOrderRadar> createState() => _FloatingOrderRadarState();
+}
+
+class _FloatingOrderRadarState extends State<FloatingOrderRadar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  Color _getStatusColor(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+      case OrderStatus.searching:
+      case OrderStatus.accepted:
+      case OrderStatus.preparing:
+        return const Color(0xFFFFC107); // 🟡 Yellow: preparing
+      case OrderStatus.driverAssigned:
+      case OrderStatus.pickedUp:
+      case OrderStatus.onTheWay:
+        return const Color(0xFF2196F3); // 🔵 Blue: driver on the way
+      case OrderStatus.ready:
+        return const Color(0xFF4CAF50); // 🟢 Green: ready/arrived
+      default:
+        return const Color(0xFFF35535); // fallback orange
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('orders')
+          .where('customerId', isEqualTo: widget.currentUser.id)
+          .orderBy('createdAt', descending: true)
+          .limit(5)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        // Filter active orders locally to prevent Firestore composite index issues
+        final activeOrders = snapshot.data!.docs
+            .map((doc) => Order.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+            .where((order) =>
+                order.status != OrderStatus.delivered &&
+                order.status != OrderStatus.cancelled &&
+                order.status != OrderStatus.refunded)
+            .toList();
+
+        if (activeOrders.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final activeOrder = activeOrders.first;
+        final themeColor = _getStatusColor(activeOrder.status);
+
+        return PositionedDirectional(
+          bottom: 80, // Lowered down perfectly to float elegantly above bottom nav bar
+          end: 20,     // Nestled on the right side beautifully
+          child: AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  // 1. Double soft pulsating waves behind the circle button
+                  ...List.generate(2, (index) {
+                    final progress = (_pulseController.value + index / 2) % 1.0;
+                    return Container(
+                      width: 56 + (progress * 28),
+                      height: 56 + (progress * 28),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: themeColor.withValues(alpha: 0.22 * (1 - progress)),
+                      ),
+                    );
+                  }),
+                  // 2. Main interactive circular floating button (Stable, no movement)
+                  GestureDetector(
+                    onTap: () {
+                      final notificationCubit = context.read<NotificationCubit>();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (ctx) => BlocProvider<NotificationCubit>.value(
+                            value: notificationCubit,
+                            child: OrderTrackingScreen(orderId: activeOrder.id),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: themeColor.withValues(alpha: 0.35),
+                            blurRadius: 12,
+                            spreadRadius: 1,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: themeColor.withValues(alpha: 0.4),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.radar_rounded,
+                          color: themeColor,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}

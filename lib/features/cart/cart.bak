@@ -1,0 +1,11 @@
+/// Barrel export for cart feature.
+/// Populated as modules are migrated in Phases 3-7.
+library;
+
+export 'model/cart_item.dart';
+export 'datasource/cart_local_datasource.dart';
+export 'datasource/cart_firebase_datasource.dart';
+export 'repository/cart_repository.dart';
+export 'repository/cart_repository_impl.dart';
+export 'cubit/cart_cubit.dart';
+export 'widgets/cart_sidebar_widget.dart';

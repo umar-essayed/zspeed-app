@@ -1,0 +1,23 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/core/widgets/logo.dart';
+
+/// The logo header shown above the login form. Pure presentation widget — no state.
+class LoginHeader extends StatelessWidget {
+  const LoginHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      child: const SpeedLogoWithText(size: LogoSize.lg),
+    );
+  }
+}

@@ -1,0 +1,279 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/order/model/tracking_step.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+
+/// Delivery Progress Section — displays order tracking timeline.
+///
+/// Phase 8.5: Uses canonical TrackingStep model with dynamic data.
+/// Phase 8.6: Will add real-time location updates.
+class DeliveryProgressSection extends StatelessWidget {
+  final List<TrackingStep> steps;
+  final String? estimatedTime;
+  final double? progressPercentage;
+
+  const DeliveryProgressSection({
+    super.key,
+    required this.steps,
+    this.estimatedTime,
+    this.progressPercentage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = progressPercentage ?? 0.0;
+    final l10n = AppLocalizations.of(context)!;
+    final eta = estimatedTime ?? l10n.calculating;
+
+    return Container(
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [
+            Colors.orange.shade50,
+            Colors.orange.shade100,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.shade100,
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            // Delivery Time
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.estimatedTime,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      eta,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange.shade800,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade600,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    l10n.liveTracking,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Progress Bar
+            Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    children: [
+                      // Background
+                      Container(
+                        width: constraints.maxWidth,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      // Progress
+                      Container(
+                        width: constraints.maxWidth * progress,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.orange.shade400,
+                              Colors.orange.shade600,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.ordered,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                Text(
+                  l10n.percentComplete((progress * 100).round()),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Status Timeline
+            Column(
+              children: steps.asMap().entries.map((entry) {
+                final int index = entry.key;
+                final TrackingStep step = entry.value;
+                final bool isCurrent = step.isComplete &&
+                    (index >= steps.length - 1 || !steps[index + 1].isComplete);
+
+                return Container(
+                  margin: const EdgeInsetsDirectional.only(bottom: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Status Circle
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: step.isComplete
+                              ? Colors.white
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: step.isComplete
+                                ? Colors.orange.shade400
+                                : Colors.grey.shade300,
+                            width: step.isComplete ? 2 : 1,
+                          ),
+                          boxShadow: step.isComplete
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.orange.shade200,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            step.icon,
+                            color: step.isComplete
+                                ? Colors.orange.shade600
+                                : Colors.grey.shade400,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+
+                      // Status Details
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isCurrent
+                                ? Colors.orange.shade50
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isCurrent
+                                  ? Colors.orange.shade200
+                                  : Colors.grey.shade200,
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      step.title,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: step.isComplete
+                                            ? Colors.black87
+                                            : Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      step.subtitle,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (step.isComplete)
+                                Icon(
+                                  Icons.check_circle,
+                                  color: isCurrent
+                                      ? Colors.orange.shade600
+                                      : Colors.green.shade500,
+                                  size: 20,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

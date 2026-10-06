@@ -1,0 +1,8 @@
+/// Barrel for the payment_settings feature.
+library;
+
+export 'view/payment_settings_page.dart';
+export 'view/tax_information_page.dart';
+export 'view/add_payment_method_page.dart';
+export 'widgets/payment_settings_dialogs.dart';
+export 'widgets/payment_settings_tiles.dart';

@@ -1,0 +1,51 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:z_speed/features/driver/widgets/active_trip_model.dart';
+
+/// Dialog for calling a customer.
+void showCallCustomerDialog(
+    BuildContext context, ActiveTrip trip, Color primaryColor) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.white,
+      title: Text(AppLocalizations.of(context)!.callCustomer),
+      content: Text(AppLocalizations.of(context)!.callCustomerName(trip.customer)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: primaryColor)),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+          child: Text(AppLocalizations.of(context)!.call),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Dialog for calling a restaurant.
+void showCallRestaurantDialog(
+    BuildContext context, ActiveTrip trip, Color primaryColor) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.white,
+      title: Text(AppLocalizations.of(context)!.callRestaurant),
+      content: Text(AppLocalizations.of(context)!.callRestaurantName(trip.restaurant)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: primaryColor)),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+          child: Text(AppLocalizations.of(context)!.call),
+        ),
+      ],
+    ),
+  );
+}

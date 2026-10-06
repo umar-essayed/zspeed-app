@@ -1,0 +1,2777 @@
+Paylink Payment Integration API (1.0.0)
+Download OpenAPI specification:Download
+
+Download Postman collection: Download
+
+Overview
+The Paylink Payment Integration API enables merchants to seamlessly integrate secure payment processing into their applications. This API follows a simple yet robust flow that handles payment initialization, processing, and completion notifications.
+
+How It Works
+1. Payment Initialization
+Merchants call the /api/integration/init endpoint with customer details, order information, and a security signature. This creates a secure checkout session and returns:
+
+A hosted checkout URL where customers complete their payment
+A unique invoice ID for tracking
+An expiration timestamp for the payment session
+2. Customer Payment Flow
+Customers are redirected to the provided checkout URL where they:
+
+Review their order details
+Select their preferred payment method
+Complete the payment securely on Paylink's hosted page
+3. Real-time Notifications (Webhooks)
+As the payment progresses through different states, Paylink automatically sends POST requests to your configured webhook URL for enabled event types:
+
+invoice.paid / invoice.not_paid (enabled by default)
+invoice.voided / invoice.refunded / invoice.authorization_reversed (opt-in)
+Each webhook includes an event field, transaction details (including the gateway auth_code when available), and HMAC signatures for security verification. Configure which events trigger webhooks under Settings → Payment Integrations → Webhook Events.
+
+4. Customer Return (Website or Mobile App)
+After payment completion — on both success and failure — the customer is returned to the destination determined by your integration's Type:
+
+Website integrations return the customer to your configured Redirect URL (e.g. https://mywebsite.com/return).
+Mobile App integrations return the customer to your app through the configured Mobile App Return Scheme, a custom-scheme deep link (e.g. payindemo://payment-return).
+In both cases the same transaction details are delivered as query parameters:
+
+Transaction results as URL parameters
+Status information (completed/failed/cancelled)
+Security signature for verification
+Key Features
+🔒 Security First: All requests and callbacks use HMAC-SHA256 signatures for verification
+⚡ Real-time Updates: Instant webhook notifications for all transaction events
+🌍 Multi-currency: Support for EGP, EUR, and USD
+📱 Hosted Checkout: No PCI compliance burden - customers pay on Paylink's secure pages
+🔄 Automatic Retries: Failed webhook deliveries are retried up to 5 times
+⚙️ Admin Configuration: Integration type, webhook URL, redirect URL, and mobile app return scheme are configured once in your dashboard
+Configuration Requirements
+Before using this API, ensure you have configured the following in your Paylink dashboard:
+
+Type: Website or Mobile App — determines where customers are returned after payment
+Webhook URL: Where you'll receive transaction status updates
+Redirect URL: Where website customers return after payment completion
+Mobile App Return Scheme: (Mobile App integrations only) the custom-scheme deep link your app is returned to after payment
+Hash Token: Used for generating and verifying HMAC signatures
+Webhook Events: Choose which events trigger notifications (defaults: invoice.paid, invoice.not_paid)
+Authentication
+This API uses token-based authentication combined with HMAC signatures:
+
+Authentication Token: Included in API requests for identification
+Hash Token: Used for signature generation (keep this secret)
+Signatures: Required for all requests and verified on all callbacks
+Getting Started
+Follow these steps to set up your payment integration:
+
+Step 1: Get Your API Credentials
+Log in to your Paylink dashboard
+Navigate to Settings → Payment Integrations
+Click Add Integration to create a new integration
+Fill in the integration details:
+Name: A friendly name for this integration (e.g., "My Website Checkout")
+Origin: The domain of your website (e.g., https://mywebsite.com)
+Type: Website or Mobile App. Choose Mobile App only when customers pay inside a native app; choose Website for browser-based checkouts. Existing integrations created before this option default to Website.
+Webhook URL: The endpoint on your server that will receive payment notifications
+Redirect URL: Where website customers are sent after completing payment
+Mobile App Return Scheme: (Mobile App integrations only) the custom-scheme deep link your app is returned to, e.g. payindemo://payment-return
+After saving, you'll receive:
+Authentication Token: Used in API requests to identify your integration
+Hash Token: Used to generate HMAC signatures (keep this secret!)
+Step 2: Configure Your Server
+Set up your Webhook endpoint to receive POST requests with transaction updates
+Set up your Redirect page to handle customers returning from the checkout
+Store your Hash Token securely (environment variable recommended)
+Step 3: Make Your First Request
+Use the /api/integration/init endpoint below to create a checkout session, then redirect the customer to the returned checkout_url.
+
+Testing Cards
+In the sandbox/test environment, payment outcomes are driven by the transaction amount and by the card data you enter - not by special "decline card numbers". Use a valid test card from the table below and set the amount to a trigger value to simulate an approval or a specific decline.
+
+Important: Test cards from other providers (for example 4000 0000 0000 0127 or 4000 0000 0000 0069) do not work here. The sandbox authorizes any well-formed card number, so they return a successful/PAID result. Use the cards and amounts on this page instead.
+
+Test Cards
+Card Type	Card Number	Expiry	CVV
+Visa	4111 1111 1111 1111	Any future date	Any 3 digits
+Mastercard	5555 5555 5555 4444	Any future date	Any 3 digits
+Mastercard (2-series)	2222 4200 0000 1113	Any future date	Any 3 digits
+Simulating Declines
+Use any valid test card above and set the transaction amount to one of these values to force a specific decline:
+
+Amount	Result
+4051.00	Insufficient funds
+4054.00	Expired card
+4005.00	Do not honor (general decline)
+4043.00	Stolen card
+4041.00	Lost card
+7001.00	Rejected - invalid card
+You can also force a failure with invalid card data:
+
+Input	Result
+Card 4111 1111 1111 1112 (invalid checksum)	Declined
+Past expiry year (e.g. 1998)	Declined
+Amount -1 or 100000000000	Invalid request
+A declined payment returns success=0 and leaves the invoice unpaid - no booking is confirmed.
+
+Note: These triggers work only in the sandbox/test environment, never in production. In production, use real card details.
+
+Ready to get started? Begin with the /api/integration/init endpoint below.## Recurring subscriptions
+
+To charge a customer automatically on a schedule (subscriptions / card-on-file), use the Recurring Subscriptions endpoints. The customer authenticates once (3DS) on the first payment; PayLink then charges automatically each cycle and notifies you with signed subscription.* webhooks. See the dedicated Recurring Subscriptions Integration Guide (RECURRING_INTEGRATION_GUIDE.md, in this docs folder) for a complete step-by-step walkthrough.
+
+Payment Initialization
+Initialize checkout sessions for payment processing
+
+Init
+Base URL: https://pay.getpayin.com
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+token	
+string
+The integration's authentication token
+
+first_name	
+string
+Customer's first name
+
+last_name	
+string
+Customer's last name
+
+email	
+string
+Customer's email
+
+order_title	
+string
+The order title shown to the customer
+
+order_amount	
+number
+The order amount the customer will pay
+
+address	
+string
+The user's address [OPTIONAL]
+
+city	
+string
+The user's city [OPTIONAL]
+
+country	
+string
+The user's country as an ISO 3166-1 alpha-2 code (e.g. EG, US, GB). Prefills the checkout billing form; a non-ISO value is ignored for country prefill. [OPTIONAL]
+
+state	
+string
+The user's state / province / administrative area. Prefills the checkout billing form; for US/CA send the 2-letter code (e.g. NY, ON), which the card network requires there. When sent, it is signed in position immediately after country (before currency). [OPTIONAL]
+
+currency	
+string
+Short code of the currency to be paid with. Only Supported (EGP, EUR, USD)
+
+order_details	
+string
+Optional. A JSON-encoded array of {label, value} objects shown on the checkout page, each rendered on its own line (e.g. Guest, Reservation, Room, Check-In, Check-Out). When omitted, the checkout falls back to displaying the single order_title. Max 2000 characters.
+
+Important: This field is OPTIONAL and is NOT included in the signature calculation, so it can be added without changing how the signature is generated. Rows with an empty value are ignored.
+
+iframe	
+boolean
+Set to true to enable iframe mode. When enabled, the checkout URL can be embedded in an iframe on your website. Payment results will be sent via postMessage to the parent window instead of redirecting.
+
+Important: This field is NOT included in the signature calculation.
+
+Iframe Integration Example:
+
+<iframe id="paylink-checkout"
+    src="{checkout_url}"
+    style="width: 100%; height: 600px; border: none;"
+    allow="payment"></iframe>
+
+<script>
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'paylink_payment') {
+        console.log('Payment result:', event.data);
+        // event.data.success - boolean
+        // event.data.invoice_id - integer
+        // event.data.invoice_status - 'PAID' or 'UNPAID'
+        // event.data.message - string
+    }
+});
+</script>
+payment_mode	
+string
+Enum: "capture" "authorize"
+Payment mode. capture (default) charges the customer immediately upon checkout. authorize places a hold on the funds without charging — you can then settle (capture) or reverse the authorization using the payment operation endpoints.
+
+Important: This field is NOT included in the signature calculation, so it can be added without changing how the signature is generated. Requires the authorize-mode capability to be enabled for your company when using authorize.
+
+signature	
+string
+HMAC-SHA256 signature for request verification. This signature ensures the request authenticity and prevents tampering.
+
+How to generate the signature:
+
+Concatenate all field values (except 'token' and 'signature') in the exact order they appear in the request
+Create HMAC-SHA256 hash using your secret hash token (from account settings)
+Encode the result in base64
+Code Examples:
+
+PHP:
+
+// Step 1: Prepare data (exclude token and signature)
+$data = [
+    $first_name,
+    $last_name, 
+    $email,
+    $order_title,
+    $order_amount,
+    $address,     // include even if empty
+    $city,        // include even if empty  
+    $country,     // include even if empty
+    $currency
+];
+
+// Step 2: Generate signature
+$concatenated = implode('', $data);
+$signature = base64_encode(hash_hmac('sha256', $concatenated, $hashKey, true));
+Node.js:
+
+const crypto = require('crypto');
+
+// Step 1: Prepare data array
+const data = [
+    first_name,
+    last_name,
+    email, 
+    order_title,
+    order_amount,
+    address || '',   // handle optional fields
+    city || '',
+    country || '',
+    currency
+];
+
+// Step 2: Generate signature
+const concatenated = data.join('');
+const signature = crypto
+    .createHmac('sha256', hashKey)
+    .update(concatenated)
+    .digest('base64');
+Python:
+
+import hmac
+import hashlib
+import base64
+
+# Step 1: Prepare data
+data = [
+    first_name,
+    last_name,
+    email,
+    order_title, 
+    order_amount,
+    address or '',   # handle optional fields
+    city or '',
+    country or '',
+    currency
+]
+
+# Step 2: Generate signature
+concatenated = ''.join(data)
+signature = base64.b64encode(
+    hmac.new(
+        hash_key.encode('utf-8'),
+        concatenated.encode('utf-8'),
+        hashlib.sha256
+    ).digest()
+).decode('utf-8')
+Important Notes:
+
+Use the hash token from your Paylink account settings (not the public token)
+Include optional fields in concatenation even if they're empty strings
+Field order matters - follow the exact sequence shown above
+If you send the optional state field, include it in the concatenation immediately after country (before currency); the code snippets above omit it for brevity
+The signature must be recalculated for every request
+Responses
+200 Success Response
+Response Headers
+Server	
+string
+Example: "nginx/1.25.2"
+Content-Type	
+string
+Example: "application/json"
+Transfer-Encoding	
+string
+Example: "chunked"
+Connection	
+string
+Example: "keep-alive"
+Vary	
+string
+Example: "Accept-Encoding"
+X-Powered-By	
+string
+Example: "PHP/8.2.29"
+Cache-Control	
+string
+Example: "no-cache, private"
+Date	
+string
+Example: "Fri, 01 Aug 2025 18:36:36 GMT"
+X-RateLimit-Limit	
+string
+Example: "60"
+X-RateLimit-Remaining	
+string
+Example: "59"
+phpdebugbar-id	
+string
+Example: "X9ec7a97c11edbad7ef82c6b1ac3224bb"
+Content-Encoding	
+string
+Example: "gzip"
+Response Schema: application/json
+object
+403 Error Response
+Callbacks
+postTransaction Status Update WebhookgetPayment Completion Return Callback (Website Redirect or App Deep Link)
+
+post
+/api/integration/init
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"first_name": "john",
+"last_name": "doe",
+"email": "foe.bar@gmail.com",
+"order_title": "Test Order",
+"order_amount": "250",
+"address": "Baker Street",
+"city": "6th Of October",
+"country": "EG",
+"state": "Giza",
+"currency": "EGP",
+"order_details": "[{\"label\":\"Guest\",\"value\":\"John Doe\"},{\"label\":\"Check-In\",\"value\":\"Mon, Jun 09, 2026\"},{\"label\":\"Check-Out\",\"value\":\"Tue, Jun 10, 2026\"}]",
+"iframe": true,
+"payment_mode": "capture",
+"signature": "string"
+}
+Response samples
+200403
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"data": {
+"checkout_url": "https://pay.getpayin.com/integration/checkout?expires=1754075196&integration_id=2&invoice_id=40506&order_title=Test%20Order&signature=f18e03b546e60031152e7dd3e13de788727ac814b71118236fef6f688f3bef99",
+"invoice_id": 40506,
+"expires_at": "2025-08-01T19:06:36.205559Z"
+},
+"success": true
+}
+Callback payload samples
+Callback
+
+POST: Transaction Status Update Webhook
+POST: Transaction Status Update Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "invoice.paid",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "PAID",
+"message": "Payment completed successfully",
+"auth_code": "831000",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Init (v2)
+Base URL: https://pay.getpayin.com
+
+v2 of the init endpoint. Adds an optional per-request webhook_url, and includes redirection_url and webhook_url in the signature. Both must use HTTPS and be on the integration's registered domain (its Origin or the matching configured URL host).
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Idempotency-Key	
+string <= 64 characters
+Example: init-req-0001
+Optional. If the same key is replayed, the original invoice and checkout_url are returned instead of creating a duplicate invoice. Max 64 characters.
+
+Request Body schema: application/json
+token	
+string
+The integration's authentication token
+
+first_name	
+string
+Customer's first name
+
+last_name	
+string
+Customer's last name
+
+email	
+string
+Customer's email
+
+order_title	
+string
+The order title shown to the customer
+
+order_amount	
+number
+The order amount the customer will pay
+
+address	
+string
+The user's address [OPTIONAL]
+
+city	
+string
+The user's city [OPTIONAL]
+
+country	
+string
+The user's country as an ISO 3166-1 alpha-2 code (e.g. EG, US, GB). Prefills the checkout billing form; a non-ISO value is ignored for country prefill. [OPTIONAL]
+
+state	
+string
+The user's state / province / administrative area. Prefills the checkout billing form; for US/CA send the 2-letter code (e.g. NY, ON), which the card network requires there. When sent, it is signed in position immediately after country (before currency). [OPTIONAL]
+
+currency	
+string
+Short code of the currency to be paid with. Only Supported (EGP, EUR, USD)
+
+order_details	
+string
+Optional. A JSON-encoded array of {label, value} objects shown on the checkout page, each rendered on its own line (e.g. Guest, Reservation, Room, Check-In, Check-Out). When omitted, the checkout falls back to displaying the single order_title. Max 2000 characters.
+
+Important: This field is OPTIONAL and IS part of the signature calculation on v2 (unlike v1). Rows with an empty value are ignored.
+
+iframe	
+boolean
+Set to true to enable iframe mode. When enabled, the checkout URL can be embedded in an iframe on your website. Payment results will be sent via postMessage to the parent window instead of redirecting.
+
+Important: This field is NOT included in the signature calculation.
+
+Iframe Integration Example:
+
+<iframe id="paylink-checkout"
+    src="{checkout_url}"
+    style="width: 100%; height: 600px; border: none;"
+    allow="payment"></iframe>
+
+<script>
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'paylink_payment') {
+        console.log('Payment result:', event.data);
+        // event.data.success - boolean
+        // event.data.invoice_id - integer
+        // event.data.invoice_status - 'PAID' or 'UNPAID'
+        // event.data.message - string
+    }
+});
+</script>
+payment_mode	
+string
+Enum: "capture" "authorize"
+Payment mode. capture (default) charges the customer immediately upon checkout. authorize places a hold on the funds without charging — you can then settle (capture) or reverse the authorization using the payment operation endpoints.
+
+Important: This field is NOT included in the signature calculation, so it can be added without changing how the signature is generated. Requires the authorize-mode capability to be enabled for your company when using authorize.
+
+installments_enabled	
+boolean
+Optional. Set to true to charge this order as a fixed installment plan (Pay in N) instead of a single payment. The checkout then shows the fixed schedule and an authorisation consent the customer must accept before paying; the first installment is charged at checkout and the remaining installments are scheduled automatically to the saved card. Requires the Installments (Pay in N) capability to be enabled for your company.
+
+Important: This field is NOT included in the signature calculation, so it can be added without changing how the signature is generated.
+
+installments	
+integer [ 2 .. 24 ]
+The number of installments for the plan. Required when installments_enabled is true, and must match one of the installment counts your company offers (the cadence — e.g. monthly — is taken from your company's configured plan for that count). Rejected with a 422 validation error if the count is not offered, the account does not have the Installments capability enabled, or the order amount is below your configured installment minimum.
+
+Important: This field is NOT included in the signature calculation.
+
+redirection_url	
+string
+Optional. A per-request URL the customer is redirected to after payment. It MUST use HTTPS and be on the same domain as your integration's Origin (or your configured Redirect URL host). INCLUDED in the signature on v2. When omitted, your configured Redirect URL is used. Not supported for Mobile App integrations.
+
+webhook_url	
+string
+Optional. A per-request webhook URL that overrides your configured Webhook URL for this invoice only. It MUST use HTTPS and be on the same domain as your integration's Origin (or your configured Webhook URL host) — other domains are rejected. INCLUDED in the signature on v2. When omitted, your configured Webhook URL is used.
+
+signature	
+string
+HMAC-SHA256 signature that authenticates the request and protects it from tampering. This is the v2 init rule — it differs from v1, which does not sign order_details, redirection_url, or webhook_url.
+
+The four rules
+
+Signed fields — every field you send except token, signature, payment_mode, installments_enabled, and installments. An optional field you do not send is skipped (it contributes nothing).
+
+Order & separator — concatenate the values in this fixed order, with no separator. This is the server's canonical order, not the order of the keys in your JSON body:
+
+first_name, last_name, email, order_title, order_amount, address, city, country, state, currency, redirection_url, webhook_url, order_details
+
+Digest — HMAC-SHA256(concatenated, hash_token) over the raw bytes, then Base64 (standard Base64 of the raw digest — not hex, not base64url).
+
+Key — your secret hash token from the integration settings, never the public token (which only identifies the integration and is sent unsigned in the body).
+
+Code Examples:
+
+PHP:
+
+// Signed values, in the fixed order. Use '' for any optional field you don't send.
+$data = [
+    $first_name,
+    $last_name,
+    $email,
+    $order_title,
+    $order_amount,
+    $address,          // optional
+    $city,             // optional
+    $country,          // optional
+    $state,            // optional
+    $currency,
+    $redirection_url,  // optional (v2)
+    $webhook_url,      // optional (v2)
+    $order_details,    // optional (v2)
+];
+
+$signature = base64_encode(hash_hmac('sha256', implode('', $data), $hashToken, true));
+Node.js:
+
+const crypto = require('crypto');
+
+const data = [
+    first_name,
+    last_name,
+    email,
+    order_title,
+    order_amount,
+    address || '',
+    city || '',
+    country || '',
+    state || '',
+    currency,
+    redirection_url || '',
+    webhook_url || '',
+    order_details || ''
+];
+
+const signature = crypto
+    .createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+
+data = [
+    first_name,
+    last_name,
+    email,
+    order_title,
+    str(order_amount),
+    address or '',
+    city or '',
+    country or '',
+    state or '',
+    currency,
+    redirection_url or '',
+    webhook_url or '',
+    order_details or ''
+]
+
+digest = hmac.new(hash_token.encode('utf-8'), ''.join(data).encode('utf-8'), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode('utf-8')
+Notes:
+
+Use the hash token (secret), not the public token.
+No separator between values, and sign each value exactly as you send it (e.g. order_amount "250" must match the body).
+A field you omit and the same field sent as an empty string produce the same signature, so ... || '' is always safe.
+state is signed (right after country). A common cause of "Invalid signature" is signing a US/CA billing state that an older sample leaves out — include it here.
+The digest is Base64 of the raw HMAC bytes, not a hex string.
+Recalculate the signature for every request.
+Responses
+200 Success Response
+Response Headers
+Server	
+string
+Example: "nginx/1.25.2"
+Content-Type	
+string
+Example: "application/json"
+Transfer-Encoding	
+string
+Example: "chunked"
+Connection	
+string
+Example: "keep-alive"
+Vary	
+string
+Example: "Accept-Encoding"
+X-Powered-By	
+string
+Example: "PHP/8.2.29"
+Cache-Control	
+string
+Example: "no-cache, private"
+Date	
+string
+Example: "Fri, 01 Aug 2025 18:36:36 GMT"
+X-RateLimit-Limit	
+string
+Example: "60"
+X-RateLimit-Remaining	
+string
+Example: "59"
+phpdebugbar-id	
+string
+Example: "X9ec7a97c11edbad7ef82c6b1ac3224bb"
+Content-Encoding	
+string
+Example: "gzip"
+Response Schema: application/json
+object
+403 Error Response
+Callbacks
+postTransaction Status Update WebhookgetPayment Completion Return Callback (Website Redirect or App Deep Link)
+
+post
+/api/v2/integration/init
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"first_name": "john",
+"last_name": "doe",
+"email": "foe.bar@gmail.com",
+"order_title": "Test Order",
+"order_amount": "250",
+"address": "Baker Street",
+"city": "6th Of October",
+"country": "EG",
+"state": "Giza",
+"currency": "EGP",
+"order_details": "[{\"label\":\"Guest\",\"value\":\"John Doe\"},{\"label\":\"Check-In\",\"value\":\"Mon, Jun 09, 2026\"},{\"label\":\"Check-Out\",\"value\":\"Tue, Jun 10, 2026\"}]",
+"iframe": true,
+"payment_mode": "capture",
+"installments_enabled": true,
+"installments": 3,
+"redirection_url": "https://your-domain.com/payment/callback",
+"webhook_url": "https://your-domain.com/api/payment/webhook",
+"signature": "string"
+}
+Response samples
+200403
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"data": {
+"checkout_url": "https://pay.getpayin.com/integration/checkout?expires=1754075196&integration_id=2&invoice_id=40506&order_title=Test%20Order&signature=f18e03b546e60031152e7dd3e13de788727ac814b71118236fef6f688f3bef99",
+"invoice_id": 40506,
+"expires_at": "2025-08-01T19:06:36.205559Z"
+},
+"success": true
+}
+Callback payload samples
+Callback
+
+POST: Transaction Status Update Webhook
+POST: Transaction Status Update Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "invoice.paid",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "PAID",
+"message": "Payment completed successfully",
+"auth_code": "831000",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+VCC Charge
+Server-to-server Virtual Credit Card charge, authenticated by the same public_token + HMAC-SHA256 signature as the v2 init endpoint. Requires the VCC module and an active VCC subscription; sends raw card data, so call it only from a PCI-compliant backend.
+
+VCC Charge (v2)
+Base URL: https://pay.getpayin.com
+
+Charges a Virtual Credit Card (VCC) server-to-server using your integration's HMAC signature — no hosted checkout page and no customer redirect. It is the same charge as the dashboard VCC endpoint, only authenticated by the integration token + signature (identical scheme to /api/v2/integration/init), so the request is HMAC-secured.
+
+Requirements: Payment Integrations must be enabled for your company, the integration must be active, the VCC module must be enabled, and you must hold an active VCC subscription. Because raw card data is sent directly to this endpoint, call it only from your PCI-compliant backend — never from a browser or mobile client.
+
+Webhooks: a successful charge fires the vcc.payment_success webhook event and a declined one fires vcc.payment_failed — delivered exactly like the dashboard VCC charge.
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Idempotency-Key	
+string <= 64 characters
+Example: vcc-req-0001
+Optional. If the same key is replayed after a transient failure, the original charge result is returned instead of charging the card again. Max 64 characters.
+
+Request Body schema: application/json
+token	
+string
+The integration's authentication (public) token
+
+first_name	
+string
+Cardholder first name (letters and spaces)
+
+last_name	
+string
+Cardholder last name (letters and spaces)
+
+email	
+string
+Customer email [OPTIONAL]
+
+phone	
+string
+Customer phone [OPTIONAL]
+
+currency_id	
+integer
+PayLink currency id to charge in (the same id used by the VCC and Invoice APIs)
+
+price	
+number
+Amount to charge in major units; must be greater than 0
+
+product	
+string
+Product / order description shown on the invoice
+
+reference_number	
+string
+Your own reference for this charge [OPTIONAL]
+
+card_number	
+string
+Card number (PAN)
+
+card_expiry_month	
+string
+Card expiry month (MM)
+
+card_expiry_year	
+string
+Card expiry year (YYYY)
+
+card_cvv	
+string
+Card verification value [OPTIONAL]
+
+country	
+string
+Billing country as an ISO 3166-1 alpha-2 code (e.g. EG, US, CA)
+
+address	
+string
+Billing address line
+
+city	
+string
+Billing city
+
+us_state	
+string
+2-letter US state code. Required and signed only when country = US.
+
+canada_state	
+string
+2-letter Canadian province code. Required and signed only when country = CA.
+
+postal_code	
+string
+Postal / ZIP code. Required and signed only when country = US or CA.
+
+signature	
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: first_name, last_name, email, phone, currency_id, price, product, reference_number, card_number, card_expiry_month, card_expiry_year, card_cvv, country, address, city, us_state, canada_state, postal_code. Send us_state + postal_code only when country = US, canada_state + postal_code only when country = CA.
+
+PHP:
+
+$data = [
+    $first_name,
+    $last_name,
+    $email ?? '',
+    $phone ?? '',
+    $currency_id,
+    $price,
+    $product,
+    $reference_number ?? '',
+    $card_number,
+    $card_expiry_month,
+    $card_expiry_year,
+    $card_cvv ?? '',
+    $country,
+    $address,
+    $city,
+    $us_state ?? '',
+    $canada_state ?? '',
+    $postal_code ?? '',
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    first_name,
+    last_name,
+    email || '',
+    phone || '',
+    currency_id,
+    price,
+    product,
+    reference_number || '',
+    card_number,
+    card_expiry_month,
+    card_expiry_year,
+    card_cvv || '',
+    country,
+    address,
+    city,
+    us_state || '',
+    canada_state || '',
+    postal_code || ''
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    first_name,
+    last_name,
+    email or '',
+    phone or '',
+    str(currency_id),
+    str(price),
+    product,
+    reference_number or '',
+    card_number,
+    card_expiry_month,
+    card_expiry_year,
+    card_cvv or '',
+    country,
+    address,
+    city,
+    us_state or '',
+    canada_state or '',
+    postal_code or ''
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+200 Charge approved
+Response Schema: application/json
+object
+403 VCC module not enabled, or no active VCC subscription
+422 Charge declined, or a validation / signature error
+Callbacks
+postVCC Charge Result Webhook
+
+post
+/api/v2/integration/vcc/charge
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"first_name": "Jane",
+"last_name": "Doe",
+"email": "jane.doe@example.com",
+"phone": "+201000000000",
+"currency_id": 1,
+"price": 100,
+"product": "Order #1234",
+"reference_number": "REF-1234",
+"card_number": "4111111111111111",
+"card_expiry_month": "12",
+"card_expiry_year": "2030",
+"card_cvv": "123",
+"country": "EG",
+"address": "Baker Street",
+"city": "Cairo",
+"us_state": "NY",
+"canada_state": "ON",
+"postal_code": "10001",
+"signature": "string"
+}
+Response samples
+200403422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"message": "Payment successful",
+"data": {
+"invoice_id": 40510,
+"invoice_number": "INV-000123",
+"amount": 10000,
+"currency": "USD",
+"paid_status": "PAID"
+}
+}
+Callback payload samples
+Callback
+POST: VCC Charge Result Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "vcc.payment_success",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "PAID",
+"message": "Payment successful",
+"auth_code": "831000",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Payment Operations
+Post-payment operations including void, refund, settle (capture), reverse authorization, and gateway status checks. These endpoints use the same HMAC-SHA256 signature mechanism as the init endpoint, with the hash_token from your integration settings.
+
+Void Payment
+Voids a paid invoice within 24 hours of payment. The full payment is reversed and the invoice returns to unpaid state.
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's authentication token
+
+invoice_id
+required
+integer
+The unique identifier of the invoice to void
+
+signature
+required
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: invoice_id.
+
+PHP:
+
+$data = [
+    $invoice_id,
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    invoice_id
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    str(invoice_id)
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+200 Payment voided successfully
+Response Schema: application/json
+data	
+object
+success	
+boolean
+message	
+string
+422 Validation or business logic error
+Callbacks
+postInvoice Voided Webhook
+
+post
+/api/integration/void
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"invoice_id": 40506,
+"signature": "string"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"data": {
+"invoice_id": 40506,
+"paid_status": "VOIDED",
+"auth_code": "831000"
+},
+"success": true,
+"message": "Invoice has been voided successfully."
+}
+Callback payload samples
+Callback
+POST: Invoice Voided Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "invoice.voided",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "VOIDED",
+"message": "Invoice has been voided successfully.",
+"auth_code": "831000",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Refund Payment
+Refunds a paid or partially refunded invoice. Supports partial refunds by specifying the amount.
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Idempotency-Key	
+string <= 64 characters
+Example: refund-req-0001
+Optional. Replaying the same key returns the original refund result instead of refunding again. Max 64 characters.
+
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's authentication token
+
+invoice_id
+required
+integer
+The unique identifier of the invoice to refund
+
+amount
+required
+number >= 0.01
+The refund amount in the invoice currency. Must be at least 0.01.
+
+signature
+required
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: invoice_id, amount.
+
+PHP:
+
+$data = [
+    $invoice_id,
+    $amount,
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    invoice_id,
+    amount
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    str(invoice_id),
+    str(amount)
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+200 Payment refunded successfully
+Response Schema: application/json
+data	
+object
+success	
+boolean
+message	
+string
+422 Validation or business logic error
+Callbacks
+postInvoice Refunded Webhook
+
+post
+/api/integration/refund
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"invoice_id": 40506,
+"amount": 100,
+"signature": "string"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"data": {
+"invoice_id": 40506,
+"paid_status": "PARTIALLY_REFUNDED",
+"auth_code": "831000",
+"refund_amount": 1276.94
+},
+"success": true,
+"message": "Partial refund processed successfully."
+}
+Callback payload samples
+Callback
+POST: Invoice Refunded Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "invoice.refunded",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "PARTIALLY_REFUNDED",
+"message": "Partial refund processed successfully.",
+"auth_code": "831000",
+"refund_amount": 1276.94,
+"refund_currency": "USD",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Settle (Capture) Payment
+Captures (settles) a previously authorized payment. Only available for invoices created with payment_mode: authorize. Supports partial captures.
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's authentication token
+
+invoice_id
+required
+integer
+The unique identifier of the authorized invoice to settle
+
+amount
+required
+number >= 0.01
+The capture amount in the invoice currency. Must be at least 0.01.
+
+signature
+required
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: invoice_id, amount.
+
+PHP:
+
+$data = [
+    $invoice_id,
+    $amount,
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    invoice_id,
+    amount
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    str(invoice_id),
+    str(amount)
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+200 Payment settled (captured) successfully
+Response Schema: application/json
+data	
+object
+success	
+boolean
+message	
+string
+422 Validation or business logic error
+Callbacks
+postPayment Captured (Settled) Webhook
+
+post
+/api/integration/settle
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"invoice_id": 40506,
+"amount": 250,
+"signature": "string"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"data": {
+"invoice_id": 40506,
+"paid_status": "PAID",
+"auth_code": "831000"
+},
+"success": true,
+"message": "Invoice has been settled successfully."
+}
+Callback payload samples
+Callback
+POST: Payment Captured (Settled) Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "invoice.paid",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "PAID",
+"message": "Payment Successful",
+"auth_code": "831000",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Reverse Authorization
+Reverses (voids) a previously authorized payment that has not yet been captured. Only available for invoices created with payment_mode: authorize that have not been settled.
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's authentication token
+
+invoice_id
+required
+integer
+The unique identifier of the authorized invoice to reverse
+
+signature
+required
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: invoice_id.
+
+PHP:
+
+$data = [
+    $invoice_id,
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    invoice_id
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    str(invoice_id)
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+200 Authorization reversed successfully
+Response Schema: application/json
+data	
+object
+success	
+boolean
+message	
+string
+422 Validation or business logic error
+Callbacks
+postAuthorization Reversed Webhook
+
+post
+/api/integration/reverse-authorization
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"invoice_id": 40506,
+"signature": "string"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"data": {
+"invoice_id": 40506,
+"paid_status": "REVERSED",
+"auth_code": "831000"
+},
+"success": true,
+"message": "Authorization has been reversed successfully."
+}
+Callback payload samples
+Callback
+POST: Authorization Reversed Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "invoice.authorization_reversed",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "REVERSED",
+"message": "Authorization reversed successfully.",
+"auth_code": "831000",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Check Gateway Status
+Checks the payment status directly with the payment gateway and syncs the invoice status. Useful when webhook delivery fails or you need to verify the current state.
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's authentication token
+
+invoice_id
+required
+integer
+The unique identifier of the invoice to check
+
+signature
+required
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: invoice_id.
+
+PHP:
+
+$data = [
+    $invoice_id,
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    invoice_id
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    str(invoice_id)
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+200 Gateway status checked successfully
+Response Schema: application/json
+data	
+object
+success	
+boolean
+message	
+string
+422 Validation or business logic error
+
+post
+/api/integration/check-status
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"invoice_id": 40506,
+"signature": "string"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"data": {
+"invoice_id": 40506,
+"paid_status": "PAID",
+"auth_code": "831000"
+},
+"success": true,
+"message": "Payment confirmed at the gateway. Invoice has been marked as paid."
+}
+Card Tokenization
+Vault a customer's card via secure network tokenization and charge the saved token later (MIT or CIT). Same HMAC-SHA256 auth as the other integration endpoints. Raw-PAN tokenization must be called from a PCI-compliant backend.
+
+Tokenize a card (v2)
+Base URL: https://pay.getpayin.com
+
+Tokenizes a customer's card through secure network tokenization and returns an opaque card token. The raw PAN is sent server-to-server, network-tokenized, and never stored by PayLink — only the brand and last four digits are kept. Charge the returned token later with /api/v2/integration/tokens/charge.
+
+Because raw card data is sent, call this only from your PCI-compliant backend.
+
+Authentication: the same HMAC-SHA256 scheme as /api/v2/integration/init. Concatenate the field values below in the order listed (excluding token and signature), HMAC-SHA256 them with your integration's hash_token, and base64-encode the result into signature. Omitted optional fields contribute an empty string.
+
+Requirement: this capability must be enabled for your account (contact the business team). While it is off these endpoints return HTTP 403 with a message telling the integrator the product is not enabled and to contact the business team.
+
+Request Body schema: application/json
+required
+first_name	
+string
+Cardholder first name (letters and spaces)
+
+last_name	
+string
+Cardholder last name (letters and spaces)
+
+email	
+string
+Customer email [OPTIONAL]
+
+customer_reference	
+string
+Your own identifier for this customer (groups cards under one customer profile) [OPTIONAL]
+
+external_reference	
+string
+Idempotency reference; repeating it returns the same token [OPTIONAL]
+
+card_number	
+string
+Card number (PAN)
+
+card_expiry_month	
+string
+Card expiry month (MM)
+
+card_expiry_year	
+string
+Card expiry year (YYYY)
+
+card_cvv	
+string
+Card verification value [OPTIONAL]
+
+country	
+string
+Billing country as an ISO 3166-1 alpha-2 code
+
+address	
+string
+Billing address line
+
+city	
+string
+Billing city
+
+us_state	
+string
+US state (required when country is US) [OPTIONAL]
+
+canada_state	
+string
+Canadian province (required when country is CA) [OPTIONAL]
+
+postal_code	
+string
+Postal code (required for US/CA) [OPTIONAL]
+
+token	
+string
+The integration's authentication (public) token
+
+signature	
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: first_name, last_name, email, customer_reference, external_reference, card_number, card_expiry_month, card_expiry_year, card_cvv, country, address, city, us_state, canada_state, postal_code. Send us_state + postal_code only when country = US, canada_state + postal_code only when country = CA.
+
+PHP:
+
+$data = [
+    $first_name,
+    $last_name,
+    $email ?? '',
+    $customer_reference ?? '',
+    $external_reference ?? '',
+    $card_number,
+    $card_expiry_month,
+    $card_expiry_year,
+    $card_cvv ?? '',
+    $country,
+    $address,
+    $city,
+    $us_state ?? '',
+    $canada_state ?? '',
+    $postal_code ?? '',
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    first_name,
+    last_name,
+    email || '',
+    customer_reference || '',
+    external_reference || '',
+    card_number,
+    card_expiry_month,
+    card_expiry_year,
+    card_cvv || '',
+    country,
+    address,
+    city,
+    us_state || '',
+    canada_state || '',
+    postal_code || ''
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    first_name,
+    last_name,
+    email or '',
+    customer_reference or '',
+    external_reference or '',
+    card_number,
+    card_expiry_month,
+    card_expiry_year,
+    card_cvv or '',
+    country,
+    address,
+    city,
+    us_state or '',
+    canada_state or '',
+    postal_code or ''
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+201 Card tokenized
+422 Validation, signature, disabled-integration, unsupported-brand, or tokenization error
+
+post
+/api/v2/integration/tokens/card
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"first_name": "Jane",
+"last_name": "Doe",
+"email": "jane.doe@example.com",
+"customer_reference": "cust-42",
+"external_reference": "tok-req-1",
+"card_number": "4111111111111111",
+"card_expiry_month": "12",
+"card_expiry_year": "2030",
+"card_cvv": "123",
+"country": "EG",
+"address": "Baker Street",
+"city": "Cairo",
+"us_state": "CA",
+"canada_state": "ON",
+"postal_code": "10001",
+"token": "string",
+"signature": "string"
+}
+Response samples
+201422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"data": {
+"token": "6650f0c3a1b2c",
+"card": {},
+"status": "active"
+}
+}
+Charge a card token (v2)
+Base URL: https://pay.getpayin.com
+
+Charges a previously vaulted card token server-to-server. Set initiator to merchant for an unattended merchant-initiated (MIT) rebill of the stored credential, or customer for a customer-initiated (CIT) card-on-file charge. A token can only be charged by the integration that created it.
+
+Webhooks: a successful charge fires card_token.charge_succeeded, a declined one fires card_token.charge_failed.
+
+Authentication: the same HMAC-SHA256 scheme as /api/v2/integration/init. Concatenate the field values below in the order listed (excluding token and signature), HMAC-SHA256 them with your integration's hash_token, and base64-encode the result into signature. Omitted optional fields contribute an empty string.
+
+Billing is optional. Omit the cardholder name and address to reuse the customer captured when the card was tokenized (the gateway falls back to the billing stored on the token), so a token can be charged with only card_token, initiator, currency, price, and product. Send the billing fields only to override the stored billing.
+
+Requirement: this capability must be enabled for your account (contact the business team). While it is off these endpoints return HTTP 403 with a message telling the integrator the product is not enabled and to contact the business team.
+
+header Parameters
+Idempotency-Key	
+string <= 64 characters
+Example: tok-req-0001
+Optional. If the same key is replayed after a transient failure, the original charge result is returned instead of charging the stored card again. Max 64 characters.
+
+Request Body schema: application/json
+required
+card_token	
+string
+The opaque token returned by /tokens/card
+
+initiator	
+string
+merchant (MIT rebill) or customer (CIT card-on-file)
+
+first_name	
+string
+Cardholder first name (optional — reused from the token when omitted)
+
+last_name	
+string
+Cardholder last name (optional — reused from the token when omitted)
+
+email	
+string
+Customer email [OPTIONAL] (optional — reused from the token when omitted)
+
+currency	
+string
+ISO 4217 currency code to charge in (e.g. EGP, USD, EUR, GBP)
+
+price	
+number
+Amount to charge in major units; must be greater than 0
+
+product	
+string
+Product / order description shown on the invoice
+
+reference_number	
+string
+Your own reference for this charge [OPTIONAL]
+
+country	
+string
+Billing country (ISO 3166-1 alpha-2) (optional — reused from the token when omitted)
+
+address	
+string
+Billing address line (optional — reused from the token when omitted)
+
+city	
+string
+Billing city (optional — reused from the token when omitted)
+
+us_state	
+string
+US state (required when country = US) [OPTIONAL]
+
+canada_state	
+string
+Canadian province (required when country = CA) [OPTIONAL]
+
+postal_code	
+string
+Postal code (required for US/CA) [OPTIONAL]
+
+token	
+string
+The integration's authentication (public) token
+
+signature	
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: card_token, initiator, first_name, last_name, email, currency, price, product, reference_number, country, address, city, us_state, canada_state, postal_code. Send us_state + postal_code only when country = US, canada_state + postal_code only when country = CA.
+
+PHP:
+
+$data = [
+    $card_token,
+    $initiator,
+    $first_name,
+    $last_name,
+    $email ?? '',
+    $currency,
+    $price,
+    $product,
+    $reference_number ?? '',
+    $country,
+    $address,
+    $city,
+    $us_state ?? '',
+    $canada_state ?? '',
+    $postal_code ?? '',
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    card_token,
+    initiator,
+    first_name,
+    last_name,
+    email || '',
+    currency,
+    price,
+    product,
+    reference_number || '',
+    country,
+    address,
+    city,
+    us_state || '',
+    canada_state || '',
+    postal_code || ''
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    card_token,
+    initiator,
+    first_name,
+    last_name,
+    email or '',
+    currency,
+    str(price),
+    product,
+    reference_number or '',
+    country,
+    address,
+    city,
+    us_state or '',
+    canada_state or '',
+    postal_code or ''
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+201 Charge successful
+422 Declined, unknown/foreign token, invalid signature, or validation error
+Callbacks
+postCard Token Charge Result Webhook
+
+post
+/api/v2/integration/tokens/charge
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"card_token": "6650f0c3a1b2c",
+"initiator": "merchant",
+"first_name": "Jane",
+"last_name": "Doe",
+"email": "jane.doe@example.com",
+"currency": "EGP",
+"price": 100,
+"product": "Order #1234",
+"reference_number": "REF-1234",
+"country": "EG",
+"address": "Baker Street",
+"city": "Cairo",
+"us_state": "NY",
+"canada_state": "ON",
+"postal_code": "10001",
+"token": "string",
+"signature": "string"
+}
+Response samples
+201422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"data": {
+"invoice_id": 123,
+"invoice_number": "INV-000123",
+"amount": 100,
+"currency": "EGP",
+"paid_status": "paid",
+"card_token": "6650f0c3a1b2c"
+}
+}
+Callback payload samples
+Callback
+POST: Card Token Charge Result Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "card_token.charge_succeeded",
+"success": 1,
+"invoice_id": 40506,
+"invoice_status": "PAID",
+"message": "Payment successful",
+"auth_code": "831000",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Revoke a card token (v2)
+Base URL: https://pay.getpayin.com
+
+Revokes a card token so it can no longer be charged and deletes the stored card from the vault (the Payment Instrument and Customer, plus the card reference when no other token still uses it). Idempotent — revoking an already-revoked or unknown token still returns success. A token can only be revoked by the integration that created it.
+
+Authentication: the same HMAC-SHA256 scheme as /api/v2/integration/init. Concatenate the field values below in the order listed (excluding token and signature), HMAC-SHA256 them with your integration's hash_token, and base64-encode the result into signature. Omitted optional fields contribute an empty string.
+
+Requirement: this capability must be enabled for your account (contact the business team). While it is off these endpoints return HTTP 403 with a message telling the integrator the product is not enabled and to contact the business team.
+
+Request Body schema: application/json
+required
+card_token	
+string
+The opaque token to revoke
+
+token	
+string
+The integration's authentication (public) token
+
+signature	
+string
+HMAC-SHA256 signature authenticating the request — identical scheme to /api/v2/integration/init, using the hash token from your integration settings.
+
+How to generate:
+
+Concatenate the signed field values (everything except token and signature) in the exact order below, with no separator. Include the optional fields you send; for any field you omit, concatenate an empty string.
+HMAC-SHA256 the concatenated string with your secret hash token.
+Base64-encode the digest.
+Field order: card_token.
+
+PHP:
+
+$data = [
+    $card_token,
+];
+$signature = base64_encode(
+    hash_hmac('sha256', implode('', $data), $hashToken, true)
+);
+Node.js:
+
+const crypto = require('crypto');
+const data = [
+    card_token
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(data.join(''))
+    .digest('base64');
+Python:
+
+import hmac, hashlib, base64
+data = [
+    card_token
+]
+digest = hmac.new(hash_token.encode(), ''.join(data).encode(), hashlib.sha256).digest()
+signature = base64.b64encode(digest).decode()
+Notes:
+
+Use the hash token (secret), not the public token.
+Numeric values are concatenated exactly as sent — make sure the string form matches your submitted value.
+Recalculate the signature for every request.
+Responses
+200 Token revoked
+Response Schema: application/json
+object
+
+post
+/api/v2/integration/tokens/revoke
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"card_token": "6650f0c3a1b2c",
+"token": "string",
+"signature": "string"
+}
+Response samples
+200
+Content type
+application/json
+
+Copy
+{
+"success": true,
+"message": "Token revoked."
+}
+Recurring Subscriptions
+Subscription mandate lifecycle endpoints. Create a mandate with the customer's first payment (card vaulted, 3DS-authenticated), then query status or manage the lifecycle (cancel/pause/resume). All endpoints use the same public_token + HMAC-SHA256 signature authentication as the v2 init endpoint. The recurring payments feature must be enabled for your account.
+
+Webhooks. Subscription events (subscription.activated, subscription.charged, subscription.payment_failed, subscription.suspended, subscription.cancelled, subscription.completed) are POSTed to your webhook URL. The JSON payload includes event, success, invoice_id, invoice_status, message, mandate_id, external_reference, subscription_status, an optional auth_code (the gateway approval code, present only when available) and signature. Correlate a charge to its subscription using mandate_id or external_reference — not invoice_id (each billing cycle bills a new invoice). Verify the signature as Base64(HMAC-SHA256) over the concatenated payload values except event, auth_code and signature, in order: success, invoice_id, invoice_status, message, mandate_id, external_reference, subscription_status.
+
+Full step-by-step guide: see RECURRING_INTEGRATION_GUIDE.md in this documentation folder.
+
+Create Recurring Mandate (v2)
+Creates a subscription mandate and the first setup invoice, returning a signed checkout_url. The first charge is customer-present (3DS-authenticated, card vaulted); subsequent charges run unattended on the configured cadence.
+
+Availability: Recurring payments must be enabled for your account.
+
+Idempotency: The dedup key is external_reference when provided; otherwise the Idempotency-Key request header is used. Deduplication is scoped to (company, integration, key). A replay with the same terms returns the same mandate_id and a fresh checkout_url. A replay with different terms returns 409 Conflict; the compared terms are order_amount, currency, cadence_interval, cadence_count, total_cycles, and end_date. Reusing a reference whose subscription is cancelled, failed, or completed creates a new subscription (the old mandate is preserved).
+
+Base URL: https://pay.getpayin.com
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Idempotency-Key	
+string
+Example: sub_abc123
+Optional dedup key used when external_reference is not in the request body. If the same key is replayed the original mandate and checkout_url are returned unchanged.
+
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's public authentication token.
+
+first_name
+required
+string
+Subscriber's first name.
+
+last_name
+required
+string
+Subscriber's last name.
+
+email
+required
+string <email>
+Subscriber's email address.
+
+order_title
+required
+string
+Subscription plan title shown to the subscriber at checkout.
+
+order_amount
+required
+number
+Amount charged per cycle (must be greater than 0).
+
+currency
+required
+string
+ISO currency code (e.g. EGP, USD, EUR). Must be a currency supported by your company.
+
+cadence_interval
+required
+string
+Enum: "day" "week" "month" "year"
+The interval unit for the billing cadence.
+
+cadence_count
+required
+integer >= 1
+Number of interval units between charges. E.g. cadence_count=1 with cadence_interval=month = every month; cadence_count=3 = every quarter.
+
+total_cycles	
+integer or null >= 1
+Total number of billing cycles including the setup charge. When null or omitted the subscription continues until cancelled.
+
+end_date	
+string or null <date>
+Optional hard end date for the subscription (must be a future date). No charge will occur after this date.
+
+consent_text
+required
+string <= 2000 characters
+The exact subscription terms text that the cardholder sees and accepts at checkout. Required for regulatory/mandate compliance. Max 2000 characters.
+
+external_reference	
+string or null <= 255 characters
+Your own subscription identifier. Used as the idempotency key — repeated requests with the same value return the original mandate. When omitted the Idempotency-Key header is used instead.
+
+redirection_url	
+string or null <uri>
+Optional HTTPS redirect URL for the customer after the first checkout. Must be on your integration's registered domain. Included in the signature when provided.
+
+webhook_url	
+string or null <uri>
+Optional per-request webhook URL override. Must be HTTPS on your integration's registered domain. Included in the signature when provided.
+
+signature
+required
+string
+HMAC-SHA256 signature for request verification.
+
+How to generate:
+
+Take all validated request fields in rule-definition order, EXCLUDING token, signature, and payment_mode
+Concatenate with no delimiter in this exact order: first_name + last_name + email + order_title + order_amount + currency + cadence_interval + cadence_count + [total_cycles if provided] + [end_date if provided] + consent_text + [external_reference if provided] + [redirection_url if provided] + [webhook_url if provided]
+Nullable fields are included ONLY when present in the request (absent fields are skipped)
+HMAC-SHA256 over the concatenated string using your hash_token
+Base64-encode the raw HMAC bytes
+PHP:
+
+// Build ordered field array, skip null/absent fields
+$fields = array_values(array_filter(
+    [$first_name, $last_name, $email, $order_title, $order_amount,
+     $currency, $cadence_interval, $cadence_count,
+     $total_cycles ?? null, $end_date ?? null, $consent_text,
+     $external_reference ?? null, $redirection_url ?? null, $webhook_url ?? null],
+    fn($v) => $v !== null
+));
+$signature = base64_encode(hash_hmac('sha256', implode('', $fields), $hashToken, true));
+Node.js:
+
+const crypto = require('crypto');
+const fields = [
+    first_name, last_name, email, order_title, order_amount,
+    currency, cadence_interval, cadence_count,
+    ...(total_cycles != null ? [total_cycles] : []),
+    ...(end_date != null ? [end_date] : []),
+    consent_text,
+    ...(external_reference != null ? [external_reference] : []),
+    ...(redirection_url != null ? [redirection_url] : []),
+    ...(webhook_url != null ? [webhook_url] : []),
+];
+const signature = crypto.createHmac('sha256', hashToken)
+    .update(fields.join('')).digest('base64');
+Python:
+
+import hmac, hashlib, base64
+fields = [f for f in [
+    first_name, last_name, email, order_title, str(order_amount),
+    currency, cadence_interval, str(cadence_count),
+    str(total_cycles) if total_cycles is not None else None,
+    end_date if end_date is not None else None,
+    consent_text,
+    external_reference if external_reference is not None else None,
+    redirection_url if redirection_url is not None else None,
+    webhook_url if webhook_url is not None else None,
+] if f is not None]
+signature = base64.b64encode(
+    hmac.new(hash_token.encode(), ''.join(fields).encode(), hashlib.sha256).digest()
+).decode()
+Responses
+200 Mandate created successfully. Redirect the subscriber to checkout_url for the first payment.
+Response Schema: application/json
+success	
+boolean
+data	
+object
+409 The external_reference / Idempotency-Key was reused with different subscription terms.
+422 Validation error or signature mismatch.
+Callbacks
+postSubscription Status Update Webhook
+
+post
+/api/v2/integration/recurring/init
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "string",
+"first_name": "Jane",
+"last_name": "Doe",
+"email": "jane.doe@example.com",
+"order_title": "Monthly Premium Plan",
+"order_amount": 99.99,
+"currency": "EGP",
+"cadence_interval": "month",
+"cadence_count": 1,
+"total_cycles": 12,
+"end_date": "2027-01-01",
+"consent_text": "By subscribing you authorise monthly charges of EGP 99.99 until cancelled.",
+"external_reference": "sub_customer_789",
+"redirection_url": "https://your-domain.com/subscription/return",
+"webhook_url": "https://your-domain.com/api/subscription/webhook",
+"signature": "string"
+}
+Response samples
+200409422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"data": {
+"checkout_url": "https://pay.getpayin.com/integration/checkout?expires=1754075196&integration_id=2&invoice_id=40601&order_title=Monthly+Premium+Plan&signature=abc123",
+"mandate_id": "mnd_01j9abc123def456",
+"invoice_id": 40601,
+"expires_at": "2025-08-01T19:06:36.205559Z"
+}
+}
+Callback payload samples
+Callback
+POST: Subscription Status Update Webhook
+Content type
+application/json
+
+Copy
+{
+"event": "subscription.charged",
+"success": 1,
+"invoice_id": 40601,
+"invoice_status": "PAID",
+"message": "Subscription cycle charged successfully",
+"signature": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+}
+Get Mandate Status (v2)
+Returns the current state of a recurring mandate.
+
+Signature (mandate action): base64(HMAC-SHA256(mandate_uid, hash_token)) — the HMAC input is the mandate UID string only (not any request fields).
+
+path Parameters
+mandate
+required
+string
+Example: mnd_01j9abc123def456
+The mandate UID returned by POST /api/v2/integration/recurring/init (data.mandate_id).
+
+query Parameters
+token
+required
+string
+The integration's public authentication token.
+
+signature
+required
+string
+HMAC-SHA256 signature for request verification. Mandate action signature differs from the init signature: only the mandate UID (path parameter) is signed, not the request body fields.
+
+How to generate:
+
+base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true))
+PHP:
+
+$signature = base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true));
+Node.js:
+
+const crypto = require('crypto');
+const signature = crypto.createHmac('sha256', hashToken).update(mandateUid).digest('base64');
+Python:
+
+import hmac, hashlib, base64
+signature = base64.b64encode(
+    hmac.new(hash_token.encode(), mandate_uid.encode(), hashlib.sha256).digest()
+).decode()
+header Parameters
+Accept
+required
+string
+Example: application/json
+Responses
+200 Mandate status retrieved successfully.
+Response Schema: application/json
+success	
+boolean
+data	
+object
+422 Validation error or mandate not found / action not allowed.
+
+get
+/api/v2/integration/recurring/{mandate}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"data": {
+"mandate_id": "mnd_01j9abc123def456",
+"status": "active",
+"amount": 9999,
+"completed_cycles": 3,
+"total_cycles": 12,
+"next_charge_at": "2025-09-01T00:00:00.000000Z"
+}
+}
+Cancel Mandate (v2)
+Cancels an active or paused recurring mandate. No further charges will occur. A subscription.cancelled webhook event is dispatched.
+
+Signature: HMAC-SHA256 of the mandate UID only (see Get Mandate Status for code examples).
+
+path Parameters
+mandate
+required
+string
+Example: mnd_01j9abc123def456
+The mandate UID returned by POST /api/v2/integration/recurring/init (data.mandate_id).
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's public authentication token.
+
+signature
+required
+string
+HMAC-SHA256 signature for request verification. Mandate action signature differs from the init signature: only the mandate UID (path parameter) is signed, not the request body fields.
+
+How to generate:
+
+base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true))
+PHP:
+
+$signature = base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true));
+Node.js:
+
+const crypto = require('crypto');
+const signature = crypto.createHmac('sha256', hashToken).update(mandateUid).digest('base64');
+Python:
+
+import hmac, hashlib, base64
+signature = base64.b64encode(
+    hmac.new(hash_token.encode(), mandate_uid.encode(), hashlib.sha256).digest()
+).decode()
+Responses
+200 Mandate cancelled successfully.
+Response Schema: application/json
+success	
+boolean
+data	
+object
+422 Validation error or mandate not found / action not allowed.
+
+post
+/api/v2/integration/recurring/{mandate}/cancel
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "{{auth_token}}",
+"signature": "auto-generated"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"data": {
+"cancelled": true,
+"status": "cancelled"
+}
+}
+Pause Mandate (v2)
+Pauses an active recurring mandate. Scheduled charges are suspended until the mandate is resumed. A subscription.suspended webhook event is dispatched.
+
+Signature: HMAC-SHA256 of the mandate UID only.
+
+path Parameters
+mandate
+required
+string
+Example: mnd_01j9abc123def456
+The mandate UID returned by POST /api/v2/integration/recurring/init (data.mandate_id).
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's public authentication token.
+
+signature
+required
+string
+HMAC-SHA256 signature for request verification. Mandate action signature differs from the init signature: only the mandate UID (path parameter) is signed, not the request body fields.
+
+How to generate:
+
+base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true))
+PHP:
+
+$signature = base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true));
+Node.js:
+
+const crypto = require('crypto');
+const signature = crypto.createHmac('sha256', hashToken).update(mandateUid).digest('base64');
+Python:
+
+import hmac, hashlib, base64
+signature = base64.b64encode(
+    hmac.new(hash_token.encode(), mandate_uid.encode(), hashlib.sha256).digest()
+).decode()
+Responses
+200 Mandate paused successfully.
+Response Schema: application/json
+success	
+boolean
+data	
+object
+422 Validation error or mandate not found / action not allowed.
+
+post
+/api/v2/integration/recurring/{mandate}/pause
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "{{auth_token}}",
+"signature": "auto-generated"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"data": {
+"paused": true,
+"status": "paused"
+}
+}
+Resume Mandate (v2)
+Resumes a paused recurring mandate. Scheduled charges will restart on the next cadence. A subscription.activated webhook event is dispatched.
+
+Signature: HMAC-SHA256 of the mandate UID only.
+
+path Parameters
+mandate
+required
+string
+Example: mnd_01j9abc123def456
+The mandate UID returned by POST /api/v2/integration/recurring/init (data.mandate_id).
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's public authentication token.
+
+signature
+required
+string
+HMAC-SHA256 signature for request verification. Mandate action signature differs from the init signature: only the mandate UID (path parameter) is signed, not the request body fields.
+
+How to generate:
+
+base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true))
+PHP:
+
+$signature = base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true));
+Node.js:
+
+const crypto = require('crypto');
+const signature = crypto.createHmac('sha256', hashToken).update(mandateUid).digest('base64');
+Python:
+
+import hmac, hashlib, base64
+signature = base64.b64encode(
+    hmac.new(hash_token.encode(), mandate_uid.encode(), hashlib.sha256).digest()
+).decode()
+Responses
+200 Mandate resumed successfully.
+Response Schema: application/json
+success	
+boolean
+data	
+object
+422 Validation error or mandate not found / action not allowed.
+
+post
+/api/v2/integration/recurring/{mandate}/resume
+Request samples
+Payload
+Content type
+application/json
+
+Copy
+{
+"token": "{{auth_token}}",
+"signature": "auto-generated"
+}
+Response samples
+200422
+Content type
+application/json
+
+Copy
+Expand allCollapse all
+{
+"success": true,
+"data": {
+"resumed": true,
+"status": "active"
+}
+}
+Pay Installment Early (v2)
+Charges an installment ahead of schedule on an active installment (Pay in N) plan. The customer can pay the next installment or the entire remaining balance early.
+
+Returns a signed hosted-checkout URL (valid for 60 minutes) that carries the chosen intent — open it for the customer to complete the on-session payment. After the payment succeeds the plan advances automatically: next records the paid cycle and re-anchors the following scheduled charge to the cadence; remaining settles every outstanding cycle and completes the plan. The request is refused (422) when the plan is not active, or when the target cycle is already being charged by the scheduler, so an early payment can never double-charge a cycle.
+
+Signature: HMAC-SHA256 of the mandate UID only (see Get Mandate Status for code examples).
+
+path Parameters
+mandate
+required
+string
+Example: mnd_01j9abc123def456
+The mandate UID returned by POST /api/v2/integration/recurring/init (data.mandate_id).
+
+header Parameters
+Accept
+required
+string
+Example: application/json
+Content-Type
+required
+string
+Example: application/json
+Request Body schema: application/json
+required
+token
+required
+string
+The integration's public authentication token.
+
+intent
+required
+string
+Enum: "next" "remaining"
+Which slice of the plan to charge early:
+
+next — the next scheduled installment only. The plan advances one cycle and the following charge is re-anchored to the cadence.
+remaining — the entire outstanding balance across all remaining installments, settling the plan in a single payment.
+This field is NOT part of the signature calculation.
+
+signature
+required
+string
+HMAC-SHA256 signature for request verification. Mandate action signature differs from the init signature: only the mandate UID (path parameter) is signed, not the request body fields.
+
+How to generate:
+
+base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true))
+PHP:
+
+$signature = base64_encode(hash_hmac('sha256', $mandateUid, $hashToken, true));
+Node.js:
+
+const crypto = require('crypto');
+const signature = crypto.createHmac('sha256', hashToken).update(mandateUid).digest('base64');
+Python:
+
+import hmac, hashlib, base64
+signature = base64.b64encode(
+    hmac.new(hash_token.encode(), mandate_uid.encode(), hashlib.sha256).digest()
+).decode()
+Responses
+200 Early payment is allowed. Open checkout_url for the customer to complete the on-session payment.
+Response Schema: application/json
+success	
+boolean
+data	
+object
+403 The Installments (Pay in N) capability is not enabled for the account.
+422 The intent is missing/invalid, the mandate is not an installment plan, or the target cycle cannot be paid early (plan inactive, already completed, or the cycle is already being charged by the scheduler).

@@ -1,0 +1,2 @@
+
+Error: Request to https://secretmanager.googleapis.com/v1/projects/zspeed/secrets/SMTP_USER/versions/latest:access had HTTP Error: 403, Permission 'secretmanager.versions.access' denied on resource (or it may not exist).

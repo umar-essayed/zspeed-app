@@ -1,0 +1,411 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+class Category {
+  final String id;
+  final String label;
+  final IconData icon;
+  final Color? color;
+
+  Category({
+    required this.id,
+    required this.label,
+    required this.icon,
+    this.color,
+  });
+}
+
+class CategoryCarousel extends StatefulWidget {
+  final String selectedCategory;
+  final Function(String)? onCategorySelected;
+  final bool showScrollButtons;
+  final double? height;
+
+  const CategoryCarousel({
+    super.key,
+    this.selectedCategory = "all",
+    this.onCategorySelected,
+    this.showScrollButtons = true,
+    this.height = 100,
+  });
+
+  @override
+  State<CategoryCarousel> createState() => _CategoryCarouselState();
+}
+
+class _CategoryCarouselState extends State<CategoryCarousel> {
+  final ScrollController _scrollController = ScrollController();
+  late String selected;
+  List<Category> _cachedCategories = [];
+
+  List<Category> _categories(AppLocalizations l10n) => [
+        Category(
+            id: "all",
+            label: l10n.all,
+            icon: Icons.all_inclusive,
+            color: Colors.blue),
+        Category(
+            id: "restaurants",
+            label: l10n.food,
+            icon: Icons.restaurant,
+            color: Colors.red),
+        Category(
+            id: "quick",
+            label: l10n.quickDelivery,
+            icon: Icons.delivery_dining,
+            color: Colors.green),
+        Category(
+            id: "grocery",
+            label: l10n.grocery,
+            icon: Icons.shopping_basket,
+            color: Colors.purple),
+        Category(
+            id: "desserts",
+            label: l10n.desserts,
+            icon: Icons.cake,
+            color: Colors.pink),
+        Category(
+            id: "drinks",
+            label: l10n.drinks,
+            icon: Icons.local_cafe,
+            color: Colors.brown),
+        Category(
+            id: "pharmacy",
+            label: l10n.pharmacy,
+            icon: Icons.medical_services,
+            color: Colors.teal),
+        Category(
+            id: "flowers",
+            label: l10n.flowers,
+            icon: Icons.eco,
+            color: Colors.green),
+        Category(
+            id: "pet",
+            label: l10n.petSupplies,
+            icon: Icons.pets,
+            color: Colors.orange),
+        Category(
+            id: "fresh",
+            label: l10n.freshOrganic,
+            icon: Icons.spa,
+            color: Colors.lightGreen),
+        Category(
+            id: "fastfood",
+            label: l10n.fastFood,
+            icon: Icons.fastfood,
+            color: Colors.amber),
+        Category(
+            id: "healthy",
+            label: l10n.healthy,
+            icon: Icons.fitness_center,
+            color: Colors.lightBlue),
+        Category(
+            id: "beverages",
+            label: l10n.beverages,
+            icon: Icons.local_bar,
+            color: Colors.deepOrange),
+        Category(
+            id: "bakery",
+            label: l10n.bakery,
+            icon: Icons.bakery_dining,
+            color: Colors.orangeAccent),
+      ];
+
+  @override
+  void initState() {
+    super.initState();
+    selected = widget.selectedCategory;
+
+    // Auto-scroll to selected category after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToSelectedCategory();
+    });
+  }
+
+  void _scrollToSelectedCategory() {
+    final index = _cachedCategories.indexWhere((cat) => cat.id == selected);
+    if (index != -1) {
+      const double itemWidth = 100; // Approximate width per item
+      final double offset = index * itemWidth - 50; // Center the item
+
+      _scrollController.animateTo(
+        offset.clamp(0.0, _scrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _scroll(String direction) {
+    const double offset = 200; // scroll by 200 pixels
+    final double currentOffset = _scrollController.offset;
+    final double maxOffset = _scrollController.position.maxScrollExtent;
+
+    if (direction == "left") {
+      final double newOffset = (currentOffset - offset).clamp(0.0, maxOffset);
+      _scrollController.animateTo(
+        newOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      final double newOffset = (currentOffset + offset).clamp(0.0, maxOffset);
+      _scrollController.animateTo(
+        newOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _handleSelect(String cat) {
+    setState(() {
+      selected = cat;
+    });
+
+    // Scroll to selected category
+    _scrollToSelectedCategory();
+
+    // Call callback if provided
+    widget.onCategorySelected?.call(cat);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final categories = _categories(l10n);
+    _cachedCategories = categories;
+    return Container(
+      height: widget.height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 8,
+            spreadRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.categories,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                Text(
+                  l10n.categoriesCount(categories.length),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Categories Carousel
+          Expanded(
+            child: Row(
+              children: [
+                // Left Scroll Button (conditionally shown)
+                if (widget.showScrollButtons)
+                  Container(
+                    width: 40,
+                    alignment: Alignment.center,
+                    child: IconButton(
+                      icon: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withValues(alpha: 0.3),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.chevron_left,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                      onPressed: () => _scroll("left"),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+
+                // Categories List
+                Expanded(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      // Hide/show scroll buttons based on scroll position
+                      return false;
+                    },
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+                        final bool isSelected = selected == category.id;
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: _buildCategoryItem(category, isSelected),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // Right Scroll Button (conditionally shown)
+                if (widget.showScrollButtons)
+                  Container(
+                    width: 40,
+                    alignment: Alignment.center,
+                    child: IconButton(
+                      icon: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withValues(alpha: 0.3),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                      onPressed: () => _scroll("right"),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // Selected Category Indicator
+          Container(
+            height: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: categories.map((cat) {
+                return Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: selected == cat.id
+                          ? cat.color ?? Colors.blue
+                          : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryItem(Category category, bool isSelected) {
+    final color = category.color ?? Colors.blue;
+
+    return GestureDetector(
+      onTap: () => _handleSelect(category.id),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        width: 90,
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? color : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.1),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icon Container
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                category.icon,
+                color: isSelected ? color : color.withValues(alpha: 0.8),
+                size: 22,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Label
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                category.label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

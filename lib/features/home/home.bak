@@ -1,0 +1,15 @@
+/// Barrel export for home feature.
+/// Populated as modules are migrated in Phases 3-7.
+library;
+
+// Models
+export 'model/home_category.dart';
+export 'model/home_food_item.dart';
+
+
+// Widgets
+export 'widgets/home_hero_section.dart';
+export 'widgets/home_category_bar.dart';
+export 'widgets/home_category_sheet.dart';
+export 'widgets/home_food_grid.dart';
+export 'widgets/home_service_grid.dart';

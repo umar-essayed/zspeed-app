@@ -1,0 +1,132 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+class AdminReportDialogs {
+  static void showGenerateReportDialog({
+    required BuildContext context,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String reportType = 'Sales Report';
+        String startDate = DateTime.now().toString().split(' ')[0];
+        String endDate = DateTime.now().toString().split(' ')[0];
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.generateReport, style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.reportTypeLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  initialValue: reportType,
+                  items: [
+                    AppLocalizations.of(context)!.salesReport,
+                    AppLocalizations.of(context)!.userReport,
+                    AppLocalizations.of(context)!.restaurantReport,
+                    AppLocalizations.of(context)!.orderReport,
+                  ]
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text(
+                            type,
+                            style: TextStyle(color: textDark, fontSize: 12),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) {
+                    if (value != null) reportType = value;
+                  },
+                  style: const TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.startDateLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                    suffixIcon: Icon(Icons.calendar_today,
+                        color: primaryOrange, size: 18),
+                  ),
+                  controller: TextEditingController(text: startDate),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => startDate = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.endDateLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                    suffixIcon: Icon(Icons.calendar_today,
+                        color: primaryOrange, size: 18),
+                  ),
+                  controller: TextEditingController(text: endDate),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => endDate = value,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onSuccess('Report Generated',
+                    '$reportType has been generated successfully!');
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.generate,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void handleDownloadReport({
+    required String reportName,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    onSuccess(
+        'Report Downloaded', '$reportName has been downloaded successfully!');
+  }
+
+  static void handlePreviewReport({
+    required String reportName,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    onSuccess('Report Preview', 'Previewing $reportName');
+  }
+}

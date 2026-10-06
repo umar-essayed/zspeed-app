@@ -1,0 +1,40 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/core/services/payment_guard.dart';
+
+class RoleRestrictedPaymentTile extends StatelessWidget {
+  final UserRole currentRole;
+  final VoidCallback? onPayPressed;
+  final bool isSelected;
+
+  const RoleRestrictedPaymentTile({
+    super.key,
+    required this.currentRole,
+    this.onPayPressed,
+    this.isSelected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!canInitiateCardPayment(currentRole)) {
+      return const SizedBox.shrink();
+    }
+
+    return ListTile(
+      onTap: onPayPressed,
+      leading: Icon(
+        Icons.credit_card,
+        color: isSelected ? const Color(0xFFF35535) : Colors.grey,
+      ),
+      title: Text(
+        'Credit / Debit Card',
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? const Color(0xFF333333) : Colors.grey.shade700,
+        ),
+      ),
+      trailing: isSelected
+          ? const Icon(Icons.check_circle, color: Color(0xFFF35535), size: 20)
+          : null,
+    );
+  }
+}

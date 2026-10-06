@@ -1,0 +1,4 @@
+/// Bridge — re-exports from the pages/ shell so existing routes still work.
+library;
+
+export 'package:z_speed/features/payment_settings/view/payment_settings_screen.dart';

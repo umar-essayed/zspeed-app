@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "active_drivers": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "active_rides": {
+      ".read": "auth != null",
+      "$rideId": {
+        ".write": "auth != null"
+      }
+    },
+    "pending_rides": {
+      ".read": "auth != null",
+      "$rideId": {
+        ".write": "auth != null"
+      }
+    }
+  }
+}

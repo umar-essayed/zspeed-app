@@ -1,0 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/restaurant/model/menu_item.dart';
+
+/// Horizontal chip filter for menu categories.
+class MenuCategoryFilter extends StatelessWidget {
+  const MenuCategoryFilter({
+    super.key,
+    required this.categories,
+    required this.menuItems,
+    required this.selectedCategory,
+    required this.onCategorySelected,
+    required this.primaryOrange,
+    required this.categoryResolver,
+  });
+
+  final List<String> categories;
+  final List<MenuItem> menuItems;
+  final String selectedCategory;
+  final ValueChanged<String> onCategorySelected;
+  final Color primaryOrange;
+
+  /// Maps a [MenuItem] to its category name (typically the section name).
+  final String Function(MenuItem item) categoryResolver;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categories.map((category) {
+          final bool isSelected = selectedCategory == category;
+          final itemCount = menuItems
+              .where((item) =>
+                  category == "All" || categoryResolver(item) == category)
+              .length;
+
+          return Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: ChoiceChip(
+              label: Text(
+                "$category ($itemCount)",
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              selected: isSelected,
+              onSelected: (selected) {
+                onCategorySelected(selected ? category : "All");
+              },
+              backgroundColor: Colors.white,
+              selectedColor: primaryOrange,
+              side: BorderSide(
+                color: isSelected ? primaryOrange : Colors.grey.shade300,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: isSelected ? 2 : 0,
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}

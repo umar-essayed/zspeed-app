@@ -1,0 +1,634 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:z_speed/core/services/routing_service.dart';
+
+import 'package:z_speed/features/driver/widgets/active_trip_model.dart';
+import 'package:z_speed/features/driver/widgets/no_active_trip_widget.dart';
+import 'package:z_speed/features/driver/widgets/trip_call_dialogs.dart';
+import 'package:z_speed/features/driver/widgets/trip_details_sheet.dart';
+import 'package:z_speed/features/driver/widgets/trip_location_card.dart';
+
+class ActiveTripMap extends StatefulWidget {
+  final ActiveTrip? trip;
+  final VoidCallback? onCompleteTrip;
+  final VoidCallback? onNavigate;
+
+  const ActiveTripMap({
+    super.key,
+    this.trip,
+    this.onCompleteTrip,
+    this.onNavigate,
+  });
+
+  @override
+  State<ActiveTripMap> createState() => _ActiveTripMapState();
+}
+
+class _ActiveTripMapState extends State<ActiveTripMap> {
+  Timer? _locationTimer;
+  LatLng? _currentDriverLocation;
+  final MapController _mapController = MapController();
+  final List<Marker> _markers = [];
+  final List<Polyline> _polylines = [];
+  double _progress = 0.0;
+  int _remainingTime = 0;
+
+  final Color _primaryColor = const Color(0xFFF35535);
+  final Color _successColor = Colors.green;
+  static const Color _textColor = Color(0xFF333333);
+  static const Color _subtextColor = Color(0xFF666666);
+
+  static const Map<String, double> _statusProgress = {
+    'heading_to_restaurant': 0.25,
+    'picking_up': 0.5,
+    'heading_to_customer': 0.75,
+    'completed': 1.0,
+  };
+
+  Map<String, dynamic> _buildStatusInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return {
+      'heading_to_restaurant': {
+        'label': l10n.goingToRestaurant,
+        'color': const Color(0xFFF35535),
+        'icon': Icons.restaurant,
+        'nextAction': l10n.arrivedAtRestaurant,
+        'progress': 0.25,
+      },
+      'picking_up': {
+        'label': l10n.pickingUpOrder,
+        'color': const Color(0xFFFF9800),
+        'icon': Icons.shopping_bag,
+        'nextAction': l10n.orderPickedUp,
+        'progress': 0.5,
+      },
+      'heading_to_customer': {
+        'label': l10n.deliveringToCustomer,
+        'color': Colors.green,
+        'icon': Icons.delivery_dining,
+        'nextAction': l10n.statusDelivered,
+        'progress': 0.75,
+      },
+      'completed': {
+        'label': l10n.statusCompleted,
+        'color': Colors.grey,
+        'icon': Icons.check_circle,
+        'nextAction': l10n.startNewTrip,
+        'progress': 1.0,
+      },
+    };
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.trip != null) {
+      _currentDriverLocation = widget.trip!.driverLocation;
+      _remainingTime = widget.trip!.estimatedTime;
+      _progress = _statusProgress[widget.trip!.status] ?? 0.0;
+      _updateMapMarkers();
+      _fetchRoute();
+      _startLocationSimulation();
+      _startTimer();
+    }
+  }
+
+  Future<void> _fetchRoute() async {
+    if (widget.trip == null || _currentDriverLocation == null) return;
+
+    LatLng target;
+    if (widget.trip!.status == 'heading_to_restaurant' ||
+        widget.trip!.status == 'picking_up') {
+      target = widget.trip!.pickupLocation;
+    } else if (widget.trip!.status == 'heading_to_customer') {
+      target = widget.trip!.deliveryLocation;
+    } else {
+      return;
+    }
+
+    try {
+      final result = await RoutingService.instance
+          .getDirections(_currentDriverLocation!, target);
+
+      if (result != null && mounted) {
+        setState(() {
+          _polylines.clear();
+          _polylines.add(
+            Polyline(
+              points: result.points,
+              color: _primaryColor,
+              strokeWidth: 4.0,
+            ),
+          );
+        });
+        _fitMapToBounds(result.points);
+      }
+    } catch (e) {
+      debugPrint('Error fetching route from LocationIQ: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _locationTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startLocationSimulation() {
+    if (widget.trip == null) return;
+
+    _locationTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_currentDriverLocation != null && mounted) {
+        setState(() {
+          LatLng target;
+          if (widget.trip!.status == 'heading_to_restaurant') {
+            target = widget.trip!.pickupLocation;
+          } else if (widget.trip!.status == 'heading_to_customer') {
+            target = widget.trip!.deliveryLocation;
+          } else {
+            target = _currentDriverLocation!;
+          }
+
+          final latDiff = target.latitude - _currentDriverLocation!.latitude;
+          final lngDiff = target.longitude - _currentDriverLocation!.longitude;
+
+          _currentDriverLocation = LatLng(
+            _currentDriverLocation!.latitude + (latDiff * 0.1),
+            _currentDriverLocation!.longitude + (lngDiff * 0.1),
+          );
+
+          _updateMapMarkers();
+          _updateProgress();
+        });
+      }
+    });
+  }
+
+  void _startTimer() {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingTime > 0 && mounted) {
+        setState(() {
+          _remainingTime--;
+        });
+      }
+    });
+  }
+
+  void _updateMapMarkers() {
+    if (widget.trip == null || _currentDriverLocation == null) return;
+
+    _markers.clear();
+
+    // Driver Marker - Orange
+    _markers.add(
+      Marker(
+        point: _currentDriverLocation!,
+        width: 40,
+        height: 40,
+        child: const Icon(Icons.navigation, color: Colors.orange, size: 30),
+      ),
+    );
+
+    // Pickup Marker - Red
+    _markers.add(
+      Marker(
+        point: widget.trip!.pickupLocation,
+        width: 40,
+        height: 40,
+        child: const Icon(Icons.restaurant, color: Colors.red, size: 30),
+      ),
+    );
+
+    // Delivery Marker - Green
+    _markers.add(
+      Marker(
+        point: widget.trip!.deliveryLocation,
+        width: 40,
+        height: 40,
+        child: const Icon(Icons.home, color: Colors.green, size: 30),
+      ),
+    );
+  }
+
+  void _fitMapToBounds(List<LatLng> points) {
+    if (points.isEmpty) return;
+    double minLat = points.first.latitude;
+    double maxLat = points.first.latitude;
+    double minLng = points.first.longitude;
+    double maxLng = points.first.longitude;
+
+    for (var p in points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    _mapController.fitCamera(
+      CameraFit.bounds(
+        bounds: LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng)),
+        padding: const EdgeInsets.all(32.0),
+      ),
+    );
+  }
+
+  void _updateProgress() {
+    if (widget.trip == null) return;
+
+    final double totalDistance = widget.trip!.distance;
+    final double traveledDistance = _calculateDistance(
+      widget.trip!.driverLocation,
+      _currentDriverLocation!,
+    );
+
+    setState(() {
+      _progress = traveledDistance / totalDistance;
+    });
+  }
+
+  double _calculateDistance(LatLng start, LatLng end) {
+    return 1.0;
+  }
+
+  void _callCustomer() {
+    if (widget.trip != null) {
+      showCallCustomerDialog(context, widget.trip!, _primaryColor);
+    }
+  }
+
+  void _callRestaurant() {
+    if (widget.trip != null) {
+      showCallRestaurantDialog(context, widget.trip!, _primaryColor);
+    }
+  }
+
+  void _showTripDetails() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) =>
+          TripDetailsSheet(trip: widget.trip!, primaryColor: _primaryColor),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.trip == null) {
+      return NoActiveTripWidget(primaryColor: _primaryColor);
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    final statusData = _buildStatusInfo(context)[widget.trip!.status] ?? {};
+    final statusColor = statusData['color'] ?? Colors.grey;
+    final statusLabel = statusData['label'] ?? l10n.unknownStatus;
+    final statusIcon = statusData['icon'] ?? Icons.help;
+    final nextAction = statusData['nextAction'] ?? l10n.continueLabel;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.activeTrip,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _textColor,
+                    ),
+                  ),
+                  Text(
+                    widget.trip!.orderId,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: _subtextColor,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: statusColor),
+                ),
+                child: Row(
+                  children: [
+                    Icon(statusIcon, size: 14, color: statusColor),
+                    const SizedBox(width: 6),
+                    Text(
+                      statusLabel,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Progress Bar
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.tripProgress,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: _textColor,
+                    ),
+                  ),
+                  Text(
+                    '${(_progress * 100).toInt()}%',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: _primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: _progress,
+                backgroundColor: Colors.grey.shade200,
+                color: statusColor,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.etaAndDistance(
+                    _remainingTime, widget.trip!.distance.toStringAsFixed(1)),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: _subtextColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Map
+          Container(
+            height: 200,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  initialCenter: widget.trip!.driverLocation,
+                  initialZoom: 14.0,
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: RoutingService.instance.tileUrl,
+                  ),
+                  PolylineLayer(polylines: _polylines),
+                  MarkerLayer(markers: _markers),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Pickup & Delivery Info
+          Row(
+            children: [
+              Expanded(
+                child: TripLocationCard(
+                  title: l10n.pickupTitle,
+                  name: widget.trip!.restaurant,
+                  address: widget.trip!.pickupAddress,
+                  icon: Icons.restaurant,
+                  color: _primaryColor,
+                  primaryColor: _primaryColor,
+                  onCall: _callRestaurant,
+                  onNavigate: widget.onNavigate,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TripLocationCard(
+                  title: l10n.deliveryTitle,
+                  name: widget.trip!.customer,
+                  address: widget.trip!.deliveryAddress,
+                  icon: Icons.home,
+                  color: _successColor,
+                  primaryColor: _primaryColor,
+                  onCall: _callCustomer,
+                  onNavigate: widget.onNavigate,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Trip Summary
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.fareLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _subtextColor,
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.of(context)!.egpAmount(
+                          widget.trip!.fare.toStringAsFixed(2).toString()),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: _successColor,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.items,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _subtextColor,
+                      ),
+                    ),
+                    Text(
+                      l10n.itemsCount2(widget.trip!.itemCount),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _textColor,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.distanceLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _subtextColor,
+                      ),
+                    ),
+                    Text(
+                      l10n.distanceKm('${widget.trip!.distance}'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Action Buttons
+          Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _showTripDetails,
+                  icon: Icon(Icons.info_outline, color: _primaryColor),
+                  label: Text(
+                    l10n.viewTripDetails,
+                    style: const TextStyle(color: _textColor),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade100,
+                    foregroundColor: _textColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _callCustomer,
+                      icon: Icon(Icons.phone, size: 20, color: _primaryColor),
+                      label: Text(
+                        l10n.callCustomer,
+                        style: TextStyle(color: _primaryColor),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: _primaryColor,
+                        side: BorderSide(color: _primaryColor),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // Navigate to chat
+                      },
+                      icon: Icon(Icons.message, size: 20, color: _primaryColor),
+                      label: Text(
+                        l10n.message,
+                        style: TextStyle(color: _primaryColor),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: _primaryColor,
+                        side: BorderSide(color: _primaryColor),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (widget.trip!.status != 'completed')
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: widget.onCompleteTrip,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(nextAction),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

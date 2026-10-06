@@ -1,0 +1,139 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+
+/// Static helper class containing all dialogs for [PaymentSettingsPage].
+class PaymentSettingsDialogs {
+  PaymentSettingsDialogs._();
+
+  static void showPayoutFrequency(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String selectedFrequency = 'Weekly';
+
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.payoutFrequency),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return RadioGroup<String>(
+                // ignore: deprecated_member_use
+                groupValue: selectedFrequency,
+                // ignore: deprecated_member_use
+                onChanged: (value) =>
+                    setState(() => selectedFrequency = value!),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RadioListTile(
+                      title: Text(AppLocalizations.of(context)!.daily),
+                      value: 'Daily',
+                    ),
+                    RadioListTile(
+                      title: Text(AppLocalizations.of(context)!.weekly),
+                      value: 'Weekly',
+                    ),
+                    RadioListTile(
+                      title: Text(AppLocalizations.of(context)!.monthly),
+                      value: 'Monthly',
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(AppLocalizations.of(context)!.cancel)),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .payoutFrequencySet(selectedFrequency.toString()))),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF35535)),
+              child: Text(AppLocalizations.of(context)!.save),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showMinimumPayout(BuildContext context) {
+    final TextEditingController amountController =
+        TextEditingController(text: '50.00');
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.minimumPayoutAmount),
+          content: TextField(
+            controller: amountController,
+            decoration: const InputDecoration(
+              labelText: 'Amount',
+              prefixIcon: Icon(Icons.attach_money),
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(AppLocalizations.of(context)!.cancel)),
+            ElevatedButton(
+              onPressed: () {
+                final amount = amountController.text;
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .minimumPayoutSet(amount.toString()))),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF35535)),
+              child: Text(AppLocalizations.of(context)!.save),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showEditPaymentMethod(
+      BuildContext context, String methodName, String details) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!
+              .editMethodName(methodName.toString())),
+          content: Text(AppLocalizations.of(context)!
+              .editPaymentMethodFunctionalityWillBeImplementedHer),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(AppLocalizations.of(context)!.cancel)),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('$methodName updated successfully')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF35535)),
+              child: Text(AppLocalizations.of(context)!.saveChanges),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

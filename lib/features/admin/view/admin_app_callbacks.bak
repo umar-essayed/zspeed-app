@@ -1,0 +1,289 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/admin/model/admin_models.dart';
+import 'package:z_speed/features/admin/model/admin_theme.dart';
+import 'package:z_speed/features/admin/view/admin_action_dispatchers.dart';
+import 'package:z_speed/features/admin/view/admin_feedback_dialogs.dart';
+import 'package:z_speed/features/admin/view/admin_order_dialogs.dart';
+import 'package:z_speed/features/admin/view/admin_report_dialogs.dart';
+import 'package:z_speed/features/admin/view/admin_user_dialogs.dart';
+import 'package:z_speed/features/admin/view/admin_vendor_dialogs.dart';
+
+/// Encapsulates all admin dialog and action callback wiring.
+///
+/// Keeps the [AdminApp] page shell thin by extracting the ~20 dialog
+/// forwarding methods that were previously inline in `_AdminAppState`.
+class AdminAppCallbacks {
+  final List<AdminUser> users;
+  final List<AdminOrder> orders;
+  final List<AdminVendor> restaurants;
+  final void Function(VoidCallback fn) setState;
+
+  AdminAppCallbacks({
+    this.users = const [],
+    this.orders = const [],
+    required this.restaurants,
+    required this.setState,
+  });
+
+  // ─────────────── User Dialogs ───────────────
+
+  void showAddUserDialog(BuildContext context) {
+    AdminUserDialogs.showAddUserDialog(
+      context: context,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      nextUserId: (users.length + 1).toString(),
+      onUserAdded: (newUser) => setState(() => users.add(newUser)),
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void showEditUserDialog(AdminUser user, BuildContext context) {
+    AdminUserDialogs.showEditUserDialog(
+      context: context,
+      user: user,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      onUserUpdated: (updatedUser) {
+        setState(() {
+          final index = users.indexWhere((u) => u.id == user.id);
+          if (index != -1) users[index] = updatedUser;
+        });
+      },
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void showDeleteUserDialog(AdminUser user, BuildContext context) {
+    AdminUserDialogs.showDeleteUserDialog(
+      context: context,
+      user: user,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      errorRed: AdminTheme.errorRed,
+      onDelete: (id) => setState(() => users.removeWhere((u) => u.id == id)),
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void showUserDetails(AdminUser user, BuildContext context) {
+    AdminUserDialogs.showUserDetailsDialog(
+      context: context,
+      user: user,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      primaryOrange: AdminTheme.primaryOrange,
+    );
+  }
+
+  void showChangeStatusDialog(AdminUser user, BuildContext context) {
+    AdminUserDialogs.showChangeStatusDialog(
+      context: context,
+      user: user,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      onUserUpdated: (updatedUser) {
+        setState(() {
+          final index = users.indexWhere((u) => u.id == user.id);
+          if (index != -1) users[index] = updatedUser;
+        });
+      },
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void handleUserAction(String action, AdminUser user, BuildContext context) {
+    AdminActionDispatchers.handleUserAction(
+      action: action,
+      user: user,
+      context: context,
+      onView: showUserDetails,
+      onChangeStatus: showChangeStatusDialog,
+    );
+  }
+
+  // ─────────────── Order Dialogs ───────────────
+
+  void createNewOrder(BuildContext context) {
+    AdminOrderDialogs.showCreateOrderDialog(
+      context: context,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      nextOrderId: 'ORD-${orders.length + 7845}',
+      onOrderCreated: (newOrder) => setState(() => orders.insert(0, newOrder)),
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void handleOrderAction(
+      String action, AdminOrder order, BuildContext context) {
+    AdminActionDispatchers.handleOrderAction(
+      action: action,
+      order: order,
+      context: context,
+      onEdit: editOrder,
+      onDelete: showDeleteOrderDialog,
+      onView: showOrderDetails,
+    );
+  }
+
+  void editOrder(AdminOrder order, BuildContext context) {
+    AdminOrderDialogs.showEditOrderDialog(
+      context: context,
+      order: order,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      onOrderUpdated: (updatedOrder) {
+        setState(() {
+          final index = orders.indexWhere((o) => o.id == order.id);
+          if (index != -1) orders[index] = updatedOrder;
+        });
+      },
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void showDeleteOrderDialog(AdminOrder order, BuildContext context) {
+    AdminOrderDialogs.showDeleteOrderDialog(
+      context: context,
+      order: order,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      errorRed: AdminTheme.errorRed,
+      onDelete: (id) => setState(() => orders.removeWhere((o) => o.id == id)),
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void showOrderDetails(AdminOrder order, BuildContext context) {
+    AdminOrderDialogs.showOrderDetailsDialog(
+      context: context,
+      order: order,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      primaryOrange: AdminTheme.primaryOrange,
+    );
+  }
+
+  // ─────────────── Vendor Dialogs ───────────────
+
+  void showAddVendorDialog(BuildContext context) {
+    AdminVendorDialogs.showAddVendorDialog(
+      context: context,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      nextVendorId: 'V${restaurants.length + 1}'.padLeft(3, '0'),
+      onVendorAdded: (newVendor) =>
+          setState(() => restaurants.add(newVendor)),
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void showEditVendorDialog(
+      AdminVendor vendor, BuildContext context) {
+    AdminVendorDialogs.showEditVendorDialog(
+      context: context,
+      vendor: vendor,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      onVendorUpdated: (updatedVendor) {
+        setState(() {
+          final index = restaurants.indexWhere((v) => v.id == vendor.id);
+          if (index != -1) restaurants[index] = updatedVendor;
+        });
+      },
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void showDeleteVendorDialog(
+      AdminVendor vendor, BuildContext context) {
+    AdminVendorDialogs.showDeleteVendorDialog(
+      context: context,
+      vendor: vendor,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      errorRed: AdminTheme.errorRed,
+      onDelete: (id) =>
+          setState(() => restaurants.removeWhere((v) => v.id == id)),
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  // ─────────────── Report Dialogs ───────────────
+
+  void showGenerateReportDialog(BuildContext context) {
+    AdminReportDialogs.showGenerateReportDialog(
+      context: context,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      textLight: AdminTheme.textLight,
+      borderColor: AdminTheme.borderColor,
+      primaryOrange: AdminTheme.primaryOrange,
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void downloadReport(String reportName, BuildContext context) {
+    AdminReportDialogs.handleDownloadReport(
+      reportName: reportName,
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  void previewReport(String reportName, BuildContext context) {
+    AdminReportDialogs.handlePreviewReport(
+      reportName: reportName,
+      onSuccess: (title, message) => showSuccessDialog(context, title, message),
+    );
+  }
+
+  // ─────────────── Feedback ───────────────
+
+  void showSuccessDialog(BuildContext context, String title, String message) {
+    AdminFeedbackDialogs.showSuccessDialog(
+      context: context,
+      title: title,
+      message: message,
+      white: AdminTheme.white,
+      textDark: AdminTheme.textDark,
+      textMedium: AdminTheme.textMedium,
+      primaryOrange: AdminTheme.primaryOrange,
+    );
+  }
+}

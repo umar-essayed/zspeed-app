@@ -1,0 +1,78 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Authenticated users can upload to their own folder
+    match /drivers/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+    match /vendors/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+    match /restaurants/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+    // Cuisine type images — restricted to admins via Firestore lookup
+    match /cuisine_types/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'admin'
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'superAdmin')
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    // Menu item images — restricted to vendor owner or admin
+    match /menu/{vendorId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && (firestore.get(/databases/(default)/documents/vendors/$(vendorId)).data.ownerId == request.auth.uid
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'admin'
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'superAdmin')
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    // Stories media — restricted to vendor owner or admin
+    match /stories/{vendorId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && (firestore.get(/databases/(default)/documents/vendors/$(vendorId)).data.ownerId == request.auth.uid
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'admin'
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'superAdmin')
+                   && request.resource.size < 25 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|video/.*');
+    }
+    // User profile images
+    match /profiles/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    // Settlement evidence — admin only (upload proof of payment transfers)
+    match /settlements/{allPaths=**} {
+      allow read: if request.auth != null
+                   && (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'admin'
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'superAdmin');
+      allow write: if request.auth != null
+                   && (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'admin'
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'superAdmin')
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+
+    // Admin can read all remaining paths
+    match /{allPaths=**} {
+      allow read: if request.auth != null
+                   && (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'admin'
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.type == 'superAdmin');
+    }
+  }
+}

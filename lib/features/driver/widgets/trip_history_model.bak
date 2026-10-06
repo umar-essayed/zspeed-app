@@ -1,0 +1,23 @@
+class Trip {
+  final String id;
+  final String date;
+  final String time;
+  final String restaurant;
+  final String customer;
+  final String distance;
+  final int earnings;
+  final String duration;
+  final int rating;
+
+  Trip({
+    required this.id,
+    required this.date,
+    required this.time,
+    required this.restaurant,
+    required this.customer,
+    required this.distance,
+    required this.earnings,
+    required this.duration,
+    required this.rating,
+  });
+}

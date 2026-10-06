@@ -1,0 +1,343 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+import 'package:z_speed/features/admin/model/admin_models.dart';
+
+class AdminOrderDialogs {
+  static void showCreateOrderDialog({
+    required BuildContext context,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(AdminOrder order) onOrderCreated,
+    required void Function(String title, String message) onSuccess,
+    required String nextOrderId,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String customerName = '';
+        String restaurantName = '';
+        double amount = 0.0;
+        int items = 1;
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.createNewOrder, style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.customerNameLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  onChanged: (value) => customerName = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.restaurantNameLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  onChanged: (value) => restaurantName = value,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.amount,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  keyboardType: TextInputType.number,
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => amount = double.tryParse(value) ?? 0.0,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.numberOfItemsLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  keyboardType: TextInputType.number,
+                  // ignore: deprecated_member_use
+                  onChanged: (value) => items = int.tryParse(value) ?? 1,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (customerName.isNotEmpty &&
+                    restaurantName.isNotEmpty &&
+                    amount > 0) {
+                  onOrderCreated(
+                    AdminOrder(
+                      id: nextOrderId,
+                      customerName: customerName,
+                      restaurantName: restaurantName,
+                      amount: amount,
+                      status: OrderStatus.pending,
+                      items: items,
+                      date: DateTime.now().toString().split(' ')[0],
+                      time: '${DateTime.now().hour}:${DateTime.now().minute}',
+                    ),
+                  );
+                  Navigator.pop(context);
+                  onSuccess('Order Created',
+                      'New order has been created successfully!');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.createOrder,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showEditOrderDialog({
+    required BuildContext context,
+    required AdminOrder order,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color borderColor,
+    required Color primaryOrange,
+    required void Function(AdminOrder order) onOrderUpdated,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        OrderStatus selectedStatus = order.status;
+        double amount = order.amount;
+        int items = order.items;
+
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.editOrder, style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(order.id,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: textDark)),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<OrderStatus>(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.statusLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  initialValue: selectedStatus,
+                  items: OrderStatus.values
+                      .map(
+                        (status) => DropdownMenuItem(
+                          value: status,
+                          child: Text(status.toString().split('.').last,
+                              style: TextStyle(color: textDark, fontSize: 12)),
+                        ),
+                      )
+                      .toList(),
+                  // ignore: deprecated_member_use
+                  onChanged: (value) {
+                    if (value != null) selectedStatus = value;
+                  },
+                  style: const TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.amount,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  controller: TextEditingController(text: amount.toString()),
+                  keyboardType: TextInputType.number,
+                  // ignore: deprecated_member_use
+                  onChanged: (value) =>
+                      amount = double.tryParse(value) ?? order.amount,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.numberOfItemsLabel,
+                    labelStyle: TextStyle(color: textMedium),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: borderColor)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryOrange)),
+                  ),
+                  controller: TextEditingController(text: items.toString()),
+                  keyboardType: TextInputType.number,
+                  // ignore: deprecated_member_use
+                  onChanged: (value) =>
+                      items = int.tryParse(value) ?? order.items,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onOrderUpdated(
+                  AdminOrder(
+                    id: order.id,
+                    customerName: order.customerName,
+                    restaurantName: order.restaurantName,
+                    amount: amount,
+                    status: selectedStatus,
+                    items: items,
+                    date: order.date,
+                    time: order.time,
+                  ),
+                );
+                Navigator.pop(context);
+                onSuccess(
+                    'Order Updated', 'Order has been updated successfully!');
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.saveChanges,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showDeleteOrderDialog({
+    required BuildContext context,
+    required AdminOrder order,
+    required Color white,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color errorRed,
+    required void Function(String id) onDelete,
+    required void Function(String title, String message) onSuccess,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.deleteOrder, style: TextStyle(color: textDark)),
+          content: Text(
+            AppLocalizations.of(context)!.deleteOrderConfirm(order.id),
+            style: TextStyle(color: textMedium),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: textLight)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onDelete(order.id);
+                Navigator.pop(context);
+                onSuccess(
+                    'Order Deleted', 'Order has been deleted successfully!');
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: errorRed, foregroundColor: white),
+              child: Text(AppLocalizations.of(context)!.delete,
+                  style: TextStyle(color: white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showOrderDetailsDialog({
+    required BuildContext context,
+    required AdminOrder order,
+    required Color white,
+    required Color textDark,
+    required Color primaryOrange,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: white,
+          title: Text(AppLocalizations.of(context)!.orderDetails, style: TextStyle(color: textDark)),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(AppLocalizations.of(context)!.orderIdValue(order.id.toString()),
+                    style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.customerValue(order.customerName.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.restaurantValue(order.restaurantName.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.amountEgpValue(order.amount.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.statusValue(order.status.toString().split('.').last.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.itemsValue(order.items.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.dateValue(order.date.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.timeValue(order.time.toString()), style: TextStyle(color: textDark, fontSize: 12)),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.close, style: TextStyle(color: primaryOrange)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

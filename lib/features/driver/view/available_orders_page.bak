@@ -1,0 +1,17 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/driver/view/driver_app_screen.dart';
+
+/// Available orders page — redirects to the full DriverApp (Requests tab).
+///
+/// The real available-order/delivery-request flow is handled by
+/// [DriverRequestsTab] inside the driver dashboard, so we simply
+/// navigate there.
+class AvailableOrdersPage extends StatelessWidget {
+  const AvailableOrdersPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Navigate directly to the full driver portal
+    return const DriverApp();
+  }
+}

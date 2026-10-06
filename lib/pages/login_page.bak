@@ -1,0 +1,536 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/core/errors/failure_localization_ext.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/core/widgets/logo.dart';
+import 'package:z_speed/features/auth/cubit/auth_cubit.dart';
+import 'package:z_speed/features/auth/model/user_model.dart';
+import 'package:z_speed/features/auth/widgets/login_glass_field.dart';
+import 'package:z_speed/features/auth/widgets/login_button.dart';
+import 'package:z_speed/features/auth/widgets/login_or_divider.dart';
+import 'package:z_speed/features/auth/widgets/login_social_button.dart';
+import 'package:z_speed/features/auth/widgets/login_toggle_row.dart';
+import 'package:z_speed/features/auth/widgets/phone_login_sheet.dart';
+import 'package:z_speed/features/auth/widgets/name_dialog.dart';
+import 'package:z_speed/features/auth/widgets/email_verification_dialog.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:z_speed/features/auth/widgets/partner_links_widget.dart';
+import 'package:z_speed/features/auth/widgets/language_switcher_overlay.dart';
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isSignUp = false;
+  bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _submit() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final authCubit = context.read<AuthCubit>();
+
+        if (_isSignUp) {
+          // ── Step 1: Verify email BEFORE creating account ──
+          final verified = await EmailVerificationDialog.show(
+            context,
+            email: _emailController.text.trim(),
+            skipExistingCheck: false,
+          );
+
+          if (!mounted) return;
+          if (verified != true) {
+            setState(() => _isLoading = false);
+            return;
+          }
+
+          // ── Step 2: Email verified → create account ──
+          final newUser = AppUser(
+            id: '',
+            name: _emailController.text.split('@')[0],
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            type: UserType.customer,
+          );
+          await authCubit.register(newUser);
+        } else {
+          // ── Login: existing account ──
+          await authCubit.login(
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
+        }
+
+        // AuthWrapper reactively rebuilds when auth state changes.
+        // If the widget was disposed during the async gap (AuthWrapper
+        // already navigated away), stop here.
+        if (!mounted) return;
+
+        // Check if login/register actually failed
+        if (authCubit.state.hasError || authCubit.state.user == null) {
+          setState(() => _isLoading = false);
+          final msg = authCubit.state.failure?.getLocalizedMessage(context) ??
+              (_isSignUp ? 'Sign up failed' : 'Login failed');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(msg), backgroundColor: Colors.red),
+          );
+          return;
+        }
+
+        // Stop spinner; AuthWrapper rebuild will unmount this page.
+        if (mounted) setState(() => _isLoading = false);
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _toggleSignUp() {
+    setState(() {
+      _isSignUp = !_isSignUp;
+      _confirmPasswordController.clear();
+    });
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final authCubit = context.read<AuthCubit>();
+      await authCubit.signInWithGoogle();
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (!authCubit.state.isAuthenticated || authCubit.state.user == null) {
+        throw Exception(
+          authCubit.state.failure?.getLocalizedMessage(context) ??
+              'Google sign-in failed',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      final msg = e.toString();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _signInWithPhone() {
+    PhoneLoginSheet.show(
+      context,
+      onNewUser: () {
+        // Phone signup created a profile with empty name → ask for it
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) NameDialog.show(context);
+        });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: false,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background Image with Gradient Overlay
+          Image.asset(
+            'assets/images/restaurant_bg.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.7),
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.black.withValues(alpha: 0.3),
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.black.withValues(alpha: 0.7),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Content
+          SafeArea(
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Form Container with Glassmorphism
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.25),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 30,
+                                  spreadRadius: 2,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              children: [
+                                // Form Title Row
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SpeedLogo(size: LogoSize.sm),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      _isSignUp
+                                          ? AppLocalizations.of(context)!
+                                              .createAccount
+                                          : AppLocalizations.of(context)!
+                                              .welcomeBack,
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFFFF9800),
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black54,
+                                            blurRadius: 10,
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  _isSignUp
+                                      ? AppLocalizations.of(context)!
+                                          .joinOurDeliveryService
+                                      : AppLocalizations.of(context)!
+                                          .loginToYourAccount,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    shadows: [
+                                      Shadow(
+                                        color:
+                                            Colors.black.withValues(alpha: 0.5),
+                                        blurRadius: 6,
+                                        offset: const Offset(1, 1),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 25),
+
+                                // Login Form
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    children: [
+                                      // Email Field
+                                      LoginGlassField(
+                                        controller: _emailController,
+                                        labelText: AppLocalizations.of(context)!
+                                            .emailAddress,
+                                        hintText: AppLocalizations.of(context)!
+                                            .emailHint,
+                                        prefixIcon: Icons.email_outlined,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return AppLocalizations.of(context)!
+                                                .pleaseEnterYourEmail;
+                                          }
+                                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                              .hasMatch(value)) {
+                                            return AppLocalizations.of(context)!
+                                                .pleaseEnterValidEmail;
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 12),
+
+                                      // Password Field
+                                      LoginGlassField(
+                                        controller: _passwordController,
+                                        labelText: AppLocalizations.of(context)!
+                                            .password,
+                                        hintText: AppLocalizations.of(context)!
+                                            .enterYourPassword,
+                                        prefixIcon: Icons.lock_outline,
+                                        obscureText: !_isPasswordVisible,
+                                        suffixIcon: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _isPasswordVisible =
+                                                  !_isPasswordVisible;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            _isPasswordVisible
+                                                ? Icons.visibility
+                                                : Icons.visibility_off,
+                                            color: Colors.white
+                                                .withValues(alpha: 0.8),
+                                          ),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return AppLocalizations.of(context)!
+                                                .pleaseEnterYourPasswordValidation;
+                                          }
+                                          if (value.length < 6) {
+                                            return AppLocalizations.of(context)!
+                                                .passwordMinLength;
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 12),
+
+                                      // Confirm Password (for sign up)
+                                      if (_isSignUp)
+                                        AnimatedSwitcher(
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          child: LoginGlassField(
+                                            key: ValueKey(_isSignUp),
+                                            controller:
+                                                _confirmPasswordController,
+                                            labelText:
+                                                AppLocalizations.of(context)!
+                                                    .confirmPassword,
+                                            hintText:
+                                                AppLocalizations.of(context)!
+                                                    .confirmPassword,
+                                            prefixIcon: Icons.lock_outline,
+                                            obscureText: !_isPasswordVisible,
+                                            validator: _isSignUp
+                                                ? (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return AppLocalizations
+                                                              .of(context)!
+                                                          .pleaseConfirmYourPassword;
+                                                    }
+                                                    if (value !=
+                                                        _passwordController
+                                                            .text) {
+                                                      return AppLocalizations
+                                                              .of(context)!
+                                                          .passwordsDoNotMatch;
+                                                    }
+                                                    return null;
+                                                  }
+                                                : null,
+                                          ),
+                                        ),
+                                      if (_isSignUp) const SizedBox(height: 12),
+
+                                      // Forgot Password (only in login mode)
+                                      if (!_isSignUp)
+                                        Align(
+                                          alignment:
+                                              AlignmentDirectional.centerEnd,
+                                          child: TextButton(
+                                            onPressed: () {},
+                                            child: Text(
+                                              AppLocalizations.of(context)!
+                                                  .forgotPassword,
+                                              style: TextStyle(
+                                                color: Colors.white
+                                                    .withValues(alpha: 0.9),
+                                                fontWeight: FontWeight.w500,
+                                                shadows: [
+                                                  Shadow(
+                                                    color: Colors.black
+                                                        .withValues(alpha: 0.5),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(1, 1),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+                                      // Login/Sign Up Button
+                                      LoginButton(
+                                        isLoading: _isLoading,
+                                        isSignUp: _isSignUp,
+                                        onPressed: _submit,
+                                      ),
+
+                                      const SizedBox(height: 20),
+
+                                      // OR Divider
+                                      const LoginOrDivider(),
+
+                                      const SizedBox(height: 20),
+
+                                      // Social Login
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: LoginSocialButton(
+                                              label:
+                                                  AppLocalizations.of(context)!
+                                                      .google,
+                                              icon: Icons.g_mobiledata,
+                                              color: const Color(0xFFEA4335),
+                                              onPressed: _signInWithGoogle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 20),
+                                          Expanded(
+                                            child: LoginSocialButton(
+                                              label:
+                                                  AppLocalizations.of(context)!
+                                                      .phone,
+                                              icon: Icons.phone_outlined,
+                                              color: const Color(0xFFF35535),
+                                              onPressed: () =>
+                                                  _signInWithPhone(),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 25),
+
+                                      // Toggle Login/Sign Up
+                                      LoginToggleRow(
+                                        isSignUp: _isSignUp,
+                                        onToggle: _toggleSignUp,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          TextButton(
+                            onPressed: () {
+                              context.read<AuthCubit>().enterGuestMode();
+                            },
+                            child: Text(
+                              AppLocalizations.of(context)!.continueAsGuest,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                  ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // Terms and Conditions (for sign up)
+                          if (_isSignUp)
+                            Text(
+                              AppLocalizations.of(context)!.bySigningUp,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withValues(alpha: 0.5),
+                                    blurRadius: 6,
+                                    offset: const Offset(1, 1),
+                                  ),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+
+                          // ── Join as Driver / Vendor links ───────────────
+                          if (_isSignUp) const SizedBox(height: 20),
+                          if (_isSignUp) const PartnerLinksWidget(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Premium Language Switcher Overlay
+                const LanguageSwitcherOverlay(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

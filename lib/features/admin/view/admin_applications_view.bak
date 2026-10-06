@@ -1,0 +1,199 @@
+import 'package:flutter/material.dart';
+import 'package:z_speed/l10n/app_localizations.dart';
+
+import 'package:z_speed/features/admin/model/application_model.dart';
+import 'package:z_speed/features/admin/cubit/admin_application_cubit.dart';
+import 'package:z_speed/features/admin/cubit/admin_application_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/features/admin/widgets/application_list_item.dart';
+import 'package:z_speed/features/admin/view/admin_application_detail_view.dart';
+
+/// Tabbed list of driver/vendor applications for admin review.
+///
+/// Tabs: Pending | Approved | Rejected
+/// Supports filtering by application type (driver / vendor / all).
+class AdminApplicationsView extends StatefulWidget {
+  const AdminApplicationsView({super.key});
+
+  @override
+  State<AdminApplicationsView> createState() => _AdminApplicationsViewState();
+}
+
+class _AdminApplicationsViewState extends State<AdminApplicationsView>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AdminApplicationCubit, AdminApplicationState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(AppLocalizations.of(context)!.applicationReview),
+            elevation: 0,
+            actions: [
+              // Type filter dropdown
+              PopupMenuButton<ApplicationType?>(
+                icon: const Icon(Icons.filter_list),
+                tooltip: AppLocalizations.of(context)!.filterByType,
+                onSelected: (type) =>
+                    context.read<AdminApplicationCubit>().setTypeFilter(type),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: null,
+                    child: Text(AppLocalizations.of(context)!.all),
+                  ),
+                  PopupMenuItem(
+                    value: ApplicationType.driver,
+                    child: Text(AppLocalizations.of(context)!.drivers),
+                  ),
+                  PopupMenuItem(
+                    value: ApplicationType.restaurant,
+                    child: Text(AppLocalizations.of(context)!.restaurants),
+                  ),
+                ],
+              ),
+              // Refresh
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: AppLocalizations.of(context)!.refreshTooltip,
+                onPressed: () =>
+                    context.read<AdminApplicationCubit>().loadApplications(),
+              ),
+            ],
+            bottom: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(
+                    text: AppLocalizations.of(context)!
+                        .pendingTab(state.pending.length)),
+                Tab(
+                    text: AppLocalizations.of(context)!
+                        .approvedTab(state.approved.length)),
+                Tab(
+                    text: AppLocalizations.of(context)!
+                        .rejectedTab(state.rejected.length)),
+              ],
+            ),
+          ),
+          body: _buildBody(state, context),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(AdminApplicationState state, BuildContext context) {
+    if (state.isBusy) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.hasError && state.failure != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+            const SizedBox(height: 12),
+            Text(
+              state.failure!.message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Color(0xFF757575)),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () =>
+                  context.read<AdminApplicationCubit>().loadApplications(),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(AppLocalizations.of(context)!.retry),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        _ApplicationList(
+            applications: state.pending,
+            emptyLabel: AppLocalizations.of(context)!.noPendingApplications),
+        _ApplicationList(
+            applications: state.approved,
+            emptyLabel: AppLocalizations.of(context)!.noApprovedApplications),
+        _ApplicationList(
+            applications: state.rejected,
+            emptyLabel: AppLocalizations.of(context)!.noRejectedApplications),
+      ],
+    );
+  }
+}
+
+// ── Application List ─────────────────────────────────────────────────────────
+
+class _ApplicationList extends StatelessWidget {
+  final List<Application> applications;
+  final String emptyLabel;
+
+  const _ApplicationList({
+    required this.applications,
+    required this.emptyLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (applications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inbox_outlined, size: 48, color: Colors.grey[300]),
+            const SizedBox(height: 12),
+            Text(
+              emptyLabel,
+              style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 15),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        final cubit = context.read<AdminApplicationCubit>();
+        await cubit.loadApplications();
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: applications.length,
+        itemBuilder: (context, index) {
+          final app = applications[index];
+          return ApplicationListItem(
+            application: app,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<AdminApplicationCubit>(),
+                    child: AdminApplicationDetailView(applicationId: app.id),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}

@@ -1,0 +1,430 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:z_speed/features/restaurant/model/menu_item.dart';
+import 'package:z_speed/features/customer/cubit/item_detail_cubit.dart';
+import 'package:z_speed/features/customer/widgets/addon_group_selector.dart';
+import 'package:z_speed/features/customer/widgets/quantity_selector.dart';
+
+/// Bottom sheet for viewing and configuring a menu item before adding to cart.
+class ItemDetailSheet extends StatelessWidget {
+  final MenuItem item;
+  final String restaurantId;
+  final String sectionId;
+
+  const ItemDetailSheet({
+    super.key,
+    required this.item,
+    required this.restaurantId,
+    required this.sectionId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => ItemDetailCubit(
+        item: item,
+        restaurantId: restaurantId,
+        sectionId: sectionId,
+      ),
+      child: const _ItemDetailSheetContent(),
+    );
+  }
+}
+
+class _ItemDetailSheetContent extends StatelessWidget {
+  const _ItemDetailSheetContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<ItemDetailCubit>();
+    final state = context.watch<ItemDetailCubit>().state;
+    final item = state.item;
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag Handle
+          Container(
+            margin: const EdgeInsetsDirectional.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Scrollable Content
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Item Image
+                  if (item.imageUrl.isNotEmpty)
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Image.network(
+                        item.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.restaurant, size: 64),
+                        ),
+                      ),
+                    ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Item Name
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.getLocalizedName(
+                                    Localizations.localeOf(context)
+                                        .languageCode),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ),
+                            if (item.isPopular)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.local_fire_department,
+                                        size: 16, color: Colors.white),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      AppLocalizations.of(context)!.popular,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Price
+                        Row(
+                          children: [
+                            if (item.discountedPrice != null) ...[
+                              Text(
+                                AppLocalizations.of(context)!.egpAmount(
+                                    item.price.toStringAsFixed(2).toString()),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Text(
+                              AppLocalizations.of(context)!.egpAmount(state
+                                  .basePrice
+                                  .toStringAsFixed(2)
+                                  .toString()),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: item.discountedPrice != null
+                                        ? Colors.red
+                                        : null,
+                                  ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Description
+                        if (item
+                            .getLocalizedDescription(
+                                Localizations.localeOf(context).languageCode)
+                            .isNotEmpty) ...[
+                          Text(
+                            item.getLocalizedDescription(
+                                Localizations.localeOf(context).languageCode),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.grey[700],
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Variants / Options Selector
+                        if (item.variants.isNotEmpty) ...[
+                          Text(
+                            Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'الخيارات المتاحة'
+                                : 'Available Options',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: item.variants.map((variant) {
+                              final isSelected = state.selectedVariant == variant;
+                              return ChoiceChip(
+                                label: Text(
+                                  variant.getLocalizedName(
+                                      Localizations.localeOf(context).languageCode),
+                                  style: TextStyle(
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                                selected: isSelected,
+                                selectedColor: const Color(0xFFF35535),
+                                backgroundColor: Colors.grey[100],
+                                checkmarkColor: Colors.white,
+                                side: BorderSide(
+                                  color: isSelected ? Colors.transparent : Colors.grey[300]!,
+                                ),
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    cubit.selectVariant(variant);
+                                  }
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // Quantity Selector
+                        Text(
+                          AppLocalizations.of(context)!.quantity,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        const SizedBox(height: 8),
+                        QuantitySelector(
+                          quantity: state.quantity,
+                          minQuantity: item.minQuantity ?? 1.0,
+                          maxQuantity: item.maxQuantity,
+                          measureType: item.measureType,
+                          measureStep: item.measureStep,
+                          // ignore: deprecated_member_use
+                          onChanged: (quantity) => cubit.setQuantity(quantity),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Addon Groups
+                        if (state.isLoadingAddons)
+                          const Center(child: CircularProgressIndicator())
+                        else if (state.addonGroups.isNotEmpty) ...[
+                          Text(
+                            AppLocalizations.of(context)!.customizeYourItem,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          ...state.addonGroups.map((group) {
+                            final selectedAddons =
+                                state.selectedAddons[group.id] ?? {};
+                            return Padding(
+                              padding:
+                                  const EdgeInsetsDirectional.only(bottom: 16),
+                              child: AddonGroupSelector(
+                                group: group,
+                                selectedAddonIds: selectedAddons,
+                                onToggleAddon: (addonId) =>
+                                    cubit.toggleAddon(group.id, addonId),
+                              ),
+                            );
+                          }),
+                        ],
+
+                        // Special Note
+                        const SizedBox(height: 8),
+                        Text(
+                          AppLocalizations.of(context)!.specialInstructions,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          decoration: InputDecoration(
+                            hintText: AppLocalizations.of(context)!
+                                .specialInstructionsHint,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          maxLines: 3,
+                          // ignore: deprecated_member_use
+                          onChanged: (note) => cubit.setNote(note),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Validation Errors
+                        if (state.validationErrors.isNotEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.red[200]!),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: state.validationErrors
+                                  .map((error) => Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Icon(Icons.error_outline,
+                                              size: 16, color: Colors.red),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              error,
+                                              style: const TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Bottom Bar: Total Price + Add to Cart Button
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Total Price
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.total,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.of(context)!.egpAmount(
+                          state.itemTotal.toStringAsFixed(2).toString()),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(width: 16),
+
+                // Add to Cart Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: state.canAddToCart
+                        ? () {
+                            final cartItem = state.toCartItem();
+                            Navigator.pop(context, cartItem);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    AppLocalizations.of(context)!.addedToCart),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.addToCartButton,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

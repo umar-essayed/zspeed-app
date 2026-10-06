@@ -1,0 +1,540 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/admin/widgets/user_management_models.dart';
+import 'package:z_speed/features/admin/widgets/user_management_dialogs.dart';
+import 'package:z_speed/features/admin/widgets/user_card_widget.dart';
+import 'package:z_speed/features/admin/widgets/user_summary_card.dart';
+
+export 'package:z_speed/features/admin/widgets/user_management_models.dart'
+    show UserManagementEntry;
+
+class UserManagement extends StatefulWidget {
+  const UserManagement({super.key});
+
+  @override
+  State<UserManagement> createState() => _UserManagementState();
+}
+
+class _UserManagementState extends State<UserManagement> {
+  List<UserManagementEntry> users = [
+    UserManagementEntry(
+      id: "USR-001",
+      name: "Ahmed Hassan",
+      email: "ahmed@example.com",
+      role: "customer",
+      status: "active",
+      joinDate: "2024-01-15",
+      totalSpent: 2450,
+    ),
+    UserManagementEntry(
+      id: "USR-002",
+      name: "Fatima Ali",
+      email: "fatima@example.com",
+      role: "driver",
+      status: "active",
+      joinDate: "2024-01-20",
+      tripsCompleted: 245,
+    ),
+    UserManagementEntry(
+      id: "USR-003",
+      name: "Restaurant XYZ",
+      email: "restaurant@example.com",
+      role: "restaurant",
+      status: "suspended",
+      joinDate: "2024-01-10",
+      ordersServed: 1200,
+    ),
+    UserManagementEntry(
+      id: "USR-004",
+      name: "Mohamed Ahmed",
+      email: "mohamed@example.com",
+      role: "customer",
+      status: "active",
+      joinDate: "2024-02-01",
+      totalSpent: 1850,
+    ),
+    UserManagementEntry(
+      id: "USR-005",
+      name: "Layla Ibrahim",
+      email: "layla@example.com",
+      role: "driver",
+      status: "banned",
+      joinDate: "2024-02-10",
+      tripsCompleted: 85,
+    ),
+    UserManagementEntry(
+      id: "USR-006",
+      name: "Pizza Palace",
+      email: "pizza@example.com",
+      role: "restaurant",
+      status: "active",
+      joinDate: "2024-02-15",
+      ordersServed: 850,
+    ),
+    UserManagementEntry(
+      id: "USR-007",
+      name: "Sara Mahmoud",
+      email: "sara@example.com",
+      role: "customer",
+      status: "active",
+      joinDate: "2024-02-20",
+      totalSpent: 3200,
+    ),
+    UserManagementEntry(
+      id: "USR-008",
+      name: "Omar Khalid",
+      email: "omar@example.com",
+      role: "driver",
+      status: "suspended",
+      joinDate: "2024-02-25",
+      tripsCompleted: 120,
+    ),
+  ];
+
+  String searchTerm = "";
+  String roleFilter = "all";
+  String statusFilter = "all";
+
+  void updateUserStatus(String id, String newStatus) {
+    setState(() {
+      users = users.map((u) {
+        if (u.id == id) u.status = newStatus;
+        return u;
+      }).toList();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!
+            .userStatusUpdated(id.toString(), newStatus.toString())),
+        backgroundColor: newStatus == 'active'
+            ? Colors.orange.shade600
+            : newStatus == 'suspended'
+                ? Colors.orange
+                : Colors.orange.shade800,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<UserManagementEntry> filtered = users.where((user) {
+      final bool matchesSearch =
+          user.name.toLowerCase().contains(searchTerm.toLowerCase()) ||
+              user.email.toLowerCase().contains(searchTerm.toLowerCase());
+      final bool matchesRole = roleFilter == "all" || user.role == roleFilter;
+      final bool matchesStatus =
+          statusFilter == "all" || user.status == statusFilter;
+      return matchesSearch && matchesRole && matchesStatus;
+    }).toList();
+
+    final int totalUsers = users.length;
+    final int activeUsers = users.where((u) => u.status == "active").length;
+    final int customers = users.where((u) => u.role == "customer").length;
+    final int drivers = users.where((u) => u.role == "driver").length;
+    final int restaurants = users.where((u) => u.role == "restaurant").length;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'User Management',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.orange.shade600,
+        elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => showAddUserDialog(context),
+            tooltip: 'Add New User',
+          ),
+        ],
+      ),
+      body: Container(
+        color: Colors.grey.shade50,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // Summary Cards
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  UserSummaryCard(
+                      title: "Total Users",
+                      value: totalUsers.toString(),
+                      color: Colors.orange.shade600,
+                      icon: Icons.people),
+                  UserSummaryCard(
+                      title: "Active Users",
+                      value: activeUsers.toString(),
+                      color: Colors.green.shade600,
+                      icon: Icons.check_circle),
+                  UserSummaryCard(
+                      title: "Customers",
+                      value: customers.toString(),
+                      color: Colors.blue.shade600,
+                      icon: Icons.person),
+                  UserSummaryCard(
+                      title: "Drivers",
+                      value: drivers.toString(),
+                      color: Colors.purple.shade600,
+                      icon: Icons.directions_car),
+                  UserSummaryCard(
+                      title: "Restaurants",
+                      value: restaurants.toString(),
+                      color: Colors.green.shade600,
+                      icon: Icons.store),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Filters Card
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        // Search
+                        TextField(
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.search,
+                                color: Colors.orange.shade600),
+                            hintText: "Search users by name or email...",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                  color: Colors.orange.shade600, width: 2),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                              horizontal: 16,
+                            ),
+                            fillColor: Colors.white,
+                            filled: true,
+                          ),
+                          // ignore: deprecated_member_use
+                          onChanged: (val) => setState(() => searchTerm = val),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Filters Row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Role Filter",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color: Colors.grey.shade300),
+                                    ),
+                                    child: DropdownButton<String>(
+                                      value: roleFilter,
+                                      isExpanded: true,
+                                      underline: const SizedBox(),
+                                      icon: Icon(Icons.arrow_drop_down,
+                                          color: Colors.orange.shade600),
+                                      dropdownColor: Colors.white,
+                                      items: [
+                                        DropdownMenuItem(
+                                          value: "all",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.all_inclusive,
+                                                  size: 18,
+                                                  color:
+                                                      Colors.orange.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "All Roles",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: "customer",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.person,
+                                                  size: 18,
+                                                  color: Colors.blue.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "Customers",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: "driver",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.directions_car,
+                                                  size: 18,
+                                                  color:
+                                                      Colors.purple.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "Drivers",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: "restaurant",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.store,
+                                                  size: 18,
+                                                  color: Colors.green.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "Restaurants",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      // ignore: deprecated_member_use
+                                      onChanged: (val) => setState(
+                                          () => roleFilter = val ?? "all"),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Status Filter",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color: Colors.grey.shade300),
+                                    ),
+                                    child: DropdownButton<String>(
+                                      value: statusFilter,
+                                      isExpanded: true,
+                                      underline: const SizedBox(),
+                                      icon: Icon(Icons.arrow_drop_down,
+                                          color: Colors.orange.shade600),
+                                      dropdownColor: Colors.white,
+                                      items: [
+                                        DropdownMenuItem(
+                                          value: "all",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.all_inclusive,
+                                                  size: 18,
+                                                  color:
+                                                      Colors.orange.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "All Status",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: "active",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.check_circle,
+                                                  size: 18,
+                                                  color: Colors.green.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "Active",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: "suspended",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.pause_circle,
+                                                  size: 18,
+                                                  color:
+                                                      Colors.orange.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "Suspended",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: "banned",
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.block,
+                                                  size: 18,
+                                                  color: Colors.red.shade600),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                "Banned",
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.grey.shade800),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      // ignore: deprecated_member_use
+                                      onChanged: (val) => setState(
+                                          () => statusFilter = val ?? "all"),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Results Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade200,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Users (${filtered.length})",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      "Showing ${filtered.length} of ${users.length} users",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Users List
+              Expanded(
+                child: filtered.isEmpty
+                    ? const UserEmptyState()
+                    : ListView.separated(
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: filtered.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final user = filtered[index];
+                          return UserCardWidget(
+                            user: user,
+                            onStatusUpdate: updateUserStatus,
+                            onViewDetails: (u) =>
+                                showUserDetailsDialog(context, u),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

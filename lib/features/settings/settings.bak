@@ -1,0 +1,9 @@
+/// Barrel export for settings feature.
+/// Populated as modules are migrated in Phases 3-7.
+library;
+
+export 'view/settings_screen.dart';
+export 'widgets/settings_info_dialogs.dart';
+export 'widgets/settings_password_dialog.dart';
+export 'widgets/settings_payment_dialogs.dart';
+export 'widgets/settings_profile_dialogs.dart';

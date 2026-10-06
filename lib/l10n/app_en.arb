@@ -1,0 +1,3778 @@
+{
+  "@@locale": "en",
+  "rememberMe": "Remember Me",
+  "criticalUpdateTitle": "Update Required",
+  "criticalUpdateMessage": "A new version of Z Speed is available. You must update the app to continue using our services.",
+  "flexibleUpdateTitle": "New Update Available!",
+  "flexibleUpdateMessage": "A new version of Z Speed is available with improvements and new features. Would you like to update now?",
+  "updateNow": "Update Now",
+  "updateLater": "Later",
+  "versionSettingsTitle": "App Update Configuration",
+  "minRequiredVersionLabel": "Minimum Required Version",
+  "latestVersionLabel": "Latest App Version",
+  "iosUrlLabel": "iOS Update URL (App Store)",
+  "androidUrlLabel": "Android Update URL (Play Store)",
+  "fallbackUrlLabel": "Fallback Update URL",
+  "saveSettings": "Save Settings",
+  "settingsSaved": "Settings saved successfully",
+  "onlySuperAdminCanEdit": "Only super admin can modify these settings",
+  "driverEarningsLimitSettings": "Driver Earnings Limit Settings",
+  "globalEarningsLimit": "Global Earnings Limit (EGP)",
+  "earningsLimitDescription": "0.0 or empty means no limit. Drivers will be locked when they exceed this limit.",
+  "settingsError": "Error saving settings",
+  "accountLocked": "Account Locked",
+  "earningsLimitReachedDesc": "You have reached your earnings limit. To continue taking requests, please contact administration or visit a hub to settle your balance.",
+  "currentEarnings": "Current Earnings:",
+  "limitThreshold": "Limit Threshold:",
+  "refreshStatus": "Refresh Status",
+  "lockedDueToEarningsLimit": "Your account is locked due to earnings limit. Please settle your balance.",
+  "earningsLimitAndLockStatus": "Earnings Limit & Lock Status",
+  "walletBalanceLabel": "Wallet Balance",
+  "customEarningsLimit": "Custom Earnings Limit",
+  "noCustomLimit": "No Custom Limit (using global default)",
+  "settleBalanceAndUnlock": "Settle Balance & Unlock",
+  "setCustomLimitTitle": "Set Custom Earnings Limit",
+  "earningsLimitLabel": "Earnings Limit (EGP)",
+  "customLimitHint": "Enter 0 or leave empty to use global limit",
+  "customLimitUpdated": "Custom earnings limit updated",
+  "confirmSettleTitle": "Settle Balance & Unlock Driver",
+  "confirmSettleBody": "Are you sure you want to reset the balance of EGP {amount} to 0.0 and unlock this driver?",
+  "confirmSettleButton": "Confirm Settle",
+  "settleSuccess": "Driver balance settled and account unlocked successfully",
+  "settleError": "Failed to reset: {error}",
+  "accountBlockedTitle": "Account Suspended",
+  "accountBlockedMessage": "Your account has been suspended by administration. If you believe this is a mistake or need assistance, please contact our support team.",
+  "contactSupport": "Contact Support",
+  "logout": "Log Out",
+  "registrationDisabledTitle": "Registration Closed",
+  "registrationDisabledMessage": "New account registrations are temporarily paused. Please check back soon or log in with an existing account.",
+  "phoneBlacklistedError": "This phone number has been blocked from registering.",
+  "emailBlacklistedError": "This email address has been blocked from registering.",
+  "userBlockedError": "Your account has been suspended. Please contact customer support.",
+  "allowNewSignupsLabel": "Allow New Registrations",
+  "allowNewSignupsSubtitle": "Toggle whether new users can register on the platform",
+  "signupDisabledMessageLabel": "Registration Closed Message",
+  "maintenanceMessageLabel": "Maintenance Mode Message",
+  "blacklistManagementTitle": "Blacklist & Blocked Identifiers",
+  "blacklistSubtitle": "Manage blocked phone numbers, emails, and identifiers",
+  "addToBlacklist": "Add to Blacklist",
+  "removeFromBlacklist": "Remove",
+  "confirmRemoveBlacklist": "Are you sure you want to unblock {identifier}?",
+  "blockedIdentifiers": "Blocked Identifiers",
+  "blockReason": "Reason",
+  "blockReasonHint": "e.g. Fraudulent activity, chargebacks, policy violation",
+  "blockType": "Type",
+  "phoneType": "Phone Number",
+  "emailType": "Email Address",
+  "uidType": "User ID",
+  "enterIdentifier": "Enter phone, email, or user ID",
+  "blacklistEmpty": "No blocked identifiers found.",
+  "addedToBlacklistSuccess": "Identifier successfully added to blacklist.",
+  "removedFromBlacklistSuccess": "Identifier removed from blacklist.",
+  "blacklistUserCheckbox": "Also blacklist phone number & email to prevent re-registration",
+  "appTitle": "Z_Speed",
+  "@appTitle": {
+    "description": "The main application title shown in the app bar"
+  },
+  "welcomeMessage": "Welcome back, {name}!",
+  "@welcomeMessage": {
+    "description": "Greeting on the home screen",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "ok": "OK",
+  "cancel": "Cancel",
+  "submit": "Submit",
+  "save": "Save",
+  "loading": "Loading...",
+  "errorOccurred": "An error occurred. Please try again.",
+  "retry": "Retry",
+  "yes": "Yes",
+  "no": "No",
+  "success": "Success",
+  "confirm": "Confirm",
+  "loginTitle": "Login to your account",
+  "phoneNumberLabel": "Phone Number",
+  "continueButton": "Continue",
+  "otpPrompt": "Enter Verification Code",
+  "didNotReceiveCode": "Didn't receive the code?",
+  "resendCode": "Resend",
+  "enterName": "What's your name?",
+  "accountPending": "Account Pending Verification",
+  "forDeliveryService": "FOR DELIVERY SERVICE",
+  "emailAddress": "Email Address",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "logIn": "Log In",
+  "signUp": "Sign Up",
+  "signInWithGoogle": "Sign in with Google",
+  "continueWithPhone": "Continue with Phone",
+  "orContinueWith": "Or continue with",
+  "dontHaveAnAccount": "Don't have an account?",
+  "alreadyHaveAnAccount": "Already have an account?",
+  "orText": "OR",
+  "createAccount": "Create Account",
+  "welcomeBack": "Welcome Back!",
+  "joinOurDeliveryService": "Join our delivery service",
+  "loginToYourAccount": "Login to your account",
+  "forgotPassword": "Forgot Password?",
+  "emailOrUsername": "Email or Username",
+  "emailHint": "e.g., owner@restaurant.com",
+  "pleaseEnterYourEmail": "Please enter your email",
+  "pleaseEnterValidEmail": "Please enter a valid email",
+  "enterYourPassword": "Enter your password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "homeTab": "Home",
+  "browseTab": "Browse",
+  "cartTab": "Cart",
+  "trackOrderTab": "Track Order",
+  "profileTab": "Profile",
+  "ourServices": "Our Services",
+  "chooseService": "Choose a service to get started",
+  "food": "Food",
+  "groceries": "Groceries",
+  "transport": "Transport",
+  "pharmacy": "Pharmacy",
+  "comingSoon": "Coming Soon",
+  "searchRestaurants": "Search restaurants or cuisines...",
+  "popularCategories": "Popular Categories",
+  "featuredRestaurants": "Featured Restaurants",
+  "freeDelivery": "Free Delivery",
+  "allRestaurants": "All Restaurants",
+  "openNow": "Open Now",
+  "closed": "Closed",
+  "yourCart": "Your Cart",
+  "total": "Total",
+  "subtotal": "Subtotal",
+  "deliveryFee": "Delivery Fee",
+  "taxes": "Taxes",
+  "proceedToCheckout": "Proceed to Checkout",
+  "emptyCart": "Your cart is empty",
+  "addItems": "Add items to get started",
+  "addToCart": "Add to Cart",
+  "checkout": "Checkout",
+  "myOrders": "My Orders",
+  "paymentMethods": "Payment Methods",
+  "savedAddresses": "Saved Addresses",
+  "settings": "Settings",
+  "changeLanguage": "Change Language",
+  "logout": "Logout",
+  "rating": "Rating",
+  "deliveryTimeFilter": "Delivery Time",
+  "deliveryFeeFilter": "Delivery Fee",
+  "name": "Name",
+  "openOnly": "Open Only",
+  "noRestaurantsFound": "No restaurants found",
+  "noPharmaciesFound": "No pharmacies found",
+  "noSupermarketsFound": "No supermarkets found",
+  "tryAdjustingFilters": "Try adjusting your filters or search",
+  "clearFilters": "Clear Filters",
+  "addItemsFromRestaurants": "Add items from restaurants",
+  "completed": "Completed",
+  "viewDetails": "View Details",
+  "edit": "Edit",
+  "close": "Close",
+  "tripDetails": "Trip Details",
+  "tripHistory": "Trip History",
+  "callCustomer": "Call Customer",
+  "call": "Call",
+  "callRestaurant": "Call Restaurant",
+  "itemsInOrder": "Items in Order:",
+  "noActiveTrip": "No Active Trip",
+  "viewAvailableOrders": "View Available Orders",
+  "back": "Back",
+  "next": "Next",
+  "enterLicensePlateHint": "Enter 3 or 4 numbers followed by 2, 3 or 4 letters.",
+  "licensePlate": "License Plate",
+  "navigate": "Navigate",
+  "driverApplication": "Driver Application",
+  "applicationSubmitted": "Application Submitted!",
+  "done": "Done",
+  "verifyContact": "Please verify both email and phone number.",
+  "uploadRequiredDocs": "Please upload all required documents.",
+  "fileExceedsLimit": "File exceeds the 10MB limit.",
+  "trackDriverLocation": "Track Driver Location",
+  "bookThisRide": "Book This Ride",
+  "viewRouteMap": "View Route (Map)",
+  "markAsPickedUp": "Mark as Picked Up",
+  "markAsDelivered": "Mark as Delivered",
+  "confirmDelivery": "Confirm Delivery",
+  "activeMission": "Active Mission",
+  "restaurant": "Restaurant",
+  "customer": "Customer",
+  "openMap": "Open Map",
+  "reject": "Reject",
+  "accept": "Accept",
+  "orderDetails": "Order Details",
+  "itemsToDeliver": "Items to Deliver:",
+  "noItemDetailsAvailable": "No item details available.",
+  "closeDetails": "Close Details",
+  "rejectRequest": "Reject Request",
+  "myProfile": "My Profile",
+  "noDataAvailable": "No data available",
+  "documents": "Documents",
+  "couldNotOpenDocLink": "Could not open document link",
+  "remove": "Remove",
+  "assignToOrder": "Assign to Order",
+  "assign": "Assign",
+  "removeDriver": "Remove Driver",
+  "amount": "Amount",
+  "description": "Description",
+  "review": "Review",
+  "approve": "Approve",
+  "disputeDetails": "Dispute Details",
+  "descriptionLabel": "Description:",
+  "filterOptionsComingSoon": "Filter options coming soon...",
+  "applyFilters": "Apply Filters",
+  "filterDisputes": "Filter Disputes",
+  "disputeResolution": "Dispute Resolution",
+  "sortBy": "Sort by",
+  "gotIt": "Got it",
+  "editUser": "Edit User",
+  "rejectApplication": "Reject Application",
+  "analyticsDashboard": "Analytics Dashboard",
+  "generateReport": "Generate Report",
+  "reportGenerationComingSoon": "Report generation coming soon",
+  "generate": "Generate",
+  "addRestaurant": "Add Restaurant",
+  "createOrder": "Create Order",
+  "delete": "Delete",
+  "provideRejectReason": "Please provide a reason for rejecting this section.",
+  "applicationApproved": "Application approved",
+  "applicationRejected": "Application rejected",
+  "allSectionsApproved": "All sections approved — application approved!",
+  "recentActivity": "Recent Activity",
+  "noRecentActivity": "No recent activity",
+  "saveChanges": "Save Changes",
+  "addNewRestaurant": "Add New Restaurant",
+  "editRestaurant": "Edit Restaurant",
+  "editVendor": "Edit Vendor",
+  "vendorUpdatedSuccessfully": "Vendor updated successfully",
+  "deleteRestaurant": "Delete Restaurant",
+  "addUser": "Add User",
+  "changeStatus": "Change Status",
+  "updateStatus": "Update Status",
+  "addNewUser": "Add New User",
+  "deleteUser": "Delete User",
+  "userDetails": "User Details",
+  "changeUserStatus": "Change User Status",
+  "newOrder": "New Order",
+  "recentOrders": "Recent Orders",
+  "quickActions": "Quick Actions",
+  "add": "Add",
+  "deleteCuisineType": "Delete Cuisine Type",
+  "addCuisineType": "Add Cuisine Type",
+  "create": "Create",
+  "editCuisineType": "Edit Cuisine Type",
+  "cuisineTypeDeleted": "Cuisine type deleted",
+  "bothNamesRequired": "Both English and Arabic names are required",
+  "cuisineTypeCreated": "Cuisine type created",
+  "cuisineTypeUpdated": "Cuisine type updated",
+  "noApplicationsFound": "No applications found",
+  "couldNotLoadImage": "Could not load image",
+  "createNewOrder": "Create New Order",
+  "deleteOrder": "Delete Order",
+  "editOrder": "Edit Order",
+  "applicationReview": "Application Review",
+  "all": "All",
+  "drivers": "Drivers",
+  "restaurants": "Restaurants",
+  "logoutAllOthers": "Logout All Others",
+  "allOtherSessionsLogged": "All other sessions logged out successfully",
+  "samsungGalaxySessionLogged": "Samsung Galaxy session logged out",
+  "ipadAirSessionLogged": "iPad Air session logged out",
+  "macbookProSessionLogged": "MacBook Pro session logged out",
+  "activeSessions": "Active Sessions",
+  "updatePassword": "Update Password",
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "newPasswordsDoNot": "New passwords do not match",
+  "passwordMustBeAt": "Password must be at least 8 characters",
+  "pleaseFillAllFields": "Please fill all fields",
+  "pleaseEnterYourCurrent": "Please enter your current password",
+  "oneSpecialCharacter": "• One special character",
+  "oneNumber": "• One number",
+  "oneLowercaseLetter": "• One lowercase letter",
+  "oneUppercaseLetter": "• One uppercase letter",
+  "atLeast8Characters": "• At least 8 characters",
+  "changePassword": "Change Password",
+  "saveSettings": "Save Settings",
+  "twoFaSettingsUpdatedSuccessfully": "2FA settings updated successfully",
+  "smsIsGoodFor": "• SMS is good for backup",
+  "useEmailForPrimary": "• Use email for primary verification",
+  "enableAtLeastOne": "• Enable at least one 2FA method",
+  "receiveCodeViaSms": "Receive code via SMS",
+  "smsVerification": "SMS Verification",
+  "receiveCodeViaEmail": "Receive code via email",
+  "emailVerification": "Email Verification",
+  "twofactorAuthentication": "Two-Factor Authentication",
+  "frequentlyAskedQuestions": "Frequently Asked Questions",
+  "faq": "Frequently Asked Questions",
+  "available9am5pmEst": "Available 9AM-5PM EST",
+  "liveChat": "Live Chat",
+  "phoneSupport": "Phone Support",
+  "emailSupport": "Email Support",
+  "helpSupport": "Help & Support",
+  "readFullTerms": "Read Full Terms",
+  "pricesAndFeesMay": "• Prices and fees may change",
+  "serviceMayBeInterrupted": "• Service may be interrupted for maintenance",
+  "weReserveTheRight": "• We reserve the right to modify terms",
+  "youAreResponsibleFor": "• You are responsible for your account security",
+  "youMustBeAt": "• You must be at least 18 years old",
+  "termsOfService": "Terms of Service",
+  "readFullPrivacyPolicy": "Read Full Privacy Policy",
+  "youControlYourPrivacy": "• You control your privacy settings",
+  "weNeverSellYour": "• We never sell your data",
+  "yourDataIsEncrypted": "• Your data is encrypted",
+  "weCollectOnlyNecessary": "• We collect only necessary data",
+  "keyPoints": "Key Points:",
+  "privacyPolicy": "Privacy Policy",
+  "deleteAccount": "Delete Account",
+  "pleaseTypeDeleteTo": "Please type DELETE to confirm",
+  "typeDeleteToConfirm": "Type \"DELETE\" to confirm:",
+  "removePaymentInformation": "• Remove payment information",
+  "deleteAllCustomerReviews": "• Delete all customer reviews",
+  "removeYourRestaurantFrom": "• Remove your restaurant from the platform",
+  "cancelAllPendingOrders": "• Cancel all pending orders",
+  "permanentlyDeleteAllYour": "• Permanently delete all your data",
+  "thisWill": "This will:",
+  "areYouSureYou": "Are you sure you want to delete your account?",
+  "requestDownload": "Request Download",
+  "activityLogs": "• Activity logs",
+  "preferences": "Preferences",
+  "restaurantSettings": "• Restaurant settings",
+  "paymentRecords": "• Payment records",
+  "orderHistory": "• Order history",
+  "accountInformation": "• Account information",
+  "thisIncludes": "This includes:",
+  "selectDataFormat": "Select data format:",
+  "downloadYourData": "Download Your Data",
+  "descriptionX": "Description:",
+  "couldNotOpenDocument": "Could not open document link",
+  "pleaseProvideAReason": "Please provide a reason for rejecting this section.",
+  "allSectionsApprovedApplication": "All sections approved — application approved!",
+  "bothEnglishAndArabic": "Both English and Arabic names are required",
+  "optionDeletedSuccessfully": "Option deleted successfully",
+  "deleteOption": "Delete Option",
+  "groupDeletedSuccessfully": "Group deleted successfully",
+  "deleteGroup": "Delete Group",
+  "optionNameIsRequired": "Option name is required",
+  "customerCanSelectThis": "Customer can select this option",
+  "available": "Available",
+  "preselectedForCustomer": "Pre-selected for customer",
+  "defaultSelection": "Default Selection",
+  "groupUpdatedSuccessfully": "Group updated successfully",
+  "groupCreatedSuccessfully": "Group created successfully",
+  "groupNameIsRequired": "Group name is required",
+  "customerMustSelectAn": "Customer must select an option",
+  "required": "Required",
+  "multiple": "Multiple",
+  "single": "Single",
+  "selectionType": "Selection Type:",
+  "addOption": "Add Option",
+  "addFirstGroup": "Add First Group",
+  "itemNotFound": "Item not found",
+  "manageAddons": "Manage Addons",
+  "cuisineTypes": "Cuisine Types",
+  "loadingCuisines": "Loading cuisines...",
+  "cuisineTypesUpdated": "Cuisine types updated successfully",
+  "areYouSureYouX": "Are you sure you want to logout?",
+  "symbolKey": " *",
+  "track": "Track",
+  "assignDriver": "Assign Driver",
+  "noCuisineTypesAvailable": "No cuisine types available. Please contact admin.",
+  "menuManager": "Menu Manager",
+  "pleaseLogInTo": "Please log in to manage your menu",
+  "itemDeletedSuccessfully": "Item deleted successfully",
+  "addItem": "Add Item",
+  "addFirstItem": "Add First Item",
+  "coverImage": "Cover Image *",
+  "restaurantLogo": "Restaurant Logo",
+  "viewReceipt": "View Receipt",
+  "totalX": "TOTAL",
+  "tryAdjustingYourSearch": "Try adjusting your search or filters",
+  "noOrdersFound": "No orders found",
+  "lowestAmount": "Lowest Amount",
+  "highestAmount": "Highest Amount",
+  "oldestFirst": "Oldest First",
+  "newestFirst": "Newest First",
+  "manageAndTrackAll": "Manage and track all orders",
+  "orderHistoryX": "Order History",
+  "selectCuisineType": "Select cuisine type...",
+  "symbolKeyX": "X",
+  "operatingHours": "Operating Hours",
+  "workingHours": "Working Hours",
+  "basicInformation": "Basic Information",
+  "minDeliveryTime": "Min Delivery Time",
+  "maxDeliveryTime": "Max Delivery Time",
+  "pickOnMap": "Pick on Map",
+  "coordinates": "Coordinates",
+  "documentation": "Documentation",
+  "supportCenter": "Support Center",
+  "checkOurDocumentationOr": "Check our documentation or contact support.",
+  "needHelp": "Need Help?",
+  "noOrdersYet": "No orders yet",
+  "thisWeek": "This Week",
+  "restaurantCreatedWelcomeAboard": "Restaurant created! Welcome aboard 🎉",
+  "restaurantNameIsRequired": "Restaurant name is required",
+  "createRestaurant": "Create Restaurant",
+  "notAuthenticatedPleaseLog": "Not authenticated. Please log in.",
+  "restaurantDetailsMissing": "Restaurant details missing.",
+  "orderRejected": "Order rejected",
+  "selectAReasonFor": "Select a reason for rejecting this order:",
+  "rejectOrder": "Reject Order",
+  "orderMarkedAsReady": "Order marked as ready for pickup",
+  "orderPreparationStarted": "Order preparation started",
+  "orderAcceptedSuccessfully": "Order accepted successfully",
+  "awaitingDriverPickup": "Awaiting driver pickup...",
+  "assignDriverOptional": "Assign Driver (Optional)",
+  "markAsReadyFor": "Mark as Ready for Pickup",
+  "startPreparing": "Start Preparing",
+  "trackDriver": "Track Driver",
+  "paymentMethod": "Payment Method",
+  "placedAt": "Placed At",
+  "status": "Status",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "chooseLogoFrom": "Choose logo from:",
+  "changeLogo": "Change Logo",
+  "closingTime": "Closing Time",
+  "openingTime": "Opening Time",
+  "markAsReady": "Mark as Ready",
+  "waitingForDriverLocation": "Waiting for driver location...",
+  "map": "Map",
+  "uploadingCover": "Uploading cover...",
+  "locationUpdatedFromMap": "Location updated from map",
+  "goToDashboard": "Go to Dashboard",
+  "fileExceedsThe10mb": "File exceeds the 10MB limit.",
+  "pleaseUploadBothLogo": "Please upload both logo and cover image.",
+  "pleaseUploadAllRequired": "Please upload all required documents.",
+  "selectAtLeastOne": "Select at least one cuisine type.",
+  "pleaseVerifyBothEmail": "Please verify both email and phone number.",
+  "restaurantApplication": "Restaurant Application",
+  "vendorApplication": "{vendorType} Application",
+  "@vendorApplication": {
+    "placeholders": {
+      "vendorType": {"type": "String"}
+    }
+  },
+  "vendorTypeStep": "Vendor Type",
+  "vendorTypeSubtitle": "What kind of business are you registering?",
+  "supermarket": "Supermarket",
+  "foodAndDining": "Food & dining",
+  "groceriesAndDailyNeeds": "Groceries & daily needs",
+  "medicineAndHealthProducts": "Medicine & health products",
+  "deliveryFeeSettingsSaved": "Delivery fee settings saved",
+  "discard": "Discard",
+  "discardChanges": "Discard Changes?",
+  "addTier": "Add Tier",
+  "differentRatesForDistance": "Different rates for distance ranges",
+  "tieredPricing": "Tiered Pricing",
+  "baseFeePerKm": "Base fee + per km rate",
+  "perKilometer": "Per Kilometer",
+  "calculateFeeBasedOn": "Calculate fee based on delivery distance",
+  "distancebasedFee": "Distance-Based Fee",
+  "chargeAFixedDelivery": "Charge a fixed delivery fee per order",
+  "fixedFee": "Fixed Fee",
+  "youHaveTheLatest": "You have the latest version",
+  "checkingForUpdates": "Checking for updates...",
+  "checkForUpdates": "Check for Updates",
+  "privacyPolicyContent": "Privacy Policy Content...",
+  "termsOfServiceContent": "Terms of Service Content...",
+  "issueReportedSuccessfully": "Issue reported successfully. We\\",
+  "files": "Files",
+  "fileAttachedFromFiles": "File attached from files",
+  "fileAttachedFromCamera": "File attached from camera",
+  "fileAttachedFromGallery": "File attached from gallery",
+  "chooseFileFrom": "Choose file from:",
+  "attachFile": "Attach File",
+  "blogContent": "Blog Content",
+  "blogUpdates": "Blog & Updates",
+  "technicalDocumentation": "Technical Documentation",
+  "videoTutorials": "Video Tutorials",
+  "userGuideContent": "User Guide Content",
+  "userGuide": "User Guide",
+  "connectedToSupportAgent": "Connected to support agent",
+  "connectingToSupportAgent": "Connecting to support agent...",
+  "openingLiveChat": "Opening live chat...",
+  "available247": "Available 24/7",
+  "openingEmail": "Opening email...",
+  "supportspeedridescom": "support@speedrides.com",
+  "callingSupport": "Calling support...",
+  "phoneNumberExample": "+201000000000",
+  "openMaps": "Open Maps",
+  "locationOpenedInMaps": "Location opened in maps!",
+  "send": "Send",
+  "messageSentToDriver": "Message sent to driver!",
+  "callingDriver": "Calling driver...",
+  "shareOrder": "Share Order",
+  "signIn": "Sign In",
+  "message": "Message",
+  "addedToCart": "Added to cart",
+  "labelAndAddressAre": "Label and Address are required",
+  "addSavedAddress": "Add Saved Address",
+  "addNew": "Add New",
+  "noAddressesSavedYet": "No addresses saved yet",
+  "pleaseLogin": "Please login",
+  "ratingFeatureComingSoon": "Rating feature coming soon",
+  "noMenuItemsAvailable": "No menu items available",
+  "goBack": "Go Back",
+  "restaurantNotFound": "Restaurant not found",
+  "errorLoadingRestaurant": "Error loading restaurant",
+  "createAMenuSection": "Create a menu section first",
+  "replace": "Replace",
+  "replaceCartItems": "Replace cart items?",
+  "noMenuItemsYet": "No menu items yet",
+  "cancelOrder": "Cancel Order",
+  "keepOrder": "Keep Order",
+  "pleaseSelectAReason": "Please select a reason for cancellation:",
+  "contactSupportFeatureComing": "Contact support feature coming soon",
+  "orderNotFound": "Order not found",
+  "trackOrder": "Track Order",
+  "estimatedDelivery3045Minutes": "Estimated delivery: 30-45 minutes",
+  "orderPlaced": "Order Placed",
+  "apply": "Apply",
+  "useCurrentLocation": "Use current location",
+  "locationPickerComingSoon": "Location picker coming soon",
+  "enter3Or4": "Enter 3 or 4 numbers followed by 2, 3 or 4 letters.",
+  "symbolKeyXX": "-",
+  "myAccount": "My Account",
+  "noDocumentsUploaded": "No documents uploaded.",
+  "editAnyway": "Edit Anyway",
+  "editApprovedSection": "Edit Approved Section?",
+  "sectionUpdatedSentBack": "Section updated — sent back for review.",
+  "noApplicationFound": "No application found.",
+  "myApplication": "My Application",
+  "notificationDeleted": "Notification deleted",
+  "notifications": "Notifications",
+  "shareReceipt": "Share Receipt",
+  "shareReceiptFeatureComing": "Share receipt feature coming soon!",
+  "paymentReceipt": "Payment Receipt",
+  "minimumPayoutAmount": "Minimum Payout Amount",
+  "monthly": "Monthly",
+  "weekly": "Weekly",
+  "daily": "Daily",
+  "payoutFrequency": "Payout Frequency",
+  "savePaymentMethod": "Save Payment Method",
+  "receivePaymentsViaVodafone": "Receive payments via Vodafone Cash",
+  "vodafoneCash": "Vodafone Cash",
+  "receivePaymentsViaInstapay": "Receive payments via InstaPay",
+  "instapay": "InstaPay",
+  "addPaymentMethod": "Add Payment Method",
+  "paymentMethodSaved": "Payment method saved",
+  "notSignedIn": "Not signed in",
+  "taxInformationPage": "Tax Information Page",
+  "taxInformation": "Tax Information",
+  "digitalWallet": "Digital Wallet",
+  "creditdebitCard": "Credit/Debit Card",
+  "editDetails": "Edit Details",
+  "setAsDefault": "Set as Default",
+  "defaultText": "Default",
+  "addNewPaymentMethod": "Add New Payment Method",
+  "addWallet": "Add Wallet",
+  "addDigitalWallet": "Add Digital Wallet",
+  "addCard": "Add Card",
+  "alreadyHaveAnAccountX": "Already have an account? Login",
+  "getHelpWithPrivacy": "Get help with privacy issues",
+  "readOurTermsOf": "Read our terms of service",
+  "readOurPrivacyPolicy": "Read our privacy policy",
+  "permanentlyDeleteYourAccount": "Permanently delete your account",
+  "getACopyOf": "Get a copy of your data",
+  "manageLoggedInDevices": "Manage logged-in devices",
+  "updateYourPasswordRegularly": "Update your password regularly",
+  "addAnExtraLayer": "Add an extra layer of security",
+  "useFingerprintOrFace": "Use fingerprint or face ID",
+  "biometricLogin": "Biometric Login",
+  "privacySecurity": "Privacy & Security",
+  "continueToPayment": "Continue to Payment",
+  "deliveryDetails": "Delivery Details",
+  "configureTaxSettings": "Configure Tax Settings",
+  "minimumPayout": "Minimum Payout",
+  "symbolKeyXXX": "English",
+  "english": "English",
+  "loggedOutSuccessfully": "Logged out successfully",
+  "appInformation": "App Information",
+  "submitReport": "Submit Report",
+  "attachScreenshotsIfNeeded": "Attach screenshots if needed",
+  "foundABugOr": "Found a bug or have a question?",
+  "reportAProblem": "Report a Problem",
+  "resources": "Resources",
+  "getInTouchWith": "Get in touch with our support team",
+  "contactSupport": "Contact Support",
+  "orderPlacedSuccessfully": "Order placed successfully!",
+  "creditDebitCard": "Credit / Debit Card",
+  "cashOnDelivery": "Cash on Delivery",
+  "payment": "Payment",
+  "createYourRestaurantFirst": "Create your restaurant first.",
+  "notAuthenticated": "Not authenticated.",
+  "confirmLocation": "Confirm Location",
+  "couldNotDetectLocation": "Could not detect location",
+  "ordersHistory": "Orders History",
+  "offersPage": "Offers Page",
+  "restaurantsList": "Restaurants List",
+  "speed": "Speed",
+  "downloadReceipt": "Download Receipt",
+  "orderReceipt": "Order Receipt",
+  "pleaseEnterYourPasswordValidation": "Please enter a password",
+  "passwordMinLength": "Password must be at least 6 characters",
+  "pleaseConfirmYourPassword": "Please confirm your password",
+  "bySigningUp": "By signing up, you agree to our Terms and Conditions",
+  "wantToPartnerWithUs": "Want to partner with us?",
+  "joinAsDriver": "Join as Driver",
+  "joinAsRestaurant": "Join as Vendor",
+  "google": "Google",
+  "phone": "Phone",
+  "drawerMain": "Main",
+  "drawerEngage": "Engage",
+  "drawerMore": "More",
+  "drawerDashboard": "Dashboard",
+  "drawerOrders": "Orders",
+  "drawerMenu": "Menu",
+  "drawerAnalytics": "Analytics",
+  "drawerProfile": "Profile",
+  "drawerPromotions": "Promotions",
+  "drawerReviews": "Reviews",
+  "drawerSettings": "Settings",
+  "drawerDeliveryFees": "Delivery Fees",
+  "drawerSupport": "Support",
+  "drawerAbout": "About",
+  "myRestaurant": "My Restaurant",
+  "open": "Open",
+  "dashboardOverview": "Dashboard Overview",
+  "monitorPerformance": "Monitor your restaurant performance",
+  "totalRevenue": "Total Revenue",
+  "activeOrders": "Active Orders",
+  "newCustomers": "New Customers",
+  "avgPrepTime": "Avg. Prep Time",
+  "restaurantIsOpen": "Restaurant is Open",
+  "restaurantIsClosed": "Restaurant is Closed",
+  "customersCanPlaceOrders": "Customers can place orders now",
+  "tapToStartAcceptingOrders": "Tap to start accepting orders",
+  "revenueOverview": "Revenue Overview",
+  "vsLastWeek": "vs. last week",
+  "sameAsLastWeek": "Same as last week",
+  "gettingFaster": "Getting faster",
+  "slower": "Slower",
+  "somethingWentWrong": "Something went wrong",
+  "setUpYourRestaurant": "Set up your restaurant",
+  "fillInDetailsBelow": "Fill in the details below to create your restaurant\nand start managing your menu and orders.",
+  "restaurantName": "Restaurant Name",
+  "descriptionOptional": "Description (Optional)",
+  "address": "Address",
+  "cuisineTypesCommaSeparated": "Cuisine Types (comma-separated)",
+  "cuisineTypesHint": "e.g., Italian, Pizza, Pasta",
+  "creating": "Creating...",
+  "welcomeTo": "Welcome to {name}",
+  "@welcomeTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldIsRequired": "{field} is required",
+  "@fieldIsRequired": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPending": "Pending",
+  "statusAccepted": "Accepted",
+  "statusPreparing": "Preparing",
+  "statusReady": "Ready",
+  "statusDriverAssigned": "Driver Assigned",
+  "statusPickedUp": "Picked Up",
+  "statusOnTheWay": "On the way",
+  "statusDelivered": "Delivered",
+  "statusCancelled": "Cancelled",
+  "statusRefunded": "Refunded",
+  "justNow": "Just now",
+  "minutesAgo": "{count} mins ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} hours ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dayMon": "Monday",
+  "dayTue": "Tuesday",
+  "dayWed": "Wednesday",
+  "dayThu": "Thursday",
+  "dayFri": "Friday",
+  "daySat": "Saturday",
+  "daySun": "Sunday",
+  "failedToLoadOrders": "Failed to load orders",
+  "allCount": "All ({count})",
+  "@allCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newCount": "New ({count})",
+  "@newCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activeCount": "Active ({count})",
+  "@activeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readyCount": "Ready ({count})",
+  "@readyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "order": "Order",
+  "cash": "Cash",
+  "driverAssignedAwaitingPickup": "Driver assigned — awaiting pickup",
+  "readyAssignDriver": "Ready — Assign a driver",
+  "manageDriversCount": "Manage Drivers ({count} assigned)",
+  "@manageDriversCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "itemsNotAvailable": "Items not available",
+  "tooBusy": "Too busy",
+  "closingSoon": "Closing soon",
+  "duplicateOrder": "Duplicate order",
+  "other": "Other",
+  "assignedDriversCount": "Assigned Drivers ({count})",
+  "@assignedDriversCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reason": "Reason: {reason}",
+  "@reason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "statusRejected": "Rejected",
+  "notAuthenticatedTitle": "Not Authenticated",
+  "pleaseLogInToViewProfile": "Please log in to view your profile.",
+  "noRestaurantProfileYet": "No restaurant profile yet",
+  "createRestaurantFromDashboard": "Create your restaurant from the dashboard\nto start managing your profile here.",
+  "businessInformation": "Business Information",
+  "arabicName": "Arabic Name",
+  "notSet": "Not set",
+  "location": "Location",
+  "deliverySettings": "Delivery Settings",
+  "deliveryTime": "Delivery Time",
+  "minimumOrder": "Minimum Order",
+  "deliveryRadius": "{km} km",
+  "feeMode": "Fee Mode",
+  "ratingsAndStats": "Ratings & Stats",
+  "noRatingsYet": "No ratings yet",
+  "totalReviews": "Total Reviews",
+  "memberSince": "Member since",
+  "lastUpdated": "Last updated",
+  "currentlyOpen": "Currently Open",
+  "currentlyClosed": "Currently Closed",
+  "customersCanOrderFromRestaurant": "Customers can order from your restaurant",
+  "restaurantNotAcceptingOrders": "Your restaurant isn't accepting orders",
+  "wait": "Wait",
+  "gps": "GPS",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+  "noHoursSet": "No hours set",
+  "editOperatingHours": "Edit Operating Hours",
+  "operatingHoursSaved": "Operating hours saved",
+  "failed": "Failed: {error}",
+  "@failed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "totalOrders": "Total Orders",
+  "completionRate": "Completion Rate",
+  "avgOrderValue": "Avg. Order Value",
+  "revenueTrend": "Revenue Trend",
+  "orderVolume": "Order Volume",
+  "topSellingItems": "Top Selling Items",
+  "noItemDataAvailable": "No item data available",
+  "peakHours": "Peak Hours",
+  "noHourlyDataAvailable": "No hourly data available",
+  "today": "Today",
+  "thisMonth": "This Month",
+  "lastMonth": "Last Month",
+  "custom": "Custom",
+  "noDataForThisPeriod": "No data for this period",
+  "delivered": "Delivered",
+  "cancelled": "Cancelled",
+  "refunded": "Refunded",
+  "customerInsights": "Customer Insights",
+  "totalCustomers": "Total Customers",
+  "new_": "New",
+  "returning": "Returning",
+  "unknownError": "Unknown error",
+  "createYourRestaurant": "Create Your Restaurant",
+  "setUpRestaurantProfile": "Set up your restaurant profile to start managing menu and orders.",
+  "settingsPreferences": "Preferences",
+  "manageSettingsSubtitle": "Manage notifications, payment, and account preferences.",
+  "notificationsTitle": "Notifications",
+  "configureAlerts": "Configure how you receive alerts.",
+  "newOrderAlert": "New Order Alert",
+  "showNotificationForNewOrders": "Show notification for new orders",
+  "emailNotifications": "Email Notifications",
+  "receiveEmailUpdates": "Receive email updates",
+  "autoAcceptOrders": "Auto-Accept Orders",
+  "automaticallyAcceptOrders": "Automatically accept incoming orders",
+  "restaurantNameRequired": "Restaurant Name *",
+  "email": "Email",
+  "restaurantCreatedSuccessfully": "Restaurant created successfully!",
+  "failedToCreateRestaurant": "Failed to create restaurant: {error}",
+  "@failedToCreateRestaurant": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "promotionsTitle": "Promotions",
+  "promotionsSubtitle": "Create and manage promotions to attract more customers.",
+  "discountCodes": "Discount Codes",
+  "discountCodesDesc": "Create percentage or fixed amount discount codes",
+  "specialOffers": "Special Offers",
+  "specialOffersDesc": "Set up BOGO, meal deals, and more",
+  "scheduledPromotions": "Scheduled Promotions",
+  "scheduledPromotionsDesc": "Plan promotions for holidays and peak hours",
+  "performanceTracking": "Performance Tracking",
+  "performanceTrackingDesc": "See how your promotions have performed",
+  "reviewsTitle": "Reviews",
+  "reviewsSubtitle": "See what your customers are saying about your restaurant.",
+  "customerFeedback": "Customer Feedback",
+  "customerFeedbackDesc": "Read and reply to customer reviews",
+  "ratingBreakdown": "Rating Breakdown",
+  "ratingBreakdownDesc": "Detailed breakdown of your ratings by category",
+  "sentimentTrends": "Sentiment Trends",
+  "sentimentTrendsDesc": "Track how your ratings change over time",
+  "replyToReviews": "Reply to Reviews",
+  "soldCount": "{count} sold",
+  "@soldCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setUpRestaurantProfilePrompt": "Set up your restaurant profile to start managing your menu and orders.",
+  "configureAlertsSubtitle": "Configure how you receive alerts.",
+  "newOrderAlertDescription": "Show notification for new orders",
+  "emailNotificationsDescription": "Receive email updates",
+  "autoAcceptOrdersDescription": "Automatically accept incoming orders",
+  "restaurantNameAsterisk": "Restaurant Name *",
+  "discountCodesDescription": "Create percentage or fixed-amount discount codes",
+  "specialOffersDescription": "Set up buy-one-get-one, combo deals, and more",
+  "scheduledPromotionsDescription": "Plan promotions for holidays and peak hours",
+  "performanceTrackingDescription": "See how your promotions are performing",
+  "customerFeedbackDescription": "Read and respond to customer reviews",
+  "ratingBreakdownDescription": "Detailed breakdown of your ratings by category",
+  "sentimentTrendsDescription": "Track how your ratings change over time",
+  "replyToReviewsDescription": "Engage with customers by responding to their feedback",
+  "howCanWeHelp": "How can we help?",
+  "supportTeamAssist": "Our support team is here to assist you.",
+  "liveChatAvailability": "Available 9 AM - 9 PM",
+  "faqQuestion1": "How do I update my menu?",
+  "faqAnswer1": "Go to the Menu page from the sidebar. You can add, edit, or remove items and sections. Changes are reflected to customers in real-time.",
+  "faqQuestion2": "How do I change my operating hours?",
+  "faqAnswer2": "Go to your Profile page and scroll to the Operating Hours section. Tap the edit icon next to any day to update your hours.",
+  "faqQuestion3": "How are delivery fees calculated?",
+  "faqAnswer3": "Go to Delivery Fees in the sidebar. You can set a fixed fee or distance-based pricing with tiers.",
+  "faqQuestion4": "How do I handle a rejected order?",
+  "faqAnswer4": "When you reject an order, select a reason. The customer will be notified and refunded automatically.",
+  "faqQuestion5": "How do I contact a driver?",
+  "faqAnswer5": "On the Orders page, assigned orders show the driver's name and phone number. Tap to call directly.",
+  "aboutZSpeed": "About Z Speed",
+  "aboutZSpeedDescription": "Z Speed is a fast and reliable delivery platform connecting restaurants with customers across Egypt. We empower restaurant owners with modern tools to manage their business efficiently.",
+  "openSourceLicenses": "Open Source Licenses",
+  "copyright": "© 2026 Z Speed. All rights reserved.",
+  "whatsPlanned": "What's planned:",
+  "editField": "Edit {field}",
+  "@editField": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "enterField": "Enter {field}",
+  "@enterField": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldUpdatedSuccessfully": "{field} updated successfully",
+  "@fieldUpdatedSuccessfully": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "editDayHours": "Edit {day} Hours",
+  "@editDayHours": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "dayHoursUpdated": "{day} hours updated",
+  "@dayHoursUpdated": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "selectBothTimes": "Please select both opening and closing times",
+  "logoChangedFromGallery": "Logo changed from gallery",
+  "logoChangedFromCamera": "Logo changed from camera",
+  "orderWithId": "Order #{id}",
+  "@orderWithId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteItem": "Delete Item",
+  "confirmDeleteItem": "Are you sure you want to delete '{name}'?",
+  "@confirmDeleteItem": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyEgp": "{amount} EGP",
+  "@currencyEgp": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfStock": "Out of Stock",
+  "stockCount": "Stock: {count}",
+  "@stockCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "preview": "Preview",
+  "failedToPickImage": "Failed to pick image: {error}",
+  "@failedToPickImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseSelectCuisineType": "Please select a cuisine type",
+  "englishNameRequired": "English name is required",
+  "arabicNameRequired": "Arabic name is required",
+  "englishDescriptionRequired": "English description is required",
+  "arabicDescriptionRequired": "Arabic description is required",
+  "priceRequired": "Price is required",
+  "invalidPrice": "Invalid price",
+  "salePriceError": "Sale price must be less than regular price",
+  "pleaseUploadImage": "Please upload an image for this item",
+  "failedToUploadImage": "Failed to upload image",
+  "itemCreated": "Item created",
+  "itemUpdated": "Item updated",
+  "failedToSaveItem": "Failed to save item: {error}",
+  "@failedToSaveItem": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "addMenuItem": "Add Menu Item",
+  "editMenuItem": "Edit Menu Item",
+  "cuisineTypeRequired": "Cuisine Type *",
+  "itemImageRequired": "Item Image *",
+  "itemNameEnglishRequired": "Item Name (English) *",
+  "itemNameEnglishHint": "e.g., Grilled Chicken",
+  "itemNameArabicRequired": "Item Name (Arabic) *",
+  "itemNameArabicHint": "مثال: دجاج مشوي",
+  "descriptionEnglishRequired": "Description (English) *",
+  "descriptionEnglishHint": "Brief description of the item",
+  "descriptionArabicRequired": "Description (Arabic) *",
+  "descriptionArabicHint": "وصف مختصر للصنف",
+  "priceEgpRequired": "Price (EGP) *",
+  "salePriceEgp": "Sale Price (EGP)",
+  "unavailable": "Unavailable",
+  "createItem": "Create Item",
+  "tapToUploadImage": "Tap to upload image",
+  "imageRequirements": "Required • JPG or PNG",
+  "noAddonGroupsYet": "No addon groups yet",
+  "addGroupPrompt": "Add groups like \"Choose Size\" or \"Extra Toppings\"",
+  "optionsCount": "{count, plural, =0{no options} =1{1 option} other{{count} options}}",
+  "@optionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editGroup": "Edit group",
+  "noOptionsYet": "No options yet",
+  "defaultLabel": "Default",
+  "extraPriceEgp": "+EGP {price}",
+  "@extraPriceEgp": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "editOption": "Edit option",
+  "addAddonGroup": "Add Addon Group",
+  "editAddonGroup": "Edit Addon Group",
+  "groupNameRequired": "Group Name *",
+  "groupNameHint": "e.g., Choose Size",
+  "arabicNameOptional": "Arabic Name (optional)",
+  "arabicNameHint": "e.g., اختر الحجم",
+  "minSelections": "Min Selections",
+  "maxSelections": "Max Selections",
+  "failedToSaveGroup": "Failed to save group: {error}",
+  "@failedToSaveGroup": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "update": "Update",
+  "addOptionLabel": "Add Option",
+  "editOptionLabel": "Edit Option",
+  "optionNameRequired": "Option Name *",
+  "optionNameHint": "e.g., Large",
+  "extraPriceEgpLabel": "Extra Price (EGP)",
+  "optionAdded": "Option added",
+  "optionUpdated": "Option updated",
+  "failedToSaveOption": "Failed to save option: {error}",
+  "@failedToSaveOption": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmDeleteGroup": "Are you sure you want to delete '{name}'?",
+  "@confirmDeleteGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmDeleteGroupWarning": "This will remove all {count} option(s) in this group.",
+  "@confirmDeleteGroupWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToDeleteGroup": "Failed to delete group: {error}",
+  "@failedToDeleteGroup": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmDeleteOption": "Are you sure you want to delete '{name}'?",
+  "@confirmDeleteOption": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteOption": "Failed to delete option: {error}",
+  "@failedToDeleteOption": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "andMoreItems": "{mainItem} + {count} more",
+  "@andMoreItems": {
+    "placeholders": {
+      "mainItem": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "headingTo": "Heading to {name}",
+  "@headingTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "eta": "ETA: {time}",
+  "distance": "Distance",
+  "minutesCount": "{count} min",
+  "@minutesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "creatingAccount": "Creating your account...",
+  "uploadingDocuments": "Uploading documents...",
+  "uploadingBranding": "Uploading branding images...",
+  "savingApplication": "Saving your application...",
+  "applicationSubmittedSubtitle": "Your restaurant application has been submitted successfully. We will review your application and notify you within 1-3 business days.",
+  "stepProgress": "Step {current} of {total}: {label}",
+  "@stepProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "accountSetupSubtitle": "Verify your email and phone number to get started.",
+  "submitting": "Submitting...",
+  "businessInfoStep": "Business Info",
+  "locationAndHoursStep": "Location & Hours",
+  "documentsStep": "Documents",
+  "brandingStep": "Branding",
+  "bankInfoStep": "Bank Info",
+  "reviewStep": "Review",
+  "completedOrders": "Completed Orders",
+  "cancelledOrders": "Cancelled Orders",
+  "searchOrdersHint": "Search by order ID or customer...",
+  "allOrders": "All Orders",
+  "ordersFound": "{count} {count, plural, =1{order} other{orders}} found",
+  "@ordersFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "configureDeliveryFees": "Configure how delivery fees are calculated for your orders",
+  "deliveryFeeMode": "Delivery Fee Mode",
+  "fixedDeliveryFee": "Fixed Delivery Fee",
+  "distanceBasedFeeLabel": "Distance-Based Fee",
+  "subMode": "Sub-Mode",
+  "pricingTiers": "Pricing Tiers",
+  "noTiersConfigured": "No tiers configured. Add a tier to get started.",
+  "tierWithNumber": "Tier {number}",
+  "@tierWithNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "minKm": "Min (km)",
+  "maxKm": "Max (km)",
+  "feeEgp": "Fee (EGP)",
+  "fixedFeeEgp": "Fixed Fee (EGP)",
+  "baseFeeEgp": "Base Fee (EGP)",
+  "perKmRateEgp": "Per Km Rate (EGP)",
+  "maxDeliveryDistanceKm": "Maximum Delivery Distance (km)",
+  "fixedFeeDescription": "This fee will be charged for all orders regardless of distance",
+  "radiusDescription": "Orders beyond this distance will be rejected",
+  "formulaDescription": "Formula: Base Fee + (Distance × Per Km Rate)",
+  "invalidBaseFee": "Please enter a valid base fee",
+  "invalidRadius": "Please enter a valid delivery radius",
+  "invalidPerKmRate": "Please enter a valid per km rate",
+  "addAtLeastOneTier": "Please add at least one pricing tier",
+  "unsavedChangesDescription": "You have unsaved changes. Are you sure you want to go back?",
+  "reviewYourApplication": "Review Your Application",
+  "reviewInstructions": "Please review all information carefully before submitting. You can tap \"Edit\" to go back and make changes.",
+  "accountAndContact": "Account & Contact",
+  "notUploaded": "Not uploaded",
+  "reviewDisclaimer": "By submitting this application, you confirm that all information provided is accurate. Your application will be reviewed within 1-3 business days.",
+  "notConfigured": "Not configured",
+  "tapToChange": "Tap to change",
+  "am": "AM",
+  "pm": "PM",
+  "descriptionPlaceholder": "Description",
+  "deliveryTimeRange": "{min} – {max} min",
+  "@deliveryTimeRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "@deliveryRadius": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "timeRange": "{open} – {close}",
+  "@timeRange": {
+    "placeholders": {
+      "open": {
+        "type": "String"
+      },
+      "close": {
+        "type": "String"
+      }
+    }
+  },
+  "failedWithMessage": "Failed: {error}",
+  "@failedWithMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "error": "Error: {error}",
+  "@error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "egyptian": "Egyptian",
+  "lebanese": "Lebanese",
+  "syrian": "Syrian",
+  "italian": "Italian",
+  "fastFood": "Fast Food",
+  "seafood": "Seafood",
+  "grills": "Grills",
+  "desserts": "Desserts",
+  "beverages": "Beverages",
+  "healthy": "Healthy",
+  "indian": "Indian",
+  "turkish": "Turkish",
+  "chinese": "Chinese",
+  "japanese": "Japanese",
+  "mexican": "Mexican",
+  "setHours": "Set Hours",
+  "businessDocuments": "Business Documents",
+  "provideBusinessDocs": "Upload required legal documents for your restaurant.",
+  "commercialRegistration": "Commercial Registration",
+  "commercialRegistrationDesc": "Official commercial registration certificate",
+  "businessLicense": "Business License",
+  "businessLicenseDesc": "Valid business/restaurant operating license",
+  "healthCertificate": "Health Certificate",
+  "healthCertificateDesc": "Health and safety inspection certificate",
+  "taxRegistration": "Tax Registration",
+  "taxRegistrationDesc": "Tax registration card or certificate",
+  "restaurantBranding": "Restaurant Branding",
+  "uploadLogoCover": "Upload your restaurant logo and cover photo. These will be shown to customers.",
+  "squareImageRecommended": "Square image recommended (e.g. 512x512).",
+  "tapToUploadLogo": "Tap to upload logo",
+  "coverPhoto": "Cover Photo",
+  "wideImageRecommended": "Wide image recommended (e.g. 1200x600).",
+  "tapToUploadCover": "Tap to upload cover",
+  "imagesRequiredToProceed": "Both images are required to proceed.",
+  "bankAccountDetails": "Bank Account Details",
+  "payoutInfoDesc": "Provide your bank account information for receiving payments.",
+  "bankName": "Bank Name",
+  "bankNameHint": "e.g: CIB, QNB, NBE...",
+  "bankNameRequired": "Bank Name is required",
+  "accountHolderName": "Account Holder Name",
+  "accountHolderNameHint": "Name as it appears on bank records",
+  "accountHolderNameRequired": "Account Holder Name is required",
+  "accountNumberIban": "Account Number / IBAN",
+  "accountNumberIbanHint": "Enter your full IBAN or account number",
+  "accountNumberIbanRequired": "Account Number / IBAN is required",
+  "branchNameOptional": "Branch Name (Optional)",
+  "branchNameHint": "e.g: Maadi, Zamalek...",
+  "bankSecurityNote": "Security Note",
+  "bankSecurityDesc": "Your bank details are kept secure and encrypted.",
+  "iban": "IBAN",
+  "ibanHint": "EG XX XXXX XXXX XXXX XXXX XXXX",
+  "ibanRequired": "IBAN is required",
+  "ibanMustStartWithEG": "IBAN must start with EG",
+  "ibanLengthValidation": "IBAN must be between 15 and 34 characters (current: {length})",
+  "@ibanLengthValidation": {
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "driverPersonalInfo": "Driver Personal Info",
+  "provideBasicDetails": "Provide your basic details",
+  "fullName": "Full Name",
+  "enterFullName": "Enter your full name",
+  "nameAlphaOnly": "Name must contain only letters",
+  "dateOfBirth": "Date of Birth",
+  "nationalId": "National ID",
+  "nationalIdNumber": "National ID Number",
+  "nationalIdRequired": "National ID number is required",
+  "nationalIdLength": "National ID must be exactly 14 digits",
+  "nationalIdDesc": "Front and back of your national ID",
+  "driversLicense": "Driver's License",
+  "driversLicenseDesc": "Valid driver's license",
+  "vehicleRegistration": "Vehicle Registration",
+  "vehicleRegistrationDesc": "Valid vehicle registration",
+  "vehicleInsurance": "Vehicle Insurance",
+  "vehicleInsuranceDesc": "Valid vehicle insurance",
+  "policeClearance": "Police Clearance",
+  "policeClearanceDesc": "Recent police clearance certificate",
+  "facePhoto": "Face Photo",
+  "facePhotoDesc": "Clear photo of your face",
+  "vehiclePhoto": "Vehicle Photo",
+  "vehiclePhotoDesc": "Clear photo of your vehicle",
+  "requiredDocuments": "Required Documents",
+  "uploadClearPhotos": "Upload clear photos or scans of the required documents",
+  "tapToUploadDoc": "Tap to upload {doc}",
+  "@tapToUploadDoc": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      }
+    }
+  },
+  "uploaded": "Uploaded",
+  "vehicleInfo": "Vehicle Information",
+  "provideVehicleDetails": "Provide details about your vehicle",
+  "vehicleType": "Vehicle Type",
+  "car": "Car",
+  "motorcycle": "Motorcycle",
+  "cycle": "Cycle",
+  "cycleType": "Cycle Type",
+  "normalCycle": "Normal Cycle",
+  "electronicCycle": "Electronic Cycle",
+  "selectCycleType": "Select a cycle type",
+  "make": "Make",
+  "makeRequired": "Make is required",
+  "specifyMake": "Specify Make",
+  "enterBrandManually": "Enter brand manually",
+  "model": "Model",
+  "corollaCivic": "e.g., Corolla, Civic",
+  "modelRequired": "Model is required",
+  "year": "Year",
+  "yearRequired": "Year is required",
+  "invalidYear": "Invalid year",
+  "exactColor": "Exact Color",
+  "matteBlack": "e.g., Matte Black",
+  "colorRequired": "Color is required",
+  "ownerFullName": "Owner Full Name",
+  "restaurantPhone": "Restaurant Phone",
+  "vendorNameLabel": "{vendorType} Name",
+  "@vendorNameLabel": { "placeholders": { "vendorType": { "type": "String" } } },
+  "vendorNameHint": "Enter {vendorType} name",
+  "@vendorNameHint": { "placeholders": { "vendorType": { "type": "String" } } },
+  "vendorNameRequired": "{vendorType} Name is required",
+  "@vendorNameRequired": { "placeholders": { "vendorType": { "type": "String" } } },
+  "vendorPhoneLabel": "{vendorType} Phone",
+  "@vendorPhoneLabel": { "placeholders": { "vendorType": { "type": "String" } } },
+  "vendorPhoneHint": "Enter {vendorType} phone",
+  "@vendorPhoneHint": { "placeholders": { "vendorType": { "type": "String" } } },
+  "vendorPhoneRequired": "{vendorType} Phone is required",
+  "@vendorPhoneRequired": { "placeholders": { "vendorType": { "type": "String" } } },
+  "vendorBrandingTitle": "{vendorType} Branding",
+  "@vendorBrandingTitle": { "placeholders": { "vendorType": { "type": "String" } } },
+  "vendorLogoLabel": "{vendorType} Logo",
+  "@vendorLogoLabel": { "placeholders": { "vendorType": { "type": "String" } } },
+  "noCuisinesAvailable": "No cuisines available",
+  "contactInfoTitle": "Contact Information",
+  "contactInfoSubtitle": "Provide contact details for the business owner and restaurant.",
+  "ownerEmail": "Owner Email",
+  "ownerEmailHint": "your.email@example.com",
+  "ownerPhone": "Owner Phone",
+  "ownerPhoneHint": "+20 1XX XXX XXXX",
+  "contactRestaurantPhoneHint": "Customer-facing phone number",
+  "contactRestaurantPhoneRequired": "Restaurant phone is required",
+  "fullAddress": "Full Address",
+  "city": "City",
+  "newSection": "New Section",
+  "enterSectionName": "Enter section name",
+  "addNewSection": "Add New Section",
+  "active": "Active",
+  "onSale": "On Sale",
+  "tapAddItemToCreate": "Tap 'Add Item' to create your first menu item",
+  "failedToDeleteItem": "Failed to delete item",
+  "accountSetup": "Account Setup",
+  "fillDetailsToGetStarted": "Fill out your details to get started",
+  "applicationSubmittedSuccess": "Your application has been submitted successfully!",
+  "enterCity": "Enter your city",
+  "businessInfo": "Business Information",
+  "provideBusinessDetails": "Provide your business details",
+  "enterRestaurantName": "Enter restaurant name",
+  "enterDescription": "Enter description",
+  "enterOwnerName": "Enter owner name",
+  "selectCuisinesPrompt": "Select at least one cuisine type",
+  "selectAtLeastOneCuisine": "Please select at least one cuisine",
+  "enterRestaurantPhone": "Enter restaurant phone",
+  "phoneHint": "e.g., 01012345678",
+  "whereIsRestaurant": "Where is your restaurant located?",
+  "streetBuildingFloor": "Street, Building, Floor",
+  "addressRequired": "Address is required",
+  "cityRequired": "City is required",
+  "pinpointLocation": "Pinpoint Location",
+  "locationNotSet": "Location not set",
+  "setOpeningClosingTimes": "Set opening and closing times",
+  "noRestaurantFound": "No restaurant found",
+  "completeRestaurantSetup": "Please complete your restaurant profile setup",
+  "searchMenuItems": "Search menu items...",
+  "totalItems": "Total Items",
+  "tapToUploadCoverImage": "Tap to upload cover image",
+  "optional": "Optional",
+  "deliveryRadiusLabel": "Delivery Radius",
+  "updated": "{item} updated successfully",
+  "@updated": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "statusClosed": "Closed",
+  "branding": "Branding",
+  "uploading": "Uploading...",
+  "tapToUpload": "Tap to upload",
+  "uploadedDocuments": "Uploaded Documents",
+  "documentWithIndex": "Document {index}",
+  "@documentWithIndex": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneNumber": "Phone Number",
+  "currencySymbol": "$",
+  "promotions": "Promotions",
+  "reviews": "Reviews",
+  "contactUs": "Contact Us",
+  "restaurantDashboard": "Restaurant Dashboard",
+  "paymentCash": "Cash",
+  "paymentCard": "Card",
+  "paymentWallet": "Wallet",
+  "statusCompleted": "Completed",
+  "statusFailed": "Failed",
+  "statusActive": "Active",
+  "statusSuspended": "Suspended",
+  "protectYourAccountWithAnExtraLayerOfSecurity": "Protect your account with an extra layer of security.",
+  "yourDataWillBePreparedAndSentToYourEmail": "Your data will be prepared and sent to your email.",
+  "accountDeletionScheduledYouWillReceiveAConfirmatio": "Account deletion scheduled. You will receive a confirmation email.",
+  "loadMore": "Load More",
+  "locationUpdatedSuccessfully": "Location updated successfully",
+  "editPaymentMethodFunctionalityWillBeImplementedHer": "Edit payment method functionality will be implemented here.",
+  "egpAmount": "EGP {amount}",
+  "@egpAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportedOnDate": "Reported on {date}",
+  "@reportedOnDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "disputeId": "Dispute - {id}",
+  "@disputeId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "disputeStatusUpdated": "Dispute {id} status updated to {status}",
+  "@disputeStatusUpdated": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "allDisputesCount": "All Disputes ({count})",
+  "@allDisputesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userStatusUpdated": "User {id} status updated to {status}",
+  "@userStatusUpdated": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadingReport": "Downloading {report}...",
+  "@downloadingReport": {
+    "placeholders": {
+      "report": {
+        "type": "String"
+      }
+    }
+  },
+  "previewingReport": "Previewing {report}...",
+  "@previewingReport": {
+    "placeholders": {
+      "report": {
+        "type": "String"
+      }
+    }
+  },
+  "noTypeApplications": "No {type} applications",
+  "@noTypeApplications": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "rejectSection": "Reject {section}",
+  "@rejectSection": {
+    "placeholders": {
+      "section": {
+        "type": "String"
+      }
+    }
+  },
+  "allCountParentheses": "All ({count})",
+  "@allCountParentheses": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "nameValue": "Name: {value}",
+  "@nameValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emailValue": "Email: {value}",
+  "@emailValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneValue": "Phone: {value}",
+  "@phoneValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "roleValue": "Role: {value}",
+  "@roleValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "statusValue": "Status: {value}",
+  "@statusValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "joinDateValue": "Join Date: {value}",
+  "@joinDateValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteConfirmItem": "Are you sure you want to delete \"{item}\"?\nThis action cannot be undone.",
+  "@deleteConfirmItem": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "errorValue": "Error: {error}",
+  "@errorValue": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToUpdate": "Failed to update: {error}",
+  "@failedToUpdate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rejectionReasonValue": "Rejection reason: {reason}",
+  "@rejectionReasonValue": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "rejectItem": "Reject \"{item}\"",
+  "@rejectItem": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "orderIdValue": "Order ID: {id}",
+  "@orderIdValue": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "customerValue": "Customer: {name}",
+  "@customerValue": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "restaurantValue": "Restaurant: {name}",
+  "@restaurantValue": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "amountEgpValue": "Amount: EGP {amount}",
+  "@amountEgpValue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "itemsValue": "Items: {count}",
+  "@itemsValue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dateValue": "Date: {date}",
+  "@dateValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "timeValue": "Time: {time}",
+  "@timeValue": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToReorder": "Failed to reorder: {error}",
+  "@failedToReorder": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "callCustomerName": "Call {name}?",
+  "@callCustomerName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callRestaurantName": "Call {name}?",
+  "@callRestaurantName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assignDriverId": "Assign {id}",
+  "@assignDriverId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSave": "Failed to save: {error}",
+  "@failedToSave": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutFrequencySet": "Payout frequency set to {freq}",
+  "@payoutFrequencySet": {
+    "placeholders": {
+      "freq": {
+        "type": "String"
+      }
+    }
+  },
+  "minimumPayoutSet": "Minimum payout set to ${amount}",
+  "@minimumPayoutSet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "editMethodName": "Edit {name}",
+  "@editMethodName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expiresDate": "Expires {date}",
+  "@expiresDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "addWalletType": "Add {type}",
+  "@addWalletType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "enterWalletPhone": "Enter your {type} phone number",
+  "@enterWalletPhone": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "restaurantIndex": "Restaurant {index}",
+  "@restaurantIndex": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      }
+    }
+  },
+  "lastActiveDate": "Last active: {date}",
+  "@lastActiveDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networkError": "Network error, please check your connection.",
+  "serverError": "Server connection failed.",
+  "invalidCredentials": "Invalid email or password.",
+  "emailInUse": "This email is already registered.",
+  "tooManyRequests": "Too many requests. Please try again later.",
+  "authFailed": "Authentication failed. Please try again.",
+  "unexpectedError": "An unexpected error occurred.",
+  "driverDeliveries": "Deliveries",
+  "driverHistory": "History",
+  "youAreOnline": "You're Online",
+  "youAreOffline": "You're Offline",
+  "readyToAcceptDeliveries": "Ready to accept deliveries",
+  "notReceivingRequests": "You will not receive delivery requests",
+  "goOffline": "Go Offline",
+  "goOnline": "Go Online",
+  "todaysEarnings": "Today's Earnings",
+  "keepDeliveringToIncrease": "Keep delivering to increase your earnings!",
+  "activeTrips": "Active",
+  "pendingTrips": "Pending",
+  "totalTrips": "Total Trips",
+  "confirmDeliveryProceed": "Have you delivered all items to the customer?",
+  "turnOnToStartReceivingOrders": "Turn on to start receiving orders",
+  "cantGoOfflineWithActiveOrder": "You can't go offline while you have an active order",
+  "chooseTheFoodYouLove": "Choose the Food you love",
+  "orderBestDishes": "Order the best dishes from your favorite restaurants with fast delivery to your door.",
+  "searchForFoodItem": "Search for a food item...",
+  "orderNow": "Order Now",
+  "whatDoYouNeed": "WHAT ARE WE DELIVERING TODAY?",
+  "soon": "Soon",
+  "fastDelivery": "Fast Delivery",
+  "orderFoodBestRestaurants": "Order food from the best restaurants near you with lightning-fast delivery.",
+  "browseRestaurantsBtn": "Browse Restaurants",
+  "activeOrdersTab": "Active",
+  "pastOrdersTab": "Past",
+  "noActiveOrders": "No active orders",
+  "noPastOrders": "No past orders",
+  "activeOrdersAppearHere": "Your active orders will appear here",
+  "pastOrdersAppearHere": "Your past orders will appear here",
+  "reorder": "Reorder",
+  "rate": "Rate",
+  "etaCalculating": "Calculating...",
+  "orderTimeline": "Order Timeline",
+  "waitingForRestaurant": "Waiting for restaurant",
+  "dispatching": "Dispatching",
+  "waitingToAssignDriver": "Waiting to assign driver",
+  "outForDelivery": "Out for Delivery",
+  "waitingForPickUp": "Waiting for pick up",
+  "account": "Account",
+  "driverRole": "DRIVER",
+  "drawerWallet": "Wallet",
+  "drawerLogout": "Logout",
+  "drawerHelpSupport": "Help & Support",
+  "excelImportBtn": "Import",
+  "excelImportTitle": "Bulk Import from Excel",
+  "excelImportPreviewTitle": "Preview ({count} rows)",
+  "@excelImportPreviewTitle": { "placeholders": { "count": { "type": "int" } } },
+  "excelImportingTitle": "Importing\u2026",
+  "excelImportDoneTitle": "Import Complete",
+  "excelImportStep1": "1. Download the template Excel file below.",
+  "excelImportStep2": "2. Fill in your items \u2014 Section and Available columns have dropdowns.",
+  "excelImportStep3": "3. Upload the filled file and preview before importing.",
+  "excelImportStep4": "4. Add item images after import using the edit button on each item.",
+  "excelImportSectionsLabel": "Sections for {vendorType}",
+  "@excelImportSectionsLabel": { "placeholders": { "vendorType": { "type": "String" } } },
+  "excelImportDownloadTemplate": "Download Template",
+  "excelImportUploadFile": "Upload Excel File (.xlsx)",
+  "excelImportFailedTemplate": "Failed to generate template: {error}",
+  "@excelImportFailedTemplate": { "placeholders": { "error": { "type": "String" } } },
+  "excelImportCouldNotRead": "Could not read file bytes.",
+  "excelImportNoData": "No data rows found. Make sure the file has a \"Menu Items\" sheet and data starting from row 3.",
+  "excelImportFailedRead": "Failed to read file: {error}",
+  "@excelImportFailedRead": { "placeholders": { "error": { "type": "String" } } },
+  "excelImportFailed": "Import failed. Check your connection and try again.",
+  "excelImportSuccessCount": "{count} items imported successfully.",
+  "@excelImportSuccessCount": { "placeholders": { "count": { "type": "int" } } },
+  "excelImportAddImages": "To add item images, tap the edit button on any item in your menu.",
+  "excelImportSkippedRows": "{count} row(s) were skipped.",
+  "@excelImportSkippedRows": { "placeholders": { "count": { "type": "int" } } },
+  "excelImportDownloadSkipLog": "Download Skip Log",
+  "excelImportClose": "Close",
+  "excelImportReupload": "Re-upload",
+  "excelImportConfirmBtn": "Import {count} Item(s)",
+  "@excelImportConfirmBtn": { "placeholders": { "count": { "type": "int" } } },
+  "excelImportValid": "valid",
+  "excelImportErrors": "errors (skipped)",
+  "excelImportProgress": "Importing item {current} of {total}\u2026",
+  "@excelImportProgress": { "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } } },
+  "editProfile": "Edit Profile",
+  "editProfileSubtitle": "Update your personal information",
+  "changePasswordSubtitle": "Update your login password",
+  "savedAddressesSubtitle": "Manage your delivery locations",
+  "preferencesSubtitle": "Manage your language and display settings",
+  "liveChatSubtitle": "Chat with our support agents",
+  "emailUs": "Email Us",
+  "emailUsSubtitle": "support@zspeed.app",
+  "callUs": "Call Us",
+  "callUsSubtitle": "+20 100 000 0000",
+  "faqSubtitle": "Frequently asked questions",
+  "userGuideSubtitle": "Learn how to use the app",
+  "videoTutorialsSubtitle": "Watch step-by-step guides",
+  "contactSupportTitle": "Contact Support",
+  "contactSupportSubtitle": "Reach out to our support team",
+  "resourcesTitle": "Resources",
+  "orderDelivered": "Delivered",
+  "enjoyYourMeal": "Enjoy your meal!",
+  "arrivingSoon": "Arriving soon",
+  "driverAssigned": "Driver assigned!",
+  "searchingForNearbyDriver": "Searching for nearby driver...",
+  "noDriversAvailableVicinity": "No drivers available in vicinity",
+  "assigningDriver": "Assigning driver...",
+  "verifyYourPhone": "Verify your phone",
+  "addYourPhoneNumberUpdates": "Add your phone number for order updates and delivery coordination",
+  "phoneNum": "Phone Number",
+  "sendCode": "Send Code",
+  "illDoThisLater": "I'll do this later",
+  "verifyPhone": "Verify Phone",
+  "minOrderInfo": "min order",
+  "deliveryFeeInfo": "delivery",
+  "deliveryMinInfo": "min",
+  "noItemsInSection": "No items in this section",
+  "viewCartBtn": "VIEW CART",
+  "setDeliveryAddress": "Set your delivery address",
+  "searchRestaurantsDishes": "...Search restaurants, dishes or cuisines",
+  "acceptance": "Acceptance",
+  "currentLocationUpdate": "Current Location",
+  "updateBtn": "Update",
+  "gpsTrackingActive": "GPS tracking active - Location updates every 30 seconds",
+  "checkoutLabel": "Checkout",
+  "orderSummaryLabel": "Order Summary",
+  "deliveryAddressLabel": "Delivery Address",
+  "enterYourDeliveryAddress": "Enter your delivery address",
+  "deliveryInstructionsOptional": "Delivery Instructions (Optional)",
+  "egRingDoorbell": "e.g., Ring doorbell, 2nd floor",
+  "placeOrderLabel": "Place Order",
+  "subtotalLabel": "Subtotal",
+  "deliveryFeeLabel": "Delivery Fee",
+  "itemsCount": "items {count}",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchRestaurantsPlaceholder": "...Search restaurants, dishes or cuisines",
+  "setYourDeliveryAddress": "Set your delivery address",
+  "customerPortal": "CUSTOMER PORTAL",
+  "sortByLabel": "Sort by",
+  "fastFoodCategory": "Fast Food",
+  "egyptianCategory": "Egyptian",
+  "allCategory": "All",
+  "editProfileLabel": "Edit Profile",
+  "updatePersonalInfo": "Update your personal information",
+  "changePasswordLabel": "Change Password",
+  "updateLoginPassword": "Update your login password",
+  "paymentMethodsLabel": "Payment Methods",
+  "managePaymentOptions": "Manage your payment options",
+  "savedAddressesLabel": "Saved Addresses",
+  "manageDeliveryLocations": "Manage your delivery locations",
+  "preferencesLabel": "Preferences",
+  "notificationsLabel": "Notifications",
+  "receiveOrderUpdates": "Receive order updates and promotions",
+  "languageLabel": "Language",
+  "choosePreferredLanguage": "Choose your preferred language",
+  "englishLanguage": "English",
+  "arabicLanguage": "Arabic",
+  "verifyPhoneTitle": "Verify your phone",
+  "verifyPhoneSubtitle": "Add your phone number for order updates and delivery coordination.",
+  "phoneNumberPlaceholder": "Phone Number",
+  "sendCodeButton": "Send Code",
+  "deliveryDriver": "Delivery Driver",
+  "driverNotAssignedYet": "Driver not assigned yet",
+  "assignDriverOnceReady": "We'll assign a driver once your order is ready",
+  "paymentSection": "Payment",
+  "welcomeBackToast": "Welcome back, {firstName}! 👋",
+  "@welcomeBackToast": {
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      }
+    }
+  },
+  "whatAreYouCravingToday": "What are you craving today?",
+  "chooseFoodYouLove": "Choose Food You Love",
+  "selectLocationOnMap": "Select Location on Map",
+  "tapToPinYourDeliveryLocation": "Tap to pin your delivery location",
+  "deliveryLocation": "Delivery Location",
+
+  "signOut": "Sign Out",
+  "signOutWarning": "You will be signed out of your account. Sign in again to continue.",
+  "logoutFailed": "Logout failed",
+  "role": "Role",
+  "memberSince": "Member Since",
+
+  "resetPassword": "Reset Password",
+  "resetPasswordInstructions": "Enter your email and we'll send a reset link.",
+  "sendResetLink": "Send Reset Link",
+  "resetLinkSent": "Reset link sent! Check your inbox.",
+  "failedToSendResetEmail": "Failed to send reset email. Try again.",
+  "signUpFailed": "Sign up failed",
+  "loginFailed": "Login failed",
+  "googleSignInFailed": "Google sign-in failed",
+
+  "signInWithPhone": "Sign in with Phone",
+  "phoneVerificationSmsHint": "We'll send a verification code via SMS",
+  "enterValidPhoneNumber": "Enter a valid phone number (e.g. 01012345678 or +201012345678)",
+  "failedToSendCode": "Failed to send code",
+  "autoVerificationFailed": "Auto-verification failed",
+  "failedToSendSms": "Failed to send SMS",
+  "verifyAndSignIn": "Verify & Sign In",
+  "sendVerificationCode": "Send Verification Code",
+  "enterSixDigitCode": "Enter the 6-digit code",
+  "verificationFailed": "Verification failed",
+  "invalidCode": "Invalid code",
+  "change": "Change",
+  "resendCode2": "Resend Code",
+
+  "fullName": "Full Name",
+  "fullNameHint": "e.g. Ahmed Hassan",
+  "fullNameRequired": "Please enter your name",
+  "nameTooShort": "Name is too short",
+  "weNeedYourName": "We need your name for orders and delivery.",
+  "somethingWentWrong": "Something went wrong",
+  "failedToSaveName": "Failed to save name",
+
+  "verifyYourEmail": "Verify your email",
+  "emailVerified": "Email Verified!",
+  "sentSixDigitCodeTo": "We've sent a 6-digit code to:",
+  "emailVerifiedSuccessfully": "Your email has been verified successfully!",
+  "failedToSendVerificationCode": "Failed to send verification code.",
+  "failedToSendVerificationCodeRetry": "Failed to send verification code. Please try again.",
+  "pleaseEnterSixDigitCode": "Please enter the 6-digit code.",
+  "invalidCodeError": "Invalid code.",
+  "verificationFailedRetry": "Verification failed. Please try again.",
+  "verifyCode": "Verify Code",
+  "sending": "Sending...",
+  "resendInSeconds": "Resend in {seconds}s",
+  "@resendInSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "illVerifyLater": "I'll verify later",
+
+  "chooseYourRole": "Choose Your Role",
+  "selectHowYouWantToUse": "Select how you want to use Z Speed Delivery",
+  "roleCustomer": "Customer",
+  "roleCustomerSubtitle": "Order food & track delivery",
+  "roleDriver": "Driver",
+  "roleDriverSubtitle": "Deliver orders & earn money",
+  "roleVendor": "Vendor / Partner",
+  "roleVendorSubtitle": "Restaurant, Supermarket or Pharmacy",
+  "roleAdmin": "Administrator",
+  "roleAdminSubtitle": "Full platform management",
+  "selected": "✓ Selected",
+  "pleaseEnterYourPasswordValidation": "Please enter your password",
+  "passwordMinLength": "Password must be at least 6 characters",
+  "bySigningUp": "By signing up, you agree to our Terms & Privacy Policy",
+  "google": "Google",
+  "phone": "Phone",
+
+  "adminManagement": "Admin Management",
+  "addAdmin": "Add Admin",
+  "addNewAdmin": "Add New Admin",
+  "searchAdmins": "Search admins...",
+  "adminsList": "Admins List",
+  "adminColumnHeader": "Admin",
+  "joinedColumnHeader": "Joined",
+  "noAdminUsersFound": "No admin users found",
+  "adminCreatedSuccessfully": "Admin created successfully",
+  "pleaseFillAllFields": "Please fill all fields",
+
+  "userManagement": "User Management",
+  "usersList": "Users List",
+  "userColumnHeader": "User",
+  "actionsColumnHeader": "Actions",
+  "searchUsers": "Search users...",
+  "allRoles": "All Roles",
+  "allStatuses": "All Statuses",
+
+  "restaurantManagement": "Restaurant Management",
+  "vendorManagement": "Vendor Management",
+  "addVendor": "Add Vendor",
+  "noVendorsFound": "No vendors found",
+  "changeVendorType": "Change Vendor Type",
+  "allFilter": "All",
+
+  "systemSettings": "System Settings",
+  "localizationSection": "Localization",
+  "platformConfiguration": "Platform Configuration",
+  "platformCommission": "Platform Commission",
+  "maintenanceMode": "Maintenance Mode",
+  "platformIsOffline": "Platform is offline",
+  "platformIsLive": "Platform is live",
+  "deleteSection": "Delete Section",
+  "deleteSectionConfirm": "Delete \"{name}\"? This cannot be undone.",
+  "@deleteSectionConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "editSection": "Edit Section",
+
+  "statusColumnHeader": "Status",
+  "roleColumnHeader": "Role",
+  "emailLabel": "Email",
+
+  "qtyLabel": "Qty: {qty}",
+  "@qtyLabel": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+
+  "popular": "Popular",
+  "quantity": "Quantity",
+  "customizeYourItem": "Customize Your Item",
+  "specialInstructions": "Special Instructions",
+  "specialInstructionsHint": "e.g., No onions, extra spicy...",
+  "addToCartButton": "Add to Cart",
+  "searchMenuItems": "Search menu items…",
+  "noItemsInSection": "No items in this section",
+  "itemsInSection": "{count} item",
+  "@itemsInSection": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "itemsInSectionPlural": "{count} items",
+  "@itemsInSectionPlural": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "addedToCartItem": "{name} added to cart",
+  "@addedToCartItem": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "viewCart": "VIEW CART",
+  "replaceCartContent": "Your cart contains items from another restaurant. Would you like to clear the cart and add this item instead?",
+  "vendorCurrentlyClosed": "This {vendorType} is currently closed. You can browse the menu but ordering is unavailable.",
+  "@vendorCurrentlyClosed": {
+    "placeholders": {
+      "vendorType": {"type": "String"}
+    }
+  },
+  "ownerChip": "Owner",
+
+  "required": "Required",
+  "optional": "Optional",
+  "free": "Free",
+  "addonPricePrefix": "+EGP {price}",
+  "@addonPricePrefix": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "choose1Option": "Choose 1 option",
+  "chooseUpTo1Option": "Choose up to 1 option (optional)",
+  "chooseMinToMax": "Choose {min} to {max} options",
+  "@chooseMinToMax": {
+    "placeholders": {
+      "min": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "chooseAtLeast": "Choose at least {min} option",
+  "@chooseAtLeast": {
+    "placeholders": {
+      "min": {"type": "int"}
+    }
+  },
+  "chooseAtLeastPlural": "Choose at least {min} options",
+  "@chooseAtLeastPlural": {
+    "placeholders": {
+      "min": {"type": "int"}
+    }
+  },
+  "chooseUpToMax": "Choose up to {max} options (optional)",
+  "@chooseUpToMax": {
+    "placeholders": {
+      "max": {"type": "int"}
+    }
+  },
+  "chooseAnyOptions": "Choose any number of options (optional)",
+
+  "topRestaurantsNearYou": "Top Restaurants Near You",
+  "viewAll": "View All",
+  "viewMenu": "View Menu",
+
+  "openStatus": "Open",
+  "closedStatus": "Closed",
+  "deliverySublabel": "delivery",
+  "minOrderSublabel": "min order",
+
+  "unavailable": "Unavailable",
+
+  "sortBy": "Sort by",
+  "searchSupermarkets": "Search supermarkets or products...",
+  "searchPharmacies": "Search pharmacies or medicines...",
+  "searchRestaurantsDishes": "Search restaurants, dishes or cuisines...",
+  "errorLoadingSupermarkets": "Error loading supermarkets",
+  "errorLoadingPharmacies": "Error loading pharmacies",
+  "errorLoadingRestaurants": "Error loading restaurants",
+
+  "addressRemoved": "{label} removed",
+  "@addressRemoved": {
+    "placeholders": {
+      "label": {"type": "String"}
+    }
+  },
+  "addressAdded": "{label} added!",
+  "@addressAdded": {
+    "placeholders": {
+      "label": {"type": "String"}
+    }
+  },
+  "addressLabel": "Label (e.g., Home, Work)",
+  "fullAddress": "Full Address",
+  "buildingOptional": "Building / Villa (Optional)",
+  "floorAptOptional": "Floor / Apt (Optional)",
+  "deliveryInstructionsOptional": "Delivery Instructions (Optional)",
+
+  "owner": "Owner",
+  "searchMenuItems": "Search menu items…",
+  "noItemsInSection": "No items in this section",
+  "sectionItemCount": "{count} item",
+  "@sectionItemCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sectionItemCountPlural": "{count} items",
+  "@sectionItemCountPlural": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "replaceCartContent": "Your cart contains items from another restaurant. Would you like to clear the cart and add this item instead?",
+
+  "addItemWithPrice": "Add item  EGP {price}",
+  "@addItemWithPrice": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "vendorClosedLabel": "{vendorType} Closed",
+  "@vendorClosedLabel": {
+    "placeholders": {
+      "vendorType": {"type": "String"}
+    }
+  },
+
+  "orderSummary": "Order Summary",
+  "needHelpWithOrder": "Need help with your order?",
+  "qtyWithMeasure": "Qty: {qty} {measure}",
+
+  "estimatedTime": "Estimated Time",
+  "calculating": "Calculating...",
+  "liveTracking": "Live Tracking",
+  "ordered": "Ordered",
+  "percentComplete": "{percent}% Complete",
+  "@percentComplete": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+
+  "categories": "Categories",
+  "categoriesCount": "{count} categories",
+  "@categoriesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "quickDelivery": "Quick Delivery",
+  "grocery": "Grocery",
+  "drinks": "Drinks",
+  "flowers": "Flowers",
+  "petSupplies": "Pet Supplies",
+  "freshOrganic": "Fresh & Organic",
+  "bakery": "Bakery",
+
+  "expired": "Expired",
+  "week": "Week",
+  "month": "Month",
+  "items": "Items",
+  "tripsCount": "{count} trips",
+  "@tripsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "tripDateAt": "{date} at {time}",
+  "@tripDateAt": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "time": {"type": "String"}
+    }
+  },
+  "egpEarnings": "+EGP {amount}",
+  "@egpEarnings": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "toRestaurant": "To Restaurant",
+  "toCustomer": "To Customer",
+  "itemsCount2": "{count} items",
+  "@itemsCount2": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "itemsAssigned": "{count} items assigned",
+  "@itemsAssigned": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "remainingToAccept": "remaining to accept",
+  "noPendingRequests": "No pending requests",
+  "newDeliveryRequestsWillAppear": "New delivery requests will appear here",
+  "noActiveDeliveries": "No active deliveries",
+  "acceptedOrdersWillAppear": "Accepted orders will appear here",
+  "updateLocationFirst": "Update your location first before going online",
+  "headingToRestaurant": "Heading to Restaurant",
+  "headingToCustomer": "Heading to Customer",
+  "rejectReason": "Reason (optional)",
+  "rejectReasonHint": "e.g., Too far, Busy with other delivery",
+  "areYouSureRejectRequest": "Are you sure you want to reject this delivery request?",
+  "newLabel": "NEW",
+  "orderIdShort": "Order #{id}",
+  "@orderIdShort": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "@qtyWithMeasure": {
+    "placeholders": {
+      "qty": {"type": "String"},
+      "measure": {"type": "String"}
+    }
+  },
+
+  "callDriver": "Call Driver",
+  "callingDriver2": "Calling driver:",
+  "callLabel": "Call",
+  "messageDriver": "Message Driver",
+  "sendMessageToDriver": "Send a message to your driver:",
+  "typeMessageHere": "Type your message here...",
+  "driverLocation": "Driver Location",
+  "openingDriverLocation": "Opening driver's location on map...",
+  "completeRide": "Complete Ride",
+  "hasRideBeenCompleted": "Has the ride been completed successfully?",
+  "noButton": "No",
+  "yesComplete": "Yes, Complete",
+  "cancelRide": "Cancel Ride",
+  "areYouSureCancelRide": "Are you sure you want to cancel this ride?",
+  "cannotBeUndone": "This action cannot be undone.",
+  "yesCancel": "Yes, Cancel",
+
+  "pickupLocation": "Pickup location",
+  "dropoffLocation": "Dropoff location",
+  "whereToQuestion": "Where to?",
+  "availableRides": "Available Rides",
+  "popularLocations": "Popular Locations",
+
+  "onlineStatus": "Online",
+  "typeYourMessage": "Type your message...",
+
+  "pleaseEnterDropoff": "Please enter a dropoff location",
+  "confirmBooking": "Confirm Booking",
+  "bookRideConfirm": "Book {rideType} with {driver} for {price} EGP?",
+  "@bookRideConfirm": {
+    "placeholders": {
+      "rideType": {"type": "String"},
+      "driver": {"type": "String"},
+      "price": {"type": "String"}
+    }
+  },
+  "rideBookedSuccess": "Ride booked successfully! Driver is on the way.",
+  "rideCompletedThankYou": "Ride completed! Thank you for choosing Speed Rides.",
+  "rideCancelledSuccess": "Ride cancelled successfully.",
+  "messageSent": "Message sent",
+
+  "assignDrivers": "Assign Drivers",
+  "outOfRange": "Out of range",
+  "kmFromRestaurant": "{distance} km from restaurant",
+  "@kmFromRestaurant": {
+    "placeholders": {
+      "distance": {"type": "String"}
+    }
+  },
+  "multipleItems": "Multiple items",
+  "perDriver": "Per Driver",
+  "totalDriversCount": "Total ({count} drivers)",
+  "@totalDriversCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "assignedDriversSection": "Assigned Drivers",
+  "noDriversAssigned": "No drivers assigned yet",
+  "availableDriversSection": "Available Drivers",
+  "sortedByDistance": "Sorted by distance, rating, and acceptance rate",
+  "noAvailableDrivers": "No available drivers online",
+  "alreadyAssigned": "Already Assigned",
+  "assignDriverQuestion": "Assign this driver to the order?",
+  "assignDriverNote": "Note: The driver will be assigned to deliver all items in this order.",
+  "removeDriverConfirm": "Are you sure you want to remove {name} from this order?",
+  "@removeDriverConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
+  "noActiveRide": "No Active Ride",
+  "bookRideToGetStarted": "Book a ride to get started",
+  "bookARide": "Book a Ride",
+  "pickupLabel": "PICKUP",
+  "dropoffLabel": "DROPOFF",
+  "liveMapPlaceholder": "Live map would display here",
+  "rideHistory": "Ride History",
+  "noRideHistory": "No Ride History",
+  "rideDetails": "Ride Details",
+  "rideType": "Ride Type",
+  "etaMinutes": "{minutes} minutes",
+  "@etaMinutes": {
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "distanceKm": "{distance} km",
+  "@distanceKm": {
+    "placeholders": {
+      "distance": {"type": "String"}
+    }
+  },
+  "priceEgp": "{price} EGP",
+  "@priceEgp": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "calling": "Calling...",
+  "driverLabel": "Driver: {name}",
+  "@driverLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "etaLabel": "ETA",
+  "distanceLabel": "Distance",
+  "priceLabel": "Price",
+
+  "goingToRestaurant": "Going to Restaurant",
+  "arrivedAtRestaurant": "Arrived at Restaurant",
+  "pickingUpOrder": "Picking Up Order",
+  "orderPickedUp": "Order Picked Up",
+  "deliveringToCustomer": "Delivering to Customer",
+  "startNewTrip": "Start New Trip",
+  "unknownStatus": "Unknown",
+  "continueLabel": "Continue",
+  "activeTrip": "Active Trip",
+  "tripProgress": "Trip Progress",
+  "etaAndDistance": "ETA: {minutes} min • {distance} km",
+  "@etaAndDistance": {
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "distance": {"type": "String"}
+    }
+  },
+  "fareLabel": "Fare",
+  "pickupTitle": "Pickup",
+  "deliveryTitle": "Delivery",
+  "viewTripDetails": "View Trip Details",
+  "acceptOrderToStartDriving": "Accept an order from the available orders list to start driving",
+  "acceptanceRate": "Acceptance Rate",
+  "onTimeDeliveries": "On-time Deliveries",
+  "cancellationsLabel": "Cancellations",
+  "avgRating": "Avg Rating",
+  "orderIdLabel": "Order ID",
+  "estimatedTimeMin": "{minutes} min",
+  "@estimatedTimeMin": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+
+  "uploadFailed": "Upload failed",
+
+  "personalInformation": "Personal Information",
+  "vehicleInformation": "Vehicle Information",
+  "vehicleColor": "Color",
+  "plateNumberLabel": "Plate Number",
+  "typeLabel": "Type",
+  "reviewSubtitle": "Please review all information carefully before submitting. You can tap \"Edit\" to go back and make changes.",
+  "applicationDisclaimer": "By submitting this application, you confirm that all information provided is accurate. Your application will be reviewed within 1-3 business days.",
+
+  "basicInfo": "Basic Info",
+  "vehicleStep": "Vehicle",
+  "wallet": "Wallet",
+  "currentLocation": "Current Location",
+  "updating": "Updating...",
+  "noDeliveryHistory": "No Delivery History",
+  "completedDeliveriesWillAppear": "Your completed deliveries will appear here",
+  "addressNotAvailable": "Address not available",
+  "noAddressProvided": "No address provided",
+  "orderReceivedByCustomer": "Order Received by Customer",
+  "startNavigation": "Start Navigation",
+  "zoomIn": "Zoom In",
+  "zoomOut": "Zoom Out",
+  "inAppNavigationMode": "In-App Navigation Mode",
+  "externalGoogleMaps": "External Google Maps",
+  "keepZSpeedAppOpen": "Keep Z-SPEED app open with live turn-by-turn guidance",
+  "openTurnByTurnRoute": "Open turn-by-turn route in Google Maps app",
+  "waitingForGpsCoordinates": "Waiting for GPS coordinates...",
+  "reCenter": "Re-center",
+  "driverSpecialty": "Driver Specialty",
+  "delivery": "Delivery",
+  "transport": "Transport",
+  "foodAndPackages": "Food & Packages",
+  "passengersRides": "Passengers / Rides",
+  "couldNotCall": "Could not call {phone}: {error}",
+  "@couldNotCall": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "customerPhoneNotAvailable": "Customer phone number is not available.",
+  "coordinatesNotAvailable": "Coordinates are not available.",
+  "couldNotOpenMap": "Could not open map: {error}",
+  "@couldNotOpenMap": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "exit": "Exit",
+  "driveTowardYourDestination": "Drive toward your destination",
+  "minLabel": "min",
+  "hrLabel": "hr",
+  "navigationEtaLabel": "ETA: {eta}",
+  "@navigationEtaLabel": {
+    "placeholders": {
+      "eta": {
+        "type": "String"
+      }
+    }
+  },
+  "inDistance": "In {distance}",
+  "@inDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+
+  "performanceSummary": "Performance Summary",
+  "earningsAndPayout": "Earnings & Payout",
+  "totalDeliveries": "Total Deliveries",
+  "walletBalance": "Wallet Balance",
+  "totalEarnings": "Total Earnings",
+  "completedCount": "{count} completed",
+  "@completedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "reviewsCount": "{count} reviews",
+  "@reviewsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "noApplicationData": "No application data found.",
+  "documentNumber": "Document {number}",
+  "@documentNumber": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  },
+
+  "chatWithDriver": "Chat with Driver",
+  "callingDriverTitle": "Calling Driver",
+  "speedRides": "Speed Rides",
+  "speedRidesSubtitle": "Safe, reliable transportation in New Administrative Capital",
+  "bookRide": "Book Ride",
+  "activeRide": "Active Ride",
+  "history": "History",
+
+  "stepOfTotal": "Step {step} of {total}: {label}",
+  "@stepOfTotal": {
+    "placeholders": {
+      "step": {"type": "int"},
+      "total": {"type": "int"},
+      "label": {"type": "String"}
+    }
+  },
+
+  "driverDeclined": "Driver declined",
+  "unknownRestaurant": "Unknown Restaurant",
+
+  "chatWithSupportAgents": "Chat with our support agents",
+  "allCategoryNamed": "All {name}",
+  "markAllRead": "Mark all read",
+  "noNotificationsYet": "No notifications yet",
+
+  "orderSummarySection": "📦 Order Summary",
+  "deliveryAddressSection": "📍 Delivery Address",
+  "deliveryInstructionsSection": "📝 Delivery Instructions (Optional)",
+  "paymentMethodSection": "💳 Payment Method",
+  "promoCodeSection": "🏷 Promo Code",
+  "priceBreakdownSection": "💰 Price Breakdown",
+  "ringDoorbellHint": "e.g., Ring doorbell, 2nd floor",
+  "mobileWallet": "Mobile Wallet",
+  "enterPromoCode": "Enter promo code",
+  "taxFourteen": "Tax (14%)",
+  "discountLabel": "Discount",
+  "totalLabel": "Total",
+  "pleaseFixFollowing": "Please fix the following:",
+  "placeOrderAmount": "Place Order — EGP {amount}",
+  "@placeOrderAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "failedToPlaceOrder": "Failed to place order",
+  "kmAway": "{distance} km away",
+  "@kmAway": {
+    "placeholders": {
+      "distance": {"type": "String"}
+    }
+  },
+  "estimatedMinutes": "⏱ {min}–{max} min",
+  "@estimatedMinutes": {
+    "placeholders": {
+      "min": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "fullNameLabel": "Full Name",
+  "enterYourName": "Enter your name",
+  "phoneNumberLabel": "Phone Number",
+  "enterPhoneNumber": "Enter phone number",
+  "addressLabel": "Address",
+  "enterYourAddress": "Enter your address",
+  "cityLabel": "City",
+  "enterCity": "Enter city",
+  "deliveryOptionLabel": "Delivery Option",
+  "standardDelivery": "Standard Delivery",
+  "expressDelivery": "Express Delivery",
+  "pickupPoint": "Pickup Point",
+  "failedToLoadOrder": "Failed to load order",
+  "driverWillBeAssignedSoon": "We'll assign a driver once your order is ready",
+  "searchingForDriver": "Searching for a driver…",
+  "driverFallback": "Driver",
+  "cancelReasonChangedMind": "Changed my mind",
+  "cancelReasonMistake": "Ordered by mistake",
+  "cancelReasonTooLong": "Taking too long",
+  "cancelReasonBetterOption": "Found a better option",
+  "cancelReasonOther": "Other",
+  "orderCancelledSuccess": "Order cancelled successfully",
+  "failedToCancelOrder": "Failed to cancel order",
+  "restaurantPreparingOrder": "Restaurant is preparing your order",
+  "lookingForDriver": "Looking for a driver",
+  "waitingForOrderCompletion": "Waiting for order completion",
+  "waitingForPickup": "Waiting for pickup",
+  "driverBeingDispatched": "Driver is being dispatched",
+  "contactSupportLabel": "Contact Support",
+  "deliveryService": "DELIVERY SERVICE",
+
+  "faqHowUpdateMenu": "How do I update my menu?",
+  "faqHowUpdateMenuAnswer": "Go to Menu section → Tap edit button → Make changes → Save",
+  "faqManageOrders": "How to manage orders?",
+  "faqManageOrdersAnswer": "Orders tab shows all orders. Tap to view details and update status.",
+  "faqChangeHours": "How to change restaurant hours?",
+  "faqChangeHoursAnswer": "Settings → Operating Hours → Edit times for each day",
+  "faqAddStaff": "How to add new staff members?",
+  "faqAddStaffAnswer": "Settings → Staff Management → Add New Staff",
+  "faqPaymentIssues": "Payment processing issues?",
+  "faqPaymentIssuesAnswer": "Check Payment Settings or contact support for specific issues.",
+  "faqPrintReceipts": "How to print receipts?",
+  "faqPrintReceiptsAnswer": "Order details → Print Receipt (requires connected printer)",
+  "learnHowToUseApp": "Learn how to use the app",
+  "watchStepByStepGuides": "Watch step-by-step guides",
+  "blogAndUpdates": "Blog & Updates",
+  "latestNewsAndUpdates": "Latest news and updates",
+  "subject": "Subject",
+  "describeYourIssue": "Describe your issue",
+  "appVersion": "App Version",
+  "buildNumber": "Build Number",
+  "developerLabel": "Developer",
+
+  "orderSummary": "Order Summary",
+  "placeOrderEgp": "Place Order — EGP {amount}",
+  "@placeOrderEgp": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "paymentDetails": "Payment Details",
+  "paymentId": "Payment ID",
+  "paymentMethodLabel": "Payment Method",
+  "createdAt": "Created At",
+  "completedAt": "Completed At",
+  "transactionId": "Transaction ID",
+  "paymentStatusPending": "Pending",
+  "paymentStatusCompleted": "Completed",
+  "paymentStatusFailed": "Failed",
+  "paymentStatusRefunded": "Refunded",
+  "paymentMethodCash": "Cash on Delivery",
+  "paymentMethodCard": "Credit/Debit Card",
+  "paymentMethodWallet": "Mobile Wallet",
+
+  "paymentMethodsTitle": "Payment Methods",
+  "managePaymentMethods": "Manage your payment methods for receiving payments",
+  "noPaymentMethodsSaved": "No payment methods saved",
+  "addPaymentMethodBelow": "Add a payment method below to get started",
+  "payoutSettings": "Payout Settings",
+  "payoutFrequencySetTo": "Payout frequency set to {freq}",
+  "@payoutFrequencySetTo": {
+    "placeholders": {
+      "freq": {"type": "String"}
+    }
+  },
+  "minimumPayoutSetTo": "Minimum payout set to EGP {amount}",
+  "@minimumPayoutSetTo": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "editPaymentMethodFunctionalityWillBeImplementedHer": "Edit payment method functionality will be implemented here.",
+  "editMethodNameTitle": "Edit {methodName}",
+  "@editMethodNameTitle": {
+    "placeholders": {
+      "methodName": {"type": "String"}
+    }
+  },
+  "methodUpdatedSuccess": "{methodName} updated successfully",
+  "@methodUpdatedSuccess": {
+    "placeholders": {
+      "methodName": {"type": "String"}
+    }
+  },
+  "phoneNumber": "Phone Number",
+  "registeredPhone": "Registered phone number",
+  "phoneRequired": "Phone number is required",
+  "enterValidPhone": "Enter a valid phone number",
+  "amountEgpLabel": "Amount (EGP)",
+
+  "privacySettings": "Privacy Settings",
+  "dataCollection": "Data Collection",
+  "controlWhatData": "Control what data we collect",
+  "dataCollectionEnabled": "Data collection enabled",
+  "dataCollectionDisabled": "Data collection disabled",
+  "analyticsTitle": "Analytics",
+  "helpUsImprove": "Help us improve by sharing usage data",
+  "analyticsEnabled": "Analytics enabled",
+  "analyticsDisabled": "Analytics disabled",
+  "marketingEmails": "Marketing Emails",
+  "receivePromotionalEmails": "Receive promotional emails",
+  "marketingEmailsEnabled": "Marketing emails enabled",
+  "marketingEmailsDisabled": "Marketing emails disabled",
+  "securitySettings": "Security Settings",
+  "biometricEnabled": "Biometric login enabled",
+  "biometricDisabled": "Biometric login disabled",
+  "dataManagement": "Data Management",
+  "additionalOptions": "Additional Options",
+
+  "accountSection": "Account",
+  "editProfileLabel": "Edit Profile",
+  "updatePersonalInfo": "Update your personal information",
+  "changePasswordLabel": "Change Password",
+  "updateLoginPassword": "Update your login password",
+  "paymentMethodsLabel": "Payment Methods",
+  "managePaymentOptions": "Manage your payment options",
+  "savedAddressesLabel": "Saved Addresses",
+  "manageDeliveryLocations": "Manage your delivery locations",
+  "preferencesSection": "Preferences",
+  "notificationsLabel": "Notifications",
+  "receiveOrderUpdates": "Receive order updates and promotions",
+  "notificationsEnabledMsg": "Notifications enabled",
+  "notificationsDisabledMsg": "Notifications disabled",
+  "languageLabel": "Language",
+  "choosePreferredLanguage": "Choose your preferred language",
+  "deliveryAreaLabel": "Delivery Area",
+  "selectServiceArea": "Select your service area",
+  "aboutSection": "About",
+  "aboutSpeedApp": "About Speed App",
+  "versionInfo": "Version 1.0.0",
+  "supportContact": "Support / Contact",
+  "getHelpContact": "Get help and contact support",
+  "privacyPolicyLabel": "Privacy Policy",
+  "readPrivacyPolicyLabel": "Read our privacy policy",
+  "termsOfServiceLabel": "Terms of Service",
+  "readTermsConditions": "Read our terms and conditions",
+  "logoutButton": "Logout",
+  "speedRidesVersion": "Speed Rides v1.0.0",
+  "languageChangedTo": "Language changed to {lang}",
+  "@languageChangedTo": {
+    "placeholders": {
+      "lang": {"type": "String"}
+    }
+  },
+
+  "loadingItems": "Loading items...",
+  "noteLabel": "Note",
+  "savingLabel": "Saving...",
+  "applicationStatus": "Application Status",
+  "statusApproved": "Approved",
+  "statusUnderReview": "Under Review",
+  "editWarningContent": "If you edit this section, your account will go back to pending until the admin verifies it again. Are you sure?",
+  "businessInformationSection": "Business Information",
+  "locationAndHours": "Location & Hours",
+  "contactInformation": "Contact Information",
+  "bankInformation": "Bank Information",
+  "personalInformationSection": "Personal Information",
+  "vehicleInformationSection": "Vehicle Information",
+  "docCommercialRegistration": "Commercial Registration",
+  "docBusinessLicense": "Business License",
+  "docHealthCertificate": "Health Certificate",
+  "docTaxRegistration": "Tax Registration",
+  "uploadDocument": "Upload Document",
+  "changeDocument": "Change Document",
+  "saveDocuments": "Save Documents",
+  "accountSection": "Account",
+  "preferencesSection": "Preferences",
+  "aboutSection": "About",
+  "editProfileLabel": "Edit Profile",
+  "updatePersonalInfo": "Update your personal information",
+  "changePasswordLabel": "Change Password",
+  "updateLoginPassword": "Update your login password",
+  "paymentMethodsLabel": "Payment Methods",
+  "managePaymentOptions": "Manage your payment options",
+  "savedAddressesLabel": "Saved Addresses",
+  "manageDeliveryLocations": "Manage your delivery locations",
+  "notificationsLabel": "Notifications",
+  "receiveOrderUpdates": "Receive order updates and promotions",
+  "notificationsEnabledMsg": "Notifications enabled",
+  "notificationsDisabledMsg": "Notifications disabled",
+  "languageLabel": "Language",
+  "choosePreferredLanguage": "Choose your preferred language",
+  "languageChangedTo": "Language changed to {language}",
+  "@languageChangedTo": {
+    "placeholders": {
+      "language": {"type": "String"}
+    }
+  },
+  "deliveryAreaLabel": "Delivery Area",
+  "selectServiceArea": "Select your service area",
+  "aboutSpeedApp": "About Speed App",
+  "versionInfo": "Version 1.0.0",
+  "speedRidesVersion": "Speed Rides v1.0.0",
+  "supportContact": "Support / Contact",
+  "getHelpContact": "Get help and contact support",
+  "privacyPolicyLabel": "Privacy Policy",
+  "readPrivacyPolicyLabel": "Read our privacy policy",
+  "termsOfServiceLabel": "Terms of Service",
+  "readTermsConditions": "Read our terms and conditions",
+  "logoutButton": "Logout",
+  "loadingItems": "Loading items...",
+  "noteLabel": "Note",
+  "subtotal": "Subtotal",
+  "monitorPerformance": "Monitor your {vendorLabel} performance",
+  "@monitorPerformance": {
+    "placeholders": {
+      "vendorLabel": {"type": "String"}
+    }
+  },
+  "vendorIsOpen": "{vendorLabel} is Open",
+  "@vendorIsOpen": {
+    "placeholders": {
+      "vendorLabel": {"type": "String"}
+    }
+  },
+  "vendorIsClosed": "{vendorLabel} is Closed",
+  "@vendorIsClosed": {
+    "placeholders": {
+      "vendorLabel": {"type": "String"}
+    }
+  },
+  "avgPickTime": "Avg. Pick Time",
+  "avgFillTime": "Avg. Fill Time",
+  "orderIdLabel": "Order ID",
+  "revenueTrend": "Revenue Trend",
+  "orderVolume": "Order Volume",
+  "topSellingItems": "Top Selling Items",
+  "peakHours": "Peak Hours",
+  "customerInsights": "Customer Insights",
+  "noDataForThisPeriod": "No data for this period",
+  "noItemDataAvailable": "No item data available",
+  "noHourlyDataAvailable": "No hourly data available",
+  "soldCount": "{count} sold",
+  "@soldCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "totalCustomers": "Total Customers",
+  "returning": "Returning",
+  "avgOrderValue": "Avg. Order Value",
+  "totalOrders": "Total Orders",
+  "completionRate": "Completion Rate",
+  "today": "Today",
+  "thisWeek": "This Week",
+  "thisMonth": "This Month",
+  "lastMonth": "Last Month",
+  "custom": "Custom",
+  "delivered": "Delivered",
+  "cancelled": "Cancelled",
+  "statusApprovedLabel": "Approved",
+  "statusRejectedLabel": "Rejected",
+  "statusPendingLabel": "Pending",
+  "statusUnderReviewLabel": "Under Review",
+  "applicationStatusLabel": "Application Status",
+  "saveChanges": "Save Changes",
+  "savingChanges": "Saving...",
+  "editTooltip": "Edit",
+  "cancelTooltip": "Cancel",
+  "applicationRejected": "Application Rejected",
+  "pendingReview": "Pending Review",
+  "applicationRejectedDesc": "Your application has been rejected. You can edit your profile and resubmit.",
+  "applicationPendingDesc": "Your application is being reviewed by our team. You will be notified once a decision is made.",
+  "rejectionReasonLabel": "Reason:",
+  "editAndResubmit": "Edit & Resubmit",
+  "viewApplication": "View Application",
+  "logoutTooltip": "Logout",
+  "verifyLabel": "Verify",
+  "verifiedLabel": "Verified",
+  "emailVerifiedMsg": "Email verified!",
+  "phoneVerifiedMsg": "Phone verified!",
+  "pleaseVerifyEmail": "Please verify your email",
+  "pleaseVerifyPhone": "Please verify your phone number",
+  "closedLabel": "Closed",
+  "daySchedule": "{day}: {hours}",
+  "@daySchedule": {
+    "placeholders": {
+      "day": {"type": "String"},
+      "hours": {"type": "String"}
+    }
+  },
+  "dayScheduleClosed": "{day}: Closed",
+  "@dayScheduleClosed": {
+    "placeholders": {
+      "day": {"type": "String"}
+    }
+  },
+  "editApprovedSectionDesc": "If you edit this section, your account will go back to pending until the admin verifies it again. Are you sure?",
+  "failedToSave": "Failed to save: {error}",
+  "@failedToSave": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "failedToUploadDocument": "Failed to upload document: {error}",
+  "@failedToUploadDocument": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "failedToLoadDocument": "Failed to load document",
+  "applicationDetailTitle": "Application Detail",
+  "submittedDate": "Submitted {date}",
+  "@submittedDate": { "placeholders": { "date": { "type": "String" } } },
+  "rejectedReason": "Rejected: {reason}",
+  "@rejectedReason": { "placeholders": { "reason": { "type": "String" } } },
+  "rejectionReasonHint": "Reason for rejection...",
+  "noHoursProvided": "No hours provided",
+  "approvedLabel": "Approved",
+  "rejectedLabel": "Rejected",
+  "sectionApprovedMsg": "{section} approved",
+  "@sectionApprovedMsg": { "placeholders": { "section": { "type": "String" } } },
+  "sectionRejectedMsg": "{section} rejected",
+  "@sectionRejectedMsg": { "placeholders": { "section": { "type": "String" } } },
+  "commercialRegistration": "Commercial Registration",
+  "businessLicenseDoc": "Business License",
+  "healthCertificate": "Health Certificate",
+  "taxRegistrationDoc": "Tax Registration",
+  "locationAndHours": "Location & Hours",
+  "contactInformation": "Contact Information",
+  "bankInformation": "Bank Information",
+  "personalInformation": "Personal Information",
+  "vehicleInformation": "Vehicle Information",
+  "noteLabel": "Note",
+  "notePrefixed": "Note: {note}",
+  "@notePrefixed": {
+    "placeholders": {
+      "note": {"type": "String"}
+    }
+  },
+  "addonLine": "+ {name} (EGP {price})",
+  "@addonLine": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "price": {"type": "String"}
+    }
+  },
+
+  "rateYourOrder": "Rate your order",
+  "rateDialogSubtitle": "How was your experience with {restaurantName}?",
+  "@rateDialogSubtitle": {
+    "placeholders": {
+      "restaurantName": {"type": "String"}
+    }
+  },
+  "tapToRate": "Tap to rate",
+  "ratingLabelTerrible": "Terrible",
+  "ratingLabelBad": "Bad",
+  "ratingLabelOkay": "Okay",
+  "ratingLabelGood": "Good",
+  "ratingLabelExcellent": "Excellent",
+  "shareExperienceHint": "Share your experience (optional)",
+  "pleaseSelectRating": "Please select a rating.",
+  "failedSubmitReview": "Failed to submit review. Please try again.",
+  "skipRating": "Skip",
+  "submitRating": "Submit",
+  "thankYouReview": "Thank you for your review!",
+  "alreadyRated": "Rated",
+  "customerReviewsTitle": "Customer Reviews",
+  "noReviewsYet": "No reviews yet. Be the first!",
+  "rateButtonLabel": "Rate",
+  "phoneVerified": "Phone Verified!",
+  "phoneVerifiedSuccessfully": "Your phone number has been verified successfully!",
+  "phoneAlreadyRegistered": "This phone number is already registered. Please login instead.",
+  "sessionExpired": "Session expired. Please request a new code.",
+  "invalidPhoneNumber": "Invalid phone number format.",
+  "invalidAppCredential": "Phone verification is unavailable right now. Please try again later or contact support.",
+  "pending": "Pending",
+  "inactive": "Inactive",
+  "suspended": "Suspended",
+  "banned": "Banned",
+  "profileImage": "Profile Image",
+  "filterByType": "Filter by type",
+  "refreshTooltip": "Refresh",
+  "pendingTab": "Pending ({count})",
+  "@pendingTab": {"placeholders": {"count": {"type": "int"}}},
+  "approvedTab": "Approved ({count})",
+  "@approvedTab": {"placeholders": {"count": {"type": "int"}}},
+  "rejectedTab": "Rejected ({count})",
+  "@rejectedTab": {"placeholders": {"count": {"type": "int"}}},
+  "noPendingApplications": "No pending applications",
+  "noApprovedApplications": "No approved applications",
+  "noRejectedApplications": "No rejected applications",
+  "unknownDriver": "Unknown Driver",
+  "unknownRestaurantLabel": "Unknown Restaurant",
+  "rejectionReasonPrefix": "Reason: {reason}",
+  "@rejectionReasonPrefix": {"placeholders": {"reason": {"type": "String"}}},
+  "rejectionReasonBodyHint": "Please provide a reason for rejection. This will be shown to the applicant.",
+  "rejectionReasonInputHint": "Reason for rejection...",
+  "searchHint": "Search...",
+  "adminPanelLabel": "Admin Panel",
+  "driverApplicationsTitle": "Driver Applications",
+  "vendorApplicationsTitle": "{vendorType} Applications",
+  "@vendorApplicationsTitle": {"placeholders": {"vendorType": {"type": "String"}}},
+  "searchByNameEmailPhone": "Search by name, email, phone...",
+  "analyticsInsights": "Analytics & Insights",
+  "totalUsersLabel": "Total Users",
+  "totalOrdersLabel": "Total Orders",
+  "totalRevenueLabel": "Total Revenue",
+  "avgRevenueDay": "Avg Revenue/Day",
+  "userDistribution": "User Distribution",
+  "noUserData": "No user data available",
+  "orderStatusBreakdown": "Order Status Breakdown",
+  "noOrderData": "No order data available",
+  "dailyRevenueTrend": "Daily Revenue Trend",
+  "noRevenueData": "No revenue data available",
+  "orderManagementTitle": "Order Management",
+  "allOrdersLabel": "All Orders",
+  "dateRangeLabel": "Date Range",
+  "reportGenerationTitle": "Report Generation",
+  "salesReport": "Sales Report",
+  "userReport": "User Report",
+  "restaurantReport": "Restaurant Report",
+  "orderReport": "Order Report",
+  "generateDetailedReport": "Generate detailed {report}",
+  "@generateDetailedReport": {"placeholders": {"report": {"type": "String"}}},
+  "customerNameLabel": "Customer Name",
+  "numberOfItemsLabel": "Number of Items",
+  "reportTypeLabel": "Report Type",
+  "startDateLabel": "Start Date",
+  "endDateLabel": "End Date",
+  "restaurantNameLabel": "Restaurant Name",
+  "categoryLabel": "Category",
+  "ratingLabel15": "Rating (1-5)",
+  "cuisineTypesSection": "Cuisine Types",
+  "noCuisineTypesYet": "No cuisine types yet. Tap \"Add\" to create one.",
+  "supermarketSectionsTitle": "Supermarket Sections",
+  "pharmacySectionsTitle": "Pharmacy Sections",
+  "noSectionsYet": "No sections yet. Tap \"Add\" to create one.",
+  "addSupermarketSection": "Add Supermarket Section",
+  "addPharmacySection": "Add Pharmacy Section",
+  "nameEnglishField": "Name (English) *",
+  "nameArabicField": "Name (Arabic) *",
+  "nameEnglishHint": "e.g., Italian",
+  "nameArabicHint": "مثال: إيطالي",
+  "tapToUploadImageOptional": "Tap to upload image (optional)",
+  "profileInformationSection": "Profile Information",
+  "accountDetailsSection": "Account Details",
+  "linkedApplicationsSection": "Linked Applications",
+  "provideRejectionReason": "Provide a rejection reason that the user will see:",
+  "rejectFieldHint": "e.g. Photo is unclear, please re-upload",
+  "fullNameLabel": "Full Name",
+  "emailLabel2": "Email",
+  "phoneLabel": "Phone",
+  "addressLabel2": "Address",
+  "accountTypeLabel": "Account Type",
+  "joinedLabel": "Joined",
+  "lastUpdatedLabel": "Last Updated",
+  "appliedLabel": "Applied",
+  "approvedLabel2": "Approved",
+  "applicationStatusLabel": "Application Status",
+  "globalRejectionReasonLabel": "Global Rejection Reason",
+  "driverLabel2": "Driver",
+  "restaurantLabel2": "Restaurant",
+  "applicationLabel": "Application",
+  "submittedLabel": "Submitted",
+  "quickActionAddUser": "Add New User",
+  "quickActionGenerateReport": "Generate Report",
+  "quickActionManageRestaurants": "Manage Restaurants",
+  "quickActionSystemSettings": "System Settings",
+  "deleteOrderConfirm": "Are you sure you want to delete order {orderId}?",
+  "@deleteOrderConfirm": {"placeholders": {"orderId": {"type": "String"}}},
+  "deleteRestaurantConfirm": "Are you sure you want to delete {name}?",
+  "@deleteRestaurantConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "deleteUserConfirm": "Are you sure you want to delete {name}?",
+  "@deleteUserConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "deleteItemType": "Delete {itemType}",
+  "@deleteItemType": {"placeholders": {"itemType": {"type": "String"}}},
+  "deleteItemConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+  "@deleteItemConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "changeUserStatusTitle": "Change User Status",
+  "changeUserRoleTitle": "Change User Role",
+  "updateOrderStatusTitle": "Update Order Status",
+  "updateRestaurantStatusTitle": "Update Restaurant Status",
+  "statusLabel": "Status",
+  "roleLabel": "Role",
+  "comingSoonSuffix": "— coming soon",
+  "platformFeeDescription": "Platform fee percentage applied to orders",
+  "navDashboardTitle": "Dashboard Overview",
+  "navDashboardSubtitle": "Welcome back! Here's what's happening with your platform today.",
+  "navUserManagementTitle": "User Management",
+  "navUserManagementSubtitle": "Manage user accounts, roles, and permissions",
+  "navAnalyticsTitle": "Analytics & Reports",
+  "navAnalyticsSubtitle": "Detailed analytics and insights",
+  "navReviewDriversTitle": "Review Drivers",
+  "navReviewDriversSubtitle": "Review and manage driver applications",
+  "navReviewRestaurantsTitle": "Review Restaurants",
+  "navReviewRestaurantsSubtitle": "Review and manage restaurant applications",
+  "navReviewSupermarketsTitle": "Review Supermarkets",
+  "navReviewSupermarketsSubtitle": "Review and manage supermarket applications",
+  "navReviewPharmaciesTitle": "Review Pharmacies",
+  "navReviewPharmaciesSubtitle": "Review and manage pharmacy applications",
+  "navReviewBookstoresTitle": "Review Bookstores",
+  "navReviewBookstoresSubtitle": "Review and manage bookstore applications",
+  "navReviewHomeFurnishingTitle": "Review Home & Furnishing",
+  "navReviewHomeFurnishingSubtitle": "Review and manage home & furnishing applications",
+  "navSystemSettingsTitle": "System Settings",
+  "navSystemSettingsSubtitle": "Configure platform settings and preferences",
+  "navAdminManagementTitle": "Admin Management",
+  "navAdminManagementSubtitle": "Manage administrator accounts",
+  "pendingVerification": "Pending Verification",
+  "userTypeAdmin": "Admin",
+  "userTypeSuperAdmin": "Super Admin",
+  "userTypeRestaurant": "Restaurant",
+  "userTypeCustomer": "Customer",
+  "userTypeDriver": "Driver",
+  "statTotalUsers": "Total Users",
+  "statTotalOrders": "Total Orders",
+  "statTotalRevenue": "Total Revenue",
+  "statPendingOrders": "Pending Orders",
+  "serviceFeeLabel": "Service Fee ({percent}%)",
+  "@serviceFeeLabel": {"placeholders": {"percent": {"type": "String"}}},
+  "serviceFeeSimple": "Service Fee",
+  "continueAsGuest": "Continue as Guest",
+  "signInRequired": "Sign in required",
+  "signInToAction": "Please sign in to",
+  "maybeLater": "Maybe later",
+  "viewProfile": "View your profile",
+  "viewOrders": "View your orders",
+  "paymentStaleCartTitle": "Cart Updated",
+  "paymentStaleCartDescription": "Some items in your cart have changed. Please review and confirm.",
+  "paymentStaleCartUpdateCta": "Update Cart & Try Again",
+  "paymentAttemptCapTitle": "Payment Blocked",
+  "paymentAttemptCapMessage": "You have reached the maximum number of payment attempts. Please try again later.",
+  "paymentAttemptCapNewOrderCta": "Start a New Order",
+  "paymentBillingIncompleteTitle": "Complete Your Profile",
+  "paymentBillingIncompleteMessage": "Please complete your billing profile before making a payment.",
+  "paymentRoleForbiddenMessage": "Card payments are only available for customers.",
+  "paymentAwaitingConfirmation": "Confirming payment...",
+  "paymentSuccessTitle": "Payment Successful",
+  "paymentSuccessMessage": "Your payment has been processed successfully.",
+  "paymentFailureGenericMessage": "Payment failed. Please try again.",
+  "payByCard": "Pay by Card",
+  "securePayment": "Secure Payment",
+  "processingPayment": "Processing payment...",
+  "locationServicesDisabled": "Location services are disabled.",
+  "locationPermissionDenied": "Location permissions are denied.",
+  "locationPermissionPermanentlyDenied": "Location permissions are permanently denied.",
+  "failedToGetCurrentLocation": "Failed to get current location.",
+  "loadingLocation": "Loading location...",
+  "selectedLocation": "Selected Location",
+  "statusSearching": "Searching for Driver",
+  "statusUnassigned": "No Driver Found",
+  "recommendedProducts": "Recommended Products",
+  "gourmetDining": "Gourmet Dining",
+  "market": "Market",
+  "cityTravel": "City Travel",
+  "wellnessCheck": "Wellness Check",
+  "curatedReads": "Curated Reads",
+  "cozySpaces": "Cozy Spaces",
+  "supportEmailSubject": "{appName} Support (Order #{orderId})",
+  "@supportEmailSubject": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "orderId": {
+        "type": "String"
+      }
+    }
+  },
+  "supportEmailBody": "Hello, I need help with order #{orderId}.",
+  "@supportEmailBody": {
+    "placeholders": {
+      "orderId": {
+        "type": "String"
+      }
+    }
+  },
+  "addressDetailsTitle": "Address Details",
+  "areaLabel": "Area",
+  "typeApartment": "Apartment",
+  "typeVilla": "Villa",
+  "typeOffice": "Office",
+  "buildingName": "Building Name",
+  "villaNameNumber": "Villa Name / Number",
+  "buildingCompany": "Building / Company Name",
+  "apartmentNumber": "Apartment Number",
+  "officeNumber": "Office Number",
+  "floorOptional": "Floor (Optional)",
+  "street": "Street",
+  "mobilePhoneNumber": "Mobile Phone Number",
+  "uniqueLandmark": "Unique Landmark (Optional)",
+  "confirmAddressDetails": "Confirm Address Details",
+  "phoneRequiredError": "Phone number is required",
+  "phoneLengthError": "Invalid phone number length",
+  "fieldRequiredError": "This field is required",
+  "underMaintenanceTitle": "Under Maintenance",
+  "underMaintenanceMessage": "Z Speed is currently undergoing scheduled maintenance to improve our systems. We'll be back online shortly.",
+  "checkBackSoon": "Please check back soon!",
+  "onlySuperAdminCanToggleMaintenance": "Only Super Admin can toggle maintenance mode",
+  "onboardingTitle1": "Fast & Reliable Delivery",
+  "onboardingSub1": "Get your food, groceries, and essential items delivered to your doorstep in minutes.",
+  "onboardingTitle2": "Diverse Services",
+  "onboardingSub2": "Explore top restaurants, pharmacies, books, transport options, and much more.",
+  "onboardingTitle3": "Real-time Tracking",
+  "onboardingSub3": "Track your courier live on the map and stay updated at every stage of the delivery.",
+  "onboardingSkip": "Skip",
+  "onboardingNext": "Next",
+  "onboardingGetStarted": "Get Started",
+  "onboardingLoginSignup": "Login / Sign Up",
+  "onboardingGuest": "Continue as Guest",
+  "meatAndProteins": "Meat & Proteins",
+  "clothes": "Clothing & Fashion",
+  "buyAndSell": "Buy & Sell",
+  "electronics": "Electronics",
+  "bookstore": "Bookstore & Stationery",
+  "homeFurnishing": "Home & Furnishing",
+  "meatAndProteinsSubtitle": "Fresh meat, poultry, fish and protein products",
+  "clothesSubtitle": "Men, women, kids clothing and fashion products",
+  "buyAndSellSubtitle": "Marketplace for buying and selling new and used goods",
+  "electronicsSubtitle": "Smartphones, computers, screens and home appliances",
+  "errorLoadingMeatAndProteins": "Error loading meat & protein shops",
+  "errorLoadingClothes": "Error loading clothing shops",
+  "errorLoadingBuyAndSell": "Error loading items",
+  "errorLoadingElectronics": "Error loading electronic shops",
+  "searchMeatAndProteins": "Search for meat, poultry, fish...",
+  "searchClothes": "Search for clothes, shoes, accessories...",
+  "searchBuyAndSell": "Search marketplace...",
+  "searchElectronics": "Search for phones, computers, devices...",
+  "noMeatAndProteinsFound": "No meat shops found",
+  "noClothesFound": "No clothing shops found",
+  "noBuyAndSellFound": "No marketplace items found",
+  "noElectronicsFound": "No electronic shops found",
+  "supportChats": "Support Chats",
+  "replyToCustomerSupport": "Reply to customer live chat inquiries",
+  "activeSupportChats": "Active Support Chats",
+  "noSupportChats": "No support chats available",
+  "closeChat": "Close Chat",
+  "reopenChat": "Reopen Chat",
+  "chatClosed": "Chat Closed",
+  "chatReopened": "Chat Reopened",
+  "supportAgent": "Support Agent",
+  "connectingToSupport": "Connecting to support...",
+  "ticketClosed": "This support ticket is closed.",
+  "activeDrivers": "Active Drivers",
+  "onboardingApplications": "Onboarding Applications",
+  "walletBalanceLabel": "Wallet Balance",
+  "vehicleClassification": "Vehicle Classification",
+  "adjustBalance": "Adjust Balance",
+  "activeDriversSearchPlaceholder": "Search active drivers by name, email, phone...",
+  "applicationsTitle": "Applications & Onboarding",
+  "applicationsSubtitle": "Review onboarding requests for drivers and vendors",
+  "driversTab": "Drivers",
+  "vendorsTab": "Vendors",
+  "allCategoriesFilter": "All Categories",
+  "promoFreeDeliveryApplied": "🎉 Free delivery applied!",
+  "promoApplied": "Promo code applied!",
+  "promoInvalid": "Invalid promo code. Please try again.",
+  "promoInactive": "This promo code is no longer active.",
+  "promoExpired": "This promo code has expired.",
+  "promoMaxUsageReached": "This promo code is no longer available.",
+  "promoUserLimitReached": "You've already used this promo code.",
+  "promoMinOrderNotMet": "Minimum order of EGP {amount} required.",
+  "@promoMinOrderNotMet": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "promoWrongRestaurant": "This promo code is not valid for this restaurant.",
+  "promoPercentageDiscountApplied": "🎉 {percent}% discount applied! (EGP {amount} off)",
+  "@promoPercentageDiscountApplied": {
+    "placeholders": {
+      "percent": { "type": "String" },
+      "amount": { "type": "String" }
+    }
+  },
+  "promoFixedDiscountApplied": "🎉 EGP {amount} discount applied!",
+  "@promoFixedDiscountApplied": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "placeOrderCalculating": "Place Order — Calculating...",
+  "placeOrderAndPay": "Place Order & Pay — EGP {amount}",
+  "@placeOrderAndPay": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "usersTab": "Users",
+  "manageActiveRestaurantsSubtitle": "Manage active restaurants & markets",
+  "transportSystemTitle": "Transport System",
+  "transportTab": "Transport",
+  "transportSystemSubtitle": "Live map & ride statistics",
+  "applicationsTab": "Applications",
+  "analyticsTab": "Analytics",
+  "settingsTab": "Settings",
+  "promoCodesTitle": "Promo Codes",
+  "promosTab": "Promos",
+  "promoCodesSubtitle": "Manage discount codes",
+  "settlementsTitle": "Settlements",
+  "settlementsTab": "Settlements",
+  "settlementsSubtitle": "Pay out restaurants & drivers",
+  "supportTab": "Support",
+  "adminManagementTab": "Admins",
+  "operationsTab": "Operations",
+  "financialsTab": "Financials",
+  "analyticsAndHistoryTab": "Analytics & History",
+  "activeRides": "Active Rides",
+  "recentTrips": "Recent Trips",
+  "noRidesRegisteredToday": "No rides registered today",
+  "statusAndFare": "Status: {status} | Fare: EGP {fare}",
+  "@statusAndFare": {
+    "placeholders": {
+      "status": { "type": "String" },
+      "fare": { "type": "String" }
+    }
+  },
+  "deliveryFeeFixed": "Fixed: EGP {amount}",
+  "@deliveryFeeFixed": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "deliveryFeeFormula": "Formula: {base} + {perKm}/km",
+  "@deliveryFeeFormula": {
+    "placeholders": {
+      "base": { "type": "String" },
+      "perKm": { "type": "String" }
+    }
+  },
+  "deliveryFeeTiers": "Tiers: {count} Brackets",
+  "@deliveryFeeTiers": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "broadcastTabTitle": "Broadcast Center",
+  "broadcastTabSubtitle": "Send targeted push & in-app notifications to users across regions",
+  "targetAudienceLabel": "Target Audience",
+  "targetAllUsers": "All Users",
+  "targetCustomers": "Customers Only",
+  "targetDrivers": "Drivers Only",
+  "targetVendors": "Vendors Only",
+  "targetAdmins": "Admins Only",
+  "locationAreaLabel": "Location & Area Filter",
+  "allLocations": "All Locations",
+  "specificArea": "Specific Area / City Filter",
+  "areaHint": "e.g. Cairo, Alexandria, Maadi, Nasr City",
+  "geoRadiusLabel": "Geo-Fence Radius Filter",
+  "radiusKmLabel": "Radius: {km} km",
+  "@radiusKmLabel": {
+    "placeholders": {
+      "km": { "type": "String" }
+    }
+  },
+  "notificationContent": "Notification Content & Localization",
+  "notificationTitleEn": "Title (English)",
+  "notificationBodyEn": "Body Message (English)",
+  "notificationTitleAr": "Title (Arabic)",
+  "notificationBodyAr": "Body Message (Arabic)",
+  "imageUrlLabel": "Banner Image URL (Optional)",
+  "targetScreenLabel": "Target Screen / Action",
+  "screenNone": "General (No Action)",
+  "screenPromo": "Promo Code Screen",
+  "screenVendor": "Vendor Details",
+  "screenCategory": "Category Browse",
+  "screenCustomUrl": "Custom External Link / URL",
+  "attachedPromoCode": "Attached Promo Code",
+  "targetEntityIdLabel": "Entity ID / External URL",
+  "deliveryConfigLabel": "Delivery & Priority Configurations",
+  "sendFcmPush": "Send FCM Push Notification",
+  "storeInAppInbox": "Save to User In-App Inbox",
+  "priorityLabel": "Delivery Priority",
+  "priorityHigh": "High (Heads-up alert banner)",
+  "priorityNormal": "Normal",
+  "soundLabel": "Notification Sound",
+  "soundDefault": "Default System Sound",
+  "soundAlert": "High Alert Sound",
+  "soundSilent": "Silent",
+  "presetTemplates": "Quick Preset Templates",
+  "templatePromoCode": "Promo Discount Code",
+  "templateSystemUpdate": "App Maintenance Update",
+  "templateFlashSale": "Flash Sale & Offer",
+  "templateAreaAlert": "Area Special Offer",
+  "previewHeader": "Interactive Lockscreen Preview",
+  "sendBroadcastButton": "Send Broadcast Notification",
+  "confirmBroadcastTitle": "Confirm Broadcast Dispatch",
+  "confirmBroadcastBody": "Are you sure you want to send this broadcast notification to all targeted users?",
+  "broadcastSuccessTitle": "Broadcast Sent Successfully!",
+  "targetedUsersCount": "Targeted Users: {count}",
+  "@targetedUsersCount": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "pushDeliveredCount": "Push Messages Delivered: {count}",
+  "@pushDeliveredCount": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "pushFailedCount": "Push Delivery Failures: {count}",
+  "@pushFailedCount": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "inAppSavedCount": "In-App Records Saved: {count}",
+  "@inAppSavedCount": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "setRadiusCenterMap": "Set Radius Center on Map 📍",
+  "radiusCenterSelected": "Center Location: {lat}, {lng}",
+  "selectTargetAreaMap": "Select Area on Map 📍",
+  "audienceSpecificUser": "Specific User",
+  "targetUserIdLabel": "Target User (UID / Phone / Email)",
+  "targetUserIdHint": "Enter user UID, phone number, or email address",
+  "filterAll": "All",
+  "filterUnread": "Unread",
+  "filterOrders": "Orders",
+  "filterPromos": "Offers",
+  "unreadCountNotice": "You have {count} unread notifications",
+  "@unreadCountNotice": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "allNotificationsMarkedRead": "All notifications marked as read",
+  "noUnreadNotifications": "No unread notifications",
+  "noOrderNotifications": "No order notifications",
+  "noPromoNotifications": "No offers or discounts available",
+  "allNotificationsWillAppear": "All updates and offers will appear here",
+  "viewAllNotifications": "View all notifications",
+  "promoCodeCopied": "Promo code copied: {code}",
+  "@promoCodeCopied": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "selectedOptionUnavailable": "The selected option is currently unavailable",
+  "masterLogisticsKpiDashboard": "Master Logistics KPI Dashboard",
+  "kpiDashboardSubtitle": "Real-time metrics, profits, driver payouts and vendor financial calculations",
+  "exportExcel": "Export Excel",
+  "exportPdfPrint": "Export PDF / Print",
+  "excelExportedSuccess": "Excel exported successfully",
+  "exportFailed": "Export failed",
+  "searchOrderIdCustomerHint": "Search Order ID / Customer...",
+  "yesterday": "Yesterday",
+  "last7Days": "Last 7 Days",
+  "lastMonth": "Last Month",
+  "customDateRange": "Custom Date Range",
+  "allVendorsCombined": "All Vendors (Combined)",
+  "allRidersCombined": "All Riders (Combined)",
+  "allStatuses": "All Statuses",
+  "allPaymentMethods": "All Payment Methods",
+  "platformDeliveryFeeToggle": "15% Platform Delivery Fee",
+  "restaurantGrossSales": "Restaurant Gross Sales",
+  "subtotalAcrossOrders": "Subtotal across orders",
+  "totalDeliveryFeesCollected": "Total Delivery Fees",
+  "collectedFromClients": "Collected from clients",
+  "tripsCompleted": "Trips Completed",
+  "deliveredOrdersSubtitle": "Delivered orders",
+  "activeOrdersKpi": "Active Orders",
+  "inProgressSubtitle": "In progress",
+  "rideAcceptanceRate": "Ride Acceptance",
+  "driverResponseRate": "Driver response rate",
+  "masterNetProfit": "Master Net Profit",
+  "masterCommission": "Master Commission",
+  "comm10PlusFee15": "Comm (10%) + Platform Fee (15%)",
+  "comm10Only": "10% Admin Commission Only",
+  "restaurantFinancialsPayouts": "Restaurant Financials & Payouts",
+  "noVendorFinancialData": "No vendor financial data available",
+  "deliveredOrdersCount": "{count} Delivered Orders",
+  "@deliveredOrdersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "netSalesLabel": "Net Sales",
+  "adminComm10": "Admin Comm (10%)",
+  "amountDue": "Amount Due",
+  "riderPerformanceEarnings": "Rider Performance & Earnings",
+  "noRiderTripData": "No rider trip data available",
+  "tripsCompletedCount": "{count} Trips Completed",
+  "@tripsCompletedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "totalFeesLabel": "Total Fees",
+  "riderShare85": "Rider Share (85%)",
+  "platformCut15": "Platform Cut (15%)",
+  "tripOrderDetailedRecords": "Trip & Order Detailed Records",
+  "totalOrdersCountLabel": "Total: {count} orders",
+  "@totalOrdersCountLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noOrdersMatchFilter": "No orders match current filter",
+  "tableColDate": "Date",
+  "tableColOrderTripId": "Order / Trip ID",
+  "tableColStatus": "Status",
+  "tableColChangedBy": "Changed By",
+  "tableColPayment": "Payment",
+  "tableColSubtotal": "Subtotal",
+  "tableColDeliveryFee": "Delivery Fee",
+  "tableColRiderCut": "Rider Cut (85%)",
+  "tableColAdminComm": "Admin Comm (10%)",
+  "tableColPlatformFee": "Platform Fee (15%)",
+  "actorCustomer": "Customer",
+  "actorVendor": "Vendor",
+  "actorDriver": "Driver",
+  "actorAdmin": "Admin",
+  "actorSystem": "System",
+  "pageXOfY": "Page {page} of {total}",
+  "@pageXOfY": {
+    "placeholders": {
+      "page": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "orderIdLabel": "Order ID",
+  "customerIdLabel": "Customer ID",
+  "statusLabel": "Status",
+  "paymentMethodLabel": "Payment Method",
+  "subtotalLabel": "Subtotal",
+  "deliveryFeeLabel": "Delivery Fee",
+  "taxLabel": "Tax",
+  "totalLabel": "Total",
+  "orderDetailsTitleParam": "Order Details {id}",
+  "@orderDetailsTitleParam": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "orderIdParam": "Order ID: {id}",
+  "@orderIdParam": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "customerIdParam": "Customer ID: {id}",
+  "@customerIdParam": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "statusParam": "Status: {status}",
+  "@statusParam": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "changedByParam": "Changed By: {actor}",
+  "@changedByParam": {
+    "placeholders": {
+      "actor": { "type": "String" }
+    }
+  },
+  "cancelledByParam": "Cancelled By: {actor}",
+  "@cancelledByParam": {
+    "placeholders": {
+      "actor": { "type": "String" }
+    }
+  },
+  "cancellationReasonParam": "Reason: {reason}",
+  "@cancellationReasonParam": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "paymentMethodParam": "Payment Method: {method}",
+  "@paymentMethodParam": {
+    "placeholders": {
+      "method": { "type": "String" }
+    }
+  },
+  "subtotalParam": "Subtotal: {amount}",
+  "@subtotalParam": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "deliveryFeeParam": "Delivery Fee: {amount}",
+  "@deliveryFeeParam": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "taxParam": "Tax: {amount}",
+  "@taxParam": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "totalParam": "Total: {amount}",
+  "@totalParam": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "errorLoadingKpiMetrics": "Error loading KPI metrics: {error}",
+  "@errorLoadingKpiMetrics": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "itemCurrentlyUnavailable": "This item is currently unavailable",
+  "someItemsUnavailableSkipped": "Some items in this order are no longer available and were skipped",
+  "kpiTabTitle": "Logistics KPI",
+  "kpiTabShortTitle": "KPI Dashboard",
+  "kpiTabSubtitle": "Comprehensive vendor, rider & profit calculations",
+  "busyModeLabel": "Busy Mode",
+  "busyModeActive": "Busy (Orders Paused)",
+  "busyModeInactive": "Available (Accepting Orders)",
+  "busyModeDesc": "Temporarily stop accepting new orders",
+  "vendorCurrentlyBusy": "This store is currently busy and not accepting orders.",
+  "notifyMeWhenAvailable": "Notify Me When Available",
+  "willNotifyWhenAvailable": "We'll notify you if this store comes back online within the next 2 hours! 🔔",
+  "alreadySubscribedNotify": "You will be notified as soon as this store is available.",
+  "storyApprovalStatusPending": "Pending Approval",
+  "storyApprovalStatusApproved": "Approved",
+  "storyApprovalStatusRejected": "Rejected",
+  "storySubmittedAwaitingApproval": "Story submitted! Awaiting admin approval.",
+  "storiesApprovalTabTitle": "Story Approvals",
+  "storiesApprovalTabShort": "Stories",
+  "addDeliveryArea": "Add Area on Map 📍",
+  "configuredDeliveryAreas": "Custom Delivery Map Areas",
+  "areaNameLabel": "Area / Zone Name",
+  "thresholdKmLabel": "Base Distance Threshold (km)",
+  "extraKmRateLabel": "Rate after threshold (EGP/km)",
+  "noAreasConfigured": "No custom map areas added yet.",
+  "deleteArea": "Delete Area",
+  "editArea": "Edit Area",
+  "areaRulesInfo": "Orders within this area charge base fee up to threshold + extra km rate."
+}

@@ -1,0 +1,7 @@
+/// Barrel export for restaurant models.
+library;
+
+export 'restaurant.dart';
+export 'menu_section.dart';
+export 'menu_item.dart';
+export 'addon_group.dart';

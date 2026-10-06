@@ -1,0 +1,181 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/admin/model/admin_theme.dart';
+import 'package:z_speed/features/admin/cubit/admin_reports_cubit.dart';
+import 'package:z_speed/features/admin/cubit/admin_reports_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class AdminReportsView extends StatelessWidget {
+  const AdminReportsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AdminReportsCubit, AdminReportsState>(
+      builder: (context, state) {
+        if (state.isBusy) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return const _ReportsContent();
+      },
+    );
+  }
+}
+
+class _ReportsContent extends StatelessWidget {
+  const _ReportsContent();
+
+  List<_ReportDef> _getReports(BuildContext context) => [
+        _ReportDef(AppLocalizations.of(context)!.salesReport,
+            Icons.attach_money, 'revenue'),
+        _ReportDef(
+            AppLocalizations.of(context)!.userReport, Icons.people, 'user'),
+        _ReportDef(AppLocalizations.of(context)!.restaurantReport, Icons.store,
+            'restaurant'),
+        _ReportDef(AppLocalizations.of(context)!.orderReport,
+            Icons.shopping_bag, 'order'),
+      ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                AppLocalizations.of(context)!.reportGenerationTitle,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AdminTheme.textDark,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => _showGenerateReportDialog(context),
+              icon: const Icon(Icons.download, size: 16),
+              label: Text(AppLocalizations.of(context)!.generateReport),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AdminTheme.primaryOrange,
+                foregroundColor: AdminTheme.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AdminTheme.surfaceWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AdminTheme.borderColor, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+                spreadRadius: -5,
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              ..._getReports(context).map((report) {
+                return ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AdminTheme.primaryOrange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color:
+                              AdminTheme.primaryOrange.withValues(alpha: 0.2),
+                          width: 1),
+                    ),
+                    child: Icon(
+                      report.icon,
+                      color: AdminTheme.primaryOrange,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    report.label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AdminTheme.textDark,
+                      fontSize: 14,
+                    ),
+                  ),
+                  subtitle: Text(
+                    AppLocalizations.of(context)!
+                        .generateDetailedReport(report.label),
+                    style: TextStyle(
+                      color: AdminTheme.textLight,
+                      fontSize: 11,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.download,
+                            color: AdminTheme.primaryOrange, size: 18),
+                        onPressed: () => _downloadReport(context, report.label),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.preview,
+                            color: AdminTheme.infoBlue, size: 18),
+                        onPressed: () => _previewReport(context, report.label),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showGenerateReportDialog(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content:
+              Text(AppLocalizations.of(context)!.reportGenerationComingSoon)),
+    );
+  }
+
+  void _downloadReport(BuildContext context, String report) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(AppLocalizations.of(context)!
+              .downloadingReport(report.toString()))),
+    );
+  }
+
+  void _previewReport(BuildContext context, String report) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(AppLocalizations.of(context)!
+              .previewingReport(report.toString()))),
+    );
+  }
+}
+
+class _ReportDef {
+  const _ReportDef(this.label, this.icon, this.type);
+  final String label;
+  final IconData icon;
+  final String type;
+}

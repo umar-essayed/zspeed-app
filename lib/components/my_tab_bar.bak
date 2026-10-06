@@ -1,0 +1,55 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+class HomeTabsPage extends StatefulWidget {
+  const HomeTabsPage({super.key});
+
+  @override
+  State<HomeTabsPage> createState() => _HomeTabsPageState();
+}
+
+class _HomeTabsPageState extends State<HomeTabsPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.speed),
+        backgroundColor: Colors.deepOrange,
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(icon: Icon(Icons.restaurant), text: "Restaurants"),
+            Tab(icon: Icon(Icons.local_offer), text: "Offers"),
+            Tab(icon: Icon(Icons.receipt_long), text: "My Orders"),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          Center(child: Text(AppLocalizations.of(context)!.restaurantsList)),
+          Center(child: Text(AppLocalizations.of(context)!.offersPage)),
+          Center(child: Text(AppLocalizations.of(context)!.ordersHistory)),
+        ],
+      ),
+    );
+  }
+}

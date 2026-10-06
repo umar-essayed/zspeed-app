@@ -1,0 +1,144 @@
+import 'package:z_speed/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:z_speed/features/driver/widgets/trip_history_card.dart';
+import 'package:z_speed/features/driver/widgets/trip_history_details_sheet.dart';
+import 'package:z_speed/features/driver/widgets/trip_history_model.dart';
+
+class TripHistory extends StatefulWidget {
+  const TripHistory({super.key});
+
+  @override
+  State<TripHistory> createState() => _TripHistoryState();
+}
+
+class _TripHistoryState extends State<TripHistory> {
+  List<Trip> trips = [
+    Trip(
+        id: "#WNL-001",
+        date: "Nov 09, 2024",
+        time: "14:30",
+        restaurant: "Pizza Palace",
+        customer: "Ahmed S.",
+        distance: "1.2 km",
+        earnings: 35,
+        duration: "12 min",
+        rating: 5),
+    Trip(
+        id: "#WNL-002",
+        date: "Nov 09, 2024",
+        time: "13:15",
+        restaurant: "Burger King",
+        customer: "Fatima M.",
+        distance: "2.5 km",
+        earnings: 50,
+        duration: "18 min",
+        rating: 4),
+    Trip(
+        id: "#WNL-003",
+        date: "Nov 09, 2024",
+        time: "12:00",
+        restaurant: "Elmasr Elgedida",
+        customer: "Mohamed K.",
+        distance: "1.8 km",
+        earnings: 40,
+        duration: "15 min",
+        rating: 5),
+  ];
+
+  String timeFilter = "today";
+  bool isDarkMode = false;
+
+  static const Color _primaryColor = Color(0xFFF35535);
+  static const Color _textColor = Color(0xFF333333);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title Row
+        Padding(
+          padding: const EdgeInsetsDirectional.only(bottom: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(AppLocalizations.of(context)!.tripHistory,
+                  style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _textColor)),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border:
+                      Border.all(color: _primaryColor.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                    AppLocalizations.of(context)!.tripsCount(trips.length),
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _primaryColor)),
+              ),
+            ],
+          ),
+        ),
+
+        // Filter Buttons
+        Row(
+          children: [
+            ("today", AppLocalizations.of(context)!.today),
+            ("week", AppLocalizations.of(context)!.week),
+            ("month", AppLocalizations.of(context)!.month),
+          ].map((entry) {
+            final (id, label) = entry;
+            final isSelected = timeFilter == id;
+            return Padding(
+              padding: const EdgeInsetsDirectional.only(end: 8),
+              child: ElevatedButton(
+                onPressed: () => setState(() => timeFilter = id),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSelected ? _primaryColor : Colors.white,
+                  foregroundColor: isSelected ? Colors.white : _primaryColor,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  side: const BorderSide(color: _primaryColor),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  elevation: isSelected ? 2 : 0,
+                ),
+                child: Text(label),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+
+        // Trip List
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: trips.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final trip = trips[index];
+            return TripHistoryCard(
+              trip: trip,
+              onViewDetails: () => showTripDetailsSheet(
+                context,
+                trip,
+                isDarkMode: isDarkMode,
+                onDarkModeChanged: (dark) => setState(() => isDarkMode = dark),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
