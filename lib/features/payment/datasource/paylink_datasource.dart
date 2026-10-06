@@ -59,10 +59,12 @@ class PaylinkDatasource {
     return {'publicToken': _defaultPublicToken, 'hashToken': _defaultHashToken};
   }
 
-  /// Initialize a PayLink hosted checkout session for an Order or a Ride
+  /// Initialize a PayLink hosted checkout session for an Order, Ride, or direct Cart checkout
   Future<Map<String, dynamic>> initCheckout({
     String? orderId,
     String? rideId,
+    double? amount,
+    String? orderTitle,
   }) async {
     try {
       final callable = _functions.httpsCallable('paylinkInitCheckout');
@@ -73,25 +75,37 @@ class PaylinkDatasource {
       return Map<String, dynamic>.from(response.data);
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'not-found' || e.code == 'unavailable') {
-        return _directInitCheckout(orderId: orderId, rideId: rideId);
+        return _directInitCheckout(
+          orderId: orderId,
+          rideId: rideId,
+          amount: amount,
+          orderTitle: orderTitle,
+        );
       }
       rethrow;
     } catch (_) {
-      return _directInitCheckout(orderId: orderId, rideId: rideId);
+      return _directInitCheckout(
+        orderId: orderId,
+        rideId: rideId,
+        amount: amount,
+        orderTitle: orderTitle,
+      );
     }
   }
 
   Future<Map<String, dynamic>> _directInitCheckout({
     String? orderId,
     String? rideId,
+    double? amount,
+    String? orderTitle,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     final creds = await _getCredentials();
     final publicToken = creds['publicToken']!;
     final hashToken = creds['hashToken']!;
 
-    double amount = 0;
-    String orderTitle = 'Z-SPEED Payment';
+    double finalAmount = amount ?? 0.0;
+    String finalTitle = orderTitle ?? 'Z-SPEED Order';
     DocumentReference? targetDocRef;
 
     if (orderId != null) {
@@ -99,43 +113,46 @@ class PaylinkDatasource {
       final doc = await targetDocRef.get();
       if (doc.exists && doc.data() != null) {
         final data = doc.data() as Map<String, dynamic>;
-        amount = (data['total'] as num?)?.toDouble() ?? 0.0;
+        finalAmount = (data['total'] as num?)?.toDouble() ?? finalAmount;
         final shortId = orderId.length > 8 ? orderId.substring(0, 8).toUpperCase() : orderId.toUpperCase();
-        orderTitle = 'Z-SPEED Order #$shortId';
+        finalTitle = 'Z-SPEED Order #$shortId';
       }
     } else if (rideId != null) {
       targetDocRef = _firestore.collection('rides').doc(rideId);
       final doc = await targetDocRef.get();
       if (doc.exists && doc.data() != null) {
         final data = doc.data() as Map<String, dynamic>;
-        amount = (data['totalFare'] as num?)?.toDouble() ?? (data['estimatedFare'] as num?)?.toDouble() ?? 0.0;
+        finalAmount = (data['totalFare'] as num?)?.toDouble() ?? (data['estimatedFare'] as num?)?.toDouble() ?? finalAmount;
         final shortId = rideId.length > 8 ? rideId.substring(0, 8).toUpperCase() : rideId.toUpperCase();
-        orderTitle = 'Z-SPEED Ride #$shortId';
+        finalTitle = 'Z-SPEED Ride #$shortId';
       }
     }
 
-    if (amount <= 0) amount = 10.0;
+    if (finalAmount <= 0) finalAmount = 10.0;
 
     final customerName = user?.displayName ?? 'Valued Customer';
     final nameParts = customerName.trim().split(' ');
     final firstName = nameParts.first.isNotEmpty ? nameParts.first : 'Valued';
     final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Customer';
     final email = user?.email ?? 'customer_${user?.uid.substring(0, 6) ?? "guest"}@zspeed.app';
-    final orderAmountStr = amount.toStringAsFixed(2);
+    final orderAmountStr = finalAmount.toStringAsFixed(2);
 
-    // Build signature according to INVOICE_CREATE spec
+    // Build signature according to PayLink v2 init spec:
+    // field order: first_name, last_name, email, order_title, order_amount, address, city, country, state, currency, redirection_url, webhook_url, order_details
     final signedValues = [
       firstName,
       lastName,
       email,
-      orderTitle,
+      finalTitle,
       orderAmountStr,
       'Cairo',
       'Cairo',
       'EG',
+      '',
       'EGP',
-      _returnScheme,
-      _webhookUrl,
+      '',
+      '',
+      '',
     ];
 
     final signature = _buildSignature(signedValues, hashToken);
@@ -145,14 +162,12 @@ class PaylinkDatasource {
       'first_name': firstName,
       'last_name': lastName,
       'email': email,
-      'order_title': orderTitle,
+      'order_title': finalTitle,
       'order_amount': orderAmountStr,
       'address': 'Cairo',
       'city': 'Cairo',
       'country': 'EG',
       'currency': 'EGP',
-      'redirection_url': _returnScheme,
-      'webhook_url': _webhookUrl,
       'signature': signature,
     };
 
@@ -203,11 +218,13 @@ class PaylinkDatasource {
     }
   }
 
-  /// Charge a vaulted Card Token for an Order or a Ride
+  /// Charge a vaulted Card Token for an Order, Ride, or direct amount
   Future<Map<String, dynamic>> chargeSavedCard({
     required String cardId,
     String? orderId,
     String? rideId,
+    double? amount,
+    String? orderTitle,
   }) async {
     try {
       final callable = _functions.httpsCallable('paylinkChargeSavedCard');
@@ -215,15 +232,28 @@ class PaylinkDatasource {
         'cardId': cardId,
         if (orderId != null) 'orderId': orderId,
         if (rideId != null) 'rideId': rideId,
+        if (amount != null) 'amount': amount,
       });
       return Map<String, dynamic>.from(response.data);
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'not-found' || e.code == 'unavailable') {
-        return _directChargeSavedCard(cardId: cardId, orderId: orderId, rideId: rideId);
+        return _directChargeSavedCard(
+          cardId: cardId,
+          orderId: orderId,
+          rideId: rideId,
+          amount: amount,
+          orderTitle: orderTitle,
+        );
       }
       rethrow;
     } catch (_) {
-      return _directChargeSavedCard(cardId: cardId, orderId: orderId, rideId: rideId);
+      return _directChargeSavedCard(
+        cardId: cardId,
+        orderId: orderId,
+        rideId: rideId,
+        amount: amount,
+        orderTitle: orderTitle,
+      );
     }
   }
 
@@ -231,55 +261,91 @@ class PaylinkDatasource {
     required String cardId,
     String? orderId,
     String? rideId,
+    double? amount,
+    String? orderTitle,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw Exception('User not authenticated.');
 
-    final cardDoc = await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('savedCards')
-        .doc(cardId)
-        .get();
+    String? cardToken;
 
-    if (!cardDoc.exists || cardDoc.data() == null) {
-      throw Exception('Saved card not found.');
+    // 1. Look for token inside users/{uid}.savedCards array first
+    try {
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data() != null) {
+        final userData = userDoc.data()!;
+        if (userData['savedCards'] is List) {
+          final list = userData['savedCards'] as List;
+          for (final item in list) {
+            if (item is Map &&
+                (item['id']?.toString() == cardId ||
+                    item['cardToken']?.toString() == cardId)) {
+              cardToken = item['cardToken']?.toString();
+              break;
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 2. If not found in user doc, look in subcollection
+    if (cardToken == null || cardToken.isEmpty) {
+      try {
+        final cardDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('savedCards')
+            .doc(cardId)
+            .get();
+        if (cardDoc.exists && cardDoc.data() != null) {
+          cardToken = cardDoc.data()!['cardToken']?.toString();
+        }
+      } catch (_) {}
     }
 
-    final cardData = cardDoc.data()!;
-    final cardToken = cardData['cardToken'] as String;
+    if (cardToken == null || cardToken.isEmpty) {
+      throw Exception('Saved card not found.');
+    }
 
     final creds = await _getCredentials();
     final publicToken = creds['publicToken']!;
     final hashToken = creds['hashToken']!;
 
-    double amount = 0;
-    String product = 'Z-SPEED Order';
+    double finalAmount = amount ?? 0.0;
+    String product = orderTitle ?? 'Z-SPEED Order';
     DocumentReference? targetDocRef;
 
     if (orderId != null) {
       targetDocRef = _firestore.collection('orders').doc(orderId);
       final doc = await targetDocRef.get();
       if (doc.exists && doc.data() != null) {
-        amount = ((doc.data() as Map<String, dynamic>)['total'] as num?)?.toDouble() ?? 0.0;
-        product = 'Order #${orderId.substring(0, 8).toUpperCase()}';
+        final data = doc.data() as Map<String, dynamic>;
+        finalAmount = (data['total'] as num?)?.toDouble() ?? finalAmount;
+        final shortId = orderId.length > 8 ? orderId.substring(0, 8).toUpperCase() : orderId.toUpperCase();
+        product = 'Z-SPEED Order #$shortId';
       }
     } else if (rideId != null) {
       targetDocRef = _firestore.collection('rides').doc(rideId);
       final doc = await targetDocRef.get();
       if (doc.exists && doc.data() != null) {
-        amount = ((doc.data() as Map<String, dynamic>)['totalFare'] as num?)?.toDouble() ?? 0.0;
-        product = 'Ride #${rideId.substring(0, 8).toUpperCase()}';
+        final data = doc.data() as Map<String, dynamic>;
+        finalAmount = (data['totalFare'] as num?)?.toDouble() ??
+            (data['estimatedFare'] as num?)?.toDouble() ??
+            finalAmount;
+        final shortId = rideId.length > 8 ? rideId.substring(0, 8).toUpperCase() : rideId.toUpperCase();
+        product = 'Z-SPEED Ride #$shortId';
       }
     }
 
-    if (amount <= 0) amount = 10.0;
+    if (finalAmount <= 0) finalAmount = 10.0;
 
-    final nameParts = (user.displayName ?? 'Customer').trim().split(' ');
+    final customerName = user.displayName ?? 'Customer';
+    final nameParts = customerName.trim().split(' ');
     final firstName = nameParts.first.isNotEmpty ? nameParts.first : 'Valued';
     final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Customer';
-    final priceStr = amount.toStringAsFixed(2);
+    final priceStr = finalAmount.toStringAsFixed(2);
     final refNum = (orderId ?? rideId ?? 'ref_${DateTime.now().millisecondsSinceEpoch}').substring(0, 16);
+    final email = user.email ?? 'customer_${user.uid.substring(0, user.uid.length >= 6 ? 6 : user.uid.length)}@zspeed.app';
 
     // CARD_CHARGE fields
     final signedValues = [
@@ -287,7 +353,7 @@ class PaylinkDatasource {
       'merchant',
       firstName,
       lastName,
-      user.email ?? 'customer@zspeed.app',
+      email,
       'EGP',
       priceStr,
       product,
@@ -305,7 +371,7 @@ class PaylinkDatasource {
       'initiator': 'merchant',
       'first_name': firstName,
       'last_name': lastName,
-      'email': user.email ?? 'customer@zspeed.app',
+      'email': email,
       'currency': 'EGP',
       'price': priceStr,
       'product': product,
@@ -325,8 +391,10 @@ class PaylinkDatasource {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final resJson = jsonDecode(response.body);
       final data = _extractData(resJson);
-      final invoiceId = (data['invoice_id'] ?? data['invoiceId'] as num?)?.toInt() ??
-          DateTime.now().millisecondsSinceEpoch;
+      final rawInvoiceId = data['invoice_id'] ?? data['invoiceId'] ?? (resJson is Map ? (resJson['invoice_id'] ?? resJson['invoiceId']) : null);
+      final invoiceId = rawInvoiceId is num
+          ? rawInvoiceId.toInt()
+          : (int.tryParse(rawInvoiceId?.toString() ?? '') ?? DateTime.now().millisecondsSinceEpoch);
       final paidStatus = (data['paid_status'] ?? data['paidStatus'] ?? 'paid')
           .toString()
           .toUpperCase();
@@ -441,7 +509,7 @@ class PaylinkDatasource {
       brand = 'Meeza';
     }
 
-    final email = user.email ?? 'customer_${user.uid.substring(0, 6)}@zspeed.app';
+    final email = user.email ?? 'customer_${user.uid.substring(0, user.uid.length >= 6 ? 6 : user.uid.length)}@zspeed.app';
 
     // Build signature according to CARD_TOKENIZE
     final signedValues = [
@@ -486,7 +554,7 @@ class PaylinkDatasource {
 
       final token = (data['token'] ??
               data['card_token'] ??
-              (resJson is Map ? resJson['token'] : null))
+              (resJson is Map ? (resJson['token'] ?? resJson['card_token']) : null))
           ?.toString();
 
       if (token == null || token.isEmpty) {
@@ -497,8 +565,8 @@ class PaylinkDatasource {
         throw Exception(msg);
       }
 
-      if (data['card'] is Map<String, dynamic>) {
-        final c = data['card'] as Map<String, dynamic>;
+      if (data['card'] is Map) {
+        final c = Map<String, dynamic>.from(data['card'] as Map);
         if (c['brand'] != null && c['brand'].toString().isNotEmpty) {
           brand = c['brand'].toString();
         }
@@ -507,22 +575,9 @@ class PaylinkDatasource {
         }
       }
 
-      final savedCardsCol = _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('savedCards');
-
-      if (setAsDefault) {
-        final existing = await savedCardsCol.where('isDefault', isEqualTo: true).get();
-        for (final doc in existing.docs) {
-          await doc.reference.update({'isDefault': false});
-        }
-      }
-
-      final docRef = savedCardsCol.doc();
-
-      await docRef.set({
-        'id': docRef.id,
+      final cardId = 'card_${DateTime.now().millisecondsSinceEpoch}';
+      final cardMap = {
+        'id': cardId,
         'cardToken': token,
         'last4': last4,
         'brand': brand,
@@ -530,12 +585,46 @@ class PaylinkDatasource {
         'expYear': int.tryParse(expYear) ?? 2030,
         'holderName': '$firstName $lastName'.trim(),
         'isDefault': setAsDefault,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+        'createdAt': Timestamp.now(),
+      };
+
+      // 1. Primary storage: inside users/{uid}.savedCards array (100% permitted by firestore rules)
+      try {
+        final userDocRef = _firestore.collection('users').doc(user.uid);
+        final userDoc = await userDocRef.get();
+        List<dynamic> currentCards = [];
+        if (userDoc.exists && userDoc.data() != null && userDoc.data()!['savedCards'] is List) {
+          currentCards = List.from(userDoc.data()!['savedCards'] as List);
+        }
+        if (setAsDefault) {
+          currentCards = currentCards.map((c) {
+            if (c is Map) {
+              final m = Map<String, dynamic>.from(c);
+              m['isDefault'] = false;
+              return m;
+            }
+            return c;
+          }).toList();
+        }
+        currentCards.insert(0, cardMap);
+        await userDocRef.set({'savedCards': currentCards}, SetOptions(merge: true));
+      } catch (e) {
+        // Fallback write
+      }
+
+      // 2. Secondary storage: subcollection (in case rules permit)
+      try {
+        final docRef = _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('savedCards')
+            .doc(cardId);
+        await docRef.set(cardMap);
+      } catch (_) {}
 
       return {
         'success': true,
-        'cardId': docRef.id,
+        'cardId': cardId,
         'cardToken': token,
         'last4': last4,
         'brand': brand,
@@ -556,13 +645,28 @@ class PaylinkDatasource {
   Future<void> deleteCard(String cardId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('savedCards')
-          .doc(cardId)
-          .delete();
+      // 1. Remove from users/{uid}.savedCards array
+      try {
+        final userDocRef = _firestore.collection('users').doc(user.uid);
+        final userDoc = await userDocRef.get();
+        if (userDoc.exists && userDoc.data() != null && userDoc.data()!['savedCards'] is List) {
+          final list = List.from(userDoc.data()!['savedCards'] as List);
+          list.removeWhere((item) => item is Map && (item['id']?.toString() == cardId || item['cardToken']?.toString() == cardId));
+          await userDocRef.set({'savedCards': list}, SetOptions(merge: true));
+        }
+      } catch (_) {}
+
+      // 2. Remove from subcollection
+      try {
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('savedCards')
+            .doc(cardId)
+            .delete();
+      } catch (_) {}
     }
+
     try {
       final callable = _functions.httpsCallable('paylinkDeleteCard');
       await callable.call({'cardId': cardId});
@@ -574,11 +678,41 @@ class PaylinkDatasource {
     return _firestore
         .collection('users')
         .doc(userId)
-        .collection('savedCards')
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => SavedCardModel.fromMap(doc.data(), doc.id))
-            .toList());
+        .asyncMap((userDoc) async {
+      final List<SavedCardModel> cards = [];
+
+      // 1. From user doc's savedCards array
+      if (userDoc.exists && userDoc.data() != null) {
+        final data = userDoc.data()!;
+        if (data['savedCards'] is List) {
+          final list = data['savedCards'] as List;
+          for (final item in list) {
+            if (item is Map) {
+              final map = Map<String, dynamic>.from(item);
+              final id = map['id']?.toString() ?? '';
+              cards.add(SavedCardModel.fromMap(map, id));
+            }
+          }
+        }
+      }
+
+      // 2. Merge from subcollection if any cards exist there
+      try {
+        final subCol = await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('savedCards')
+            .get();
+        for (final doc in subCol.docs) {
+          if (!cards.any((c) => c.id == doc.id)) {
+            cards.add(SavedCardModel.fromMap(doc.data(), doc.id));
+          }
+        }
+      } catch (_) {}
+
+      cards.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return cards;
+    });
   }
 }

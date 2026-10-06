@@ -72,10 +72,13 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
-      final nameParts = _nameController.text.trim().split(' ');
-      final firstName = nameParts.first;
-      final lastName =
-          nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Cardholder';
+      final nameParts = _nameController.text.trim().split(RegExp(r'\s+'));
+      final firstName = nameParts.isNotEmpty && nameParts.first.isNotEmpty
+          ? nameParts.first
+          : 'Valued';
+      final lastName = nameParts.length > 1 && nameParts.sublist(1).join(' ').trim().isNotEmpty
+          ? nameParts.sublist(1).join(' ').trim()
+          : 'Customer';
 
       final expiryParts = _expiryController.text.trim().split('/');
       final expMonth = expiryParts[0].trim().padLeft(2, '0');

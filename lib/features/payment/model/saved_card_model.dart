@@ -23,17 +23,25 @@ class SavedCardModel extends Equatable {
   });
 
   factory SavedCardModel.fromMap(Map<String, dynamic> map, String id) {
+    DateTime dt = DateTime.now();
+    final rawCreated = map['createdAt'];
+    if (rawCreated is Timestamp) {
+      dt = rawCreated.toDate();
+    } else if (rawCreated is String) {
+      dt = DateTime.tryParse(rawCreated) ?? DateTime.now();
+    } else if (rawCreated is int) {
+      dt = DateTime.fromMillisecondsSinceEpoch(rawCreated);
+    }
+
     return SavedCardModel(
-      id: id,
-      brand: map['brand'] as String? ?? 'Card',
-      last4: map['last4'] as String? ?? '••••',
+      id: id.isNotEmpty ? id : (map['id']?.toString() ?? ''),
+      brand: map['brand']?.toString() ?? 'Card',
+      last4: map['last4']?.toString() ?? '••••',
       expMonth: (map['expMonth'] as num?)?.toInt() ?? 12,
       expYear: (map['expYear'] as num?)?.toInt() ?? 2030,
-      holderName: map['holderName'] as String? ?? '',
+      holderName: map['holderName']?.toString() ?? '',
       isDefault: map['isDefault'] as bool? ?? false,
-      createdAt: map['createdAt'] is Timestamp
-          ? (map['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
+      createdAt: dt,
     );
   }
 

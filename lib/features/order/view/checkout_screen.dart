@@ -1791,7 +1791,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SnackBar(
               content: Text(
                 Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'تم حفظ البطاقة بنجاح، يمكنك الآن تأكيد الدفع.'
+                    ? 'تم حفظ البطاقة بنجاح! يمكنك الآن تأكيد الطلب والدفع.'
                     : 'Card saved successfully! You can now place your order.',
               ),
               backgroundColor: Colors.green,
@@ -1801,23 +1801,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         return;
       }
 
-      if (!mounted) return;
-      final success = await cubit.placeOrder();
-      if (!success || !mounted) return;
-
-      final orderId = cubit.state.submittedOrderId;
-      if (orderId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Order submission failed. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
       // ── 1. CASH ON DELIVERY FLOW ──
       if (cubit.state.paymentMethod == PaymentMethodType.cash) {
+        if (!mounted) return;
+        final success = await cubit.placeOrder();
+        if (!success || !mounted) return;
+
+        final orderId = cubit.state.submittedOrderId;
+        if (orderId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Order submission failed. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
         final shortOrderId = orderId.length > 8
             ? orderId.substring(0, 8).toUpperCase()
             : orderId.toUpperCase();
@@ -1875,7 +1875,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         return;
       }
 
-      // ── 2. ONLINE PAYMENT FLOW (CARD OR WALLET) ──
+      // ── 2. PRE-PAYMENT FLOW (ONLINE CARD OR WALLET) ──
+      // Crucial: payment MUST be executed and verified BEFORE creating an order in Firestore.
+      // This prevents ghost orders, false vendor alerts, and cart loss if user aborts or card fails.
       bool paymentSuccess = false;
       String? errorMessage;
       String? transactionRef;
@@ -1887,20 +1889,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         try {
           final res = await _paylinkDatasource.chargeSavedCard(
             cardId: _selectedSavedCard!.id,
-            orderId: orderId,
+            amount: state.total,
+            orderTitle: 'Z-SPEED Order (${state.restaurantName})',
           );
-          paymentSuccess = true;
-          transactionRef = res['invoiceId']?.toString();
+          final paidStatus = res['paidStatus']?.toString().toUpperCase() ?? '';
+          if (res['success'] == true || paidStatus == 'PAID') {
+            paymentSuccess = true;
+            transactionRef = res['invoiceId']?.toString();
+          } else {
+            paymentSuccess = false;
+            errorMessage = res['message']?.toString() ?? 'Card charge was not approved';
+          }
         } catch (e) {
           paymentSuccess = false;
-          errorMessage = e.toString();
+          errorMessage = e.toString().replaceFirst('Exception: ', '');
         }
       } else {
         // Hosted checkout via PayLink (Card or Mobile Wallet)
         try {
-          final initRes = await _paylinkDatasource.initCheckout(orderId: orderId);
-          final checkoutUrl = initRes['checkoutUrl'] as String;
-          final invoiceId = (initRes['invoiceId'] as num).toInt();
+          final initRes = await _paylinkDatasource.initCheckout(
+            amount: state.total,
+            orderTitle: 'Z-SPEED Order (${state.restaurantName})',
+          );
+          final checkoutUrl = initRes['checkoutUrl']?.toString() ?? '';
+          final rawInvoiceId = initRes['invoiceId'];
+          final invoiceId = rawInvoiceId is num
+              ? rawInvoiceId.toInt()
+              : (int.tryParse(rawInvoiceId?.toString() ?? '') ?? 0);
+
+          if (checkoutUrl.isEmpty) {
+            throw Exception('Could not connect to payment gateway. Please try again.');
+          }
 
           if (!mounted) return;
           final result = await Navigator.of(context).push<PaylinkWebviewResult>(
@@ -1914,64 +1933,80 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
           if (result != null && result.success) {
             paymentSuccess = true;
-            transactionRef = invoiceId.toString();
+            transactionRef = (result.invoiceId != 0 ? result.invoiceId : invoiceId).toString();
           } else {
             paymentSuccess = false;
-            errorMessage = result?.message ?? 'Payment was cancelled or closed';
+            errorMessage = result?.message ??
+                (Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'تم إلغاء عملية الدفع أو لم تكتمل.'
+                    : 'Payment was cancelled or closed.');
           }
         } catch (e) {
           paymentSuccess = false;
-          errorMessage = e.toString();
+          errorMessage = e.toString().replaceFirst('Exception: ', '');
         }
       }
 
       if (!mounted) return;
 
-      if (paymentSuccess) {
-        // Payment verified! Now clear the cart atomically
-        await context.read<CartCubit>().clearCart();
-
-        try {
-          await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
-            'status': 'pending',
-            'paymentStatus': 'completed',
-            'paymentState': 'paid',
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        } catch (_) {}
-
-        await PaymentStatusSheet.show(
-          context: context,
-          type: PaymentStatusType.success,
-          transactionReference: transactionRef,
-          onPrimaryAction: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => OrderTrackingScreen(orderId: orderId),
-              ),
-            );
-          },
-        );
-      } else {
-        // Payment failed or was aborted by user: Cancel the order in Firestore immediately
-        try {
-          await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
-            'status': 'cancelled',
-            'paymentStatus': 'failed',
-            'paymentState': 'failed',
-            'cancellationReason': errorMessage ?? 'Online payment cancelled or failed',
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        } catch (_) {}
-
-        // Keep cart intact so user does not lose their selected food/items!
+      if (!paymentSuccess) {
+        // Payment failed or cancelled: DO NOT CREATE ANY ORDER. Cart stays intact!
         await PaymentStatusSheet.show(
           context: context,
           type: PaymentStatusType.failure,
           rawReason: errorMessage,
         );
+        return;
       }
+
+      // Online payment succeeded! Now create the order in Firestore.
+      final success = await cubit.placeOrder();
+      if (!success || !mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'تم تأكيد الدفع بنجاح (فاتورة #$transactionRef)! يرجى التواصل مع الدعم الفني لتأكيد طلبك.'
+                  : 'Payment succeeded (#$transactionRef)! Please contact support to confirm order.',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 8),
+          ),
+        );
+        return;
+      }
+
+      final orderId = cubit.state.submittedOrderId;
+      if (orderId != null) {
+        try {
+          await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
+            'status': 'pending',
+            'paymentStatus': 'completed',
+            'paymentState': 'paid',
+            'paymentInvoiceId': transactionRef,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        } catch (_) {}
+      }
+
+      // Clear the cart atomically now that payment and order are complete
+      await context.read<CartCubit>().clearCart();
+
+      await PaymentStatusSheet.show(
+        context: context,
+        type: PaymentStatusType.success,
+        transactionReference: transactionRef,
+        onPrimaryAction: () {
+          Navigator.of(context).pop();
+          if (orderId != null) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => OrderTrackingScreen(orderId: orderId),
+              ),
+            );
+          }
+        },
+      );
     } finally {
       if (mounted) {
         setState(() {
