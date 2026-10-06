@@ -26,6 +26,7 @@ class SavedCardSelector extends StatelessWidget {
     if (user == null) return const SizedBox.shrink();
 
     const orange = Color(0xFFF35535);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return StreamBuilder<List<SavedCardModel>>(
       stream: datasource.streamSavedCards(user.uid),
@@ -36,15 +37,32 @@ class SavedCardSelector extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (cards.isNotEmpty) ...[
-              const Text(
-                'Saved Cards',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D3748),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isAr ? 'البطاقات المحفوظة' : 'Saved Cards',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2D3748),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => AddCardBottomSheet.show(context, datasource),
+                    icon: const Icon(Icons.add, size: 16, color: orange),
+                    label: Text(
+                      isAr ? 'إضافة بطاقة' : 'Add Card',
+                      style: const TextStyle(
+                        color: orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               ...cards.map((card) {
                 final isSelected = !useHostedCheckout && selectedCard?.id == card.id;
 
@@ -59,19 +77,22 @@ class SavedCardSelector extends StatelessWidget {
                     ),
                   ),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                     leading: Icon(
                       card.brand.toLowerCase().contains('visa')
                           ? Icons.credit_card
                           : Icons.payment,
                       color: isSelected ? orange : Colors.grey[700],
-                      size: 28,
+                      size: 26,
                     ),
                     title: Text(
                       '${card.brand} •••• ${card.last4}',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
-                    subtitle: Text('Expires ${card.formattedExpiry}'),
+                    subtitle: Text(
+                      isAr ? 'تنتهي ${card.formattedExpiry}' : 'Expires ${card.formattedExpiry}',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -90,17 +111,24 @@ class SavedCardSelector extends StatelessWidget {
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (ctx) => AlertDialog(
-                                title: const Text('Delete Card'),
-                                content: Text('Remove ${card.brand} •••• ${card.last4}?'),
+                                title: Text(isAr ? 'حذف البطاقة' : 'Delete Card'),
+                                content: Text(
+                                  isAr
+                                      ? 'هل أنت متأكد من حذف ${card.brand} •••• ${card.last4}؟'
+                                      : 'Remove ${card.brand} •••• ${card.last4}?',
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(ctx, false),
-                                    child: const Text('Cancel'),
+                                    child: Text(isAr ? 'إلغاء' : 'Cancel'),
                                   ),
                                   ElevatedButton(
                                     onPressed: () => Navigator.pop(ctx, true),
                                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                    child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      isAr ? 'حذف' : 'Delete',
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -121,7 +149,7 @@ class SavedCardSelector extends StatelessWidget {
               }),
             ],
 
-            // Option: Pay via Hosted Checkout (New card)
+            // Clean, simplified Option: Pay with Card
             Container(
               margin: const EdgeInsets.only(top: 4, bottom: 8),
               decoration: BoxDecoration(
@@ -135,15 +163,35 @@ class SavedCardSelector extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 leading: Icon(
-                  Icons.open_in_browser_rounded,
+                  Icons.credit_card_rounded,
                   color: useHostedCheckout ? orange : Colors.grey[700],
                   size: 26,
                 ),
-                title: const Text(
-                  'Pay with New Card (PayLink Hosted)',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                title: Text(
+                  isAr ? 'الدفع بالكارت' : 'Pay with Card',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
-                subtitle: const Text('Secure payment page with 3D Secure'),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 14,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isAr ? 'دفع آمن ومحمي' : 'Secure Payment',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 trailing: Radio<bool>(
                   value: true,
                   groupValue: useHostedCheckout ? true : null,
@@ -160,19 +208,20 @@ class SavedCardSelector extends StatelessWidget {
               ),
             ),
 
-            // Button to Add New Card (Tokenize)
-            TextButton.icon(
-              onPressed: () => AddCardBottomSheet.show(context, datasource),
-              icon: const Icon(Icons.add, size: 18, color: orange),
-              label: const Text(
-                'Add & Save a new card for fast checkout',
-                style: TextStyle(
-                  color: orange,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+            if (cards.isEmpty) ...[
+              TextButton.icon(
+                onPressed: () => AddCardBottomSheet.show(context, datasource),
+                icon: const Icon(Icons.add_circle_outline_rounded, size: 18, color: orange),
+                label: Text(
+                  isAr ? 'إضافة بطاقة جديدة وحفظها' : 'Add and save a new card',
+                  style: const TextStyle(
+                    color: orange,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         );
       },

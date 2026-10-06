@@ -900,15 +900,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Expanded(
               child: _buildPaymentCardWrapper(
                 isSelected: state.paymentMethod == PaymentMethodType.wallet,
-                isEnabled: false,
+                isEnabled: true,
                 child: _buildHorizontalPaymentOption(
                   cubit,
                   state,
                   PaymentMethodType.wallet,
                   AppLocalizations.of(context)!.mobileWallet,
                   Icons.account_balance_wallet_outlined,
-                  enabled: false,
-                  badge: AppLocalizations.of(context)!.comingSoon,
+                  enabled: true,
                 ),
               ),
             ),
@@ -1555,16 +1554,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   : (state.deliveryDistanceKm == null
                                       ? AppLocalizations.of(context)!
                                           .placeOrderLabel
-                                      : (state.paymentMethod ==
-                                              PaymentMethodType.card
-                                          ? AppLocalizations.of(context)!
-                                              .placeOrderAndPay(
-                                              state.total.toStringAsFixed(2),
-                                            )
-                                          : AppLocalizations.of(context)!
-                                              .placeOrderAmount(
-                                              state.total.toStringAsFixed(2),
-                                            ))),
+                                      : (state.paymentMethod == PaymentMethodType.card
+                                          ? (_selectedSavedCard != null && !_useHostedCheckout
+                                              ? (Localizations.localeOf(context).languageCode == 'ar'
+                                                  ? 'ادفع بالبطاقة المحفوظة (' + state.total.toStringAsFixed(2) + ' ج.م)'
+                                                  : 'Pay with Saved Card (' + state.total.toStringAsFixed(2) + ')')
+                                              : (Localizations.localeOf(context).languageCode == 'ar'
+                                                  ? 'ادفع بالكارت (' + state.total.toStringAsFixed(2) + ' ج.م)'
+                                                  : 'Pay with Card (' + state.total.toStringAsFixed(2) + ')'))
+                                          : (state.paymentMethod == PaymentMethodType.wallet
+                                              ? (Localizations.localeOf(context).languageCode == 'ar'
+                                                  ? 'ادفع بالمحفظة الإلكترونية (' + state.total.toStringAsFixed(2) + ' ج.م)'
+                                                  : 'Pay with Mobile Wallet (' + state.total.toStringAsFixed(2) + ')')
+                                              : AppLocalizations.of(context)!
+                                                  .placeOrderAmount(
+                                                  state.total.toStringAsFixed(2),
+                                                )))),
                               style: TextStyle(
                                 color: canSubmit
                                     ? Colors.white
@@ -1724,8 +1729,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         // Clear cart immediately — order is now in the system
         context.read<CartCubit>().clearCart();
 
-        // For card payments, process via PayLink (Saved Card or Hosted Checkout)
-        if (cubit.state.paymentMethod == PaymentMethodType.card) {
+        // For card or wallet payments, process via PayLink
+        if (cubit.state.paymentMethod == PaymentMethodType.card ||
+            cubit.state.paymentMethod == PaymentMethodType.wallet) {
           final orderId = cubit.state.submittedOrderId;
           if (orderId == null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -1737,7 +1743,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             return;
           }
 
-          if (!_useHostedCheckout && _selectedSavedCard != null) {
+          if (cubit.state.paymentMethod == PaymentMethodType.card &&
+              !_useHostedCheckout &&
+              _selectedSavedCard != null) {
             // One-click charge with saved token
             try {
               final res = await _paylinkDatasource.chargeSavedCard(
