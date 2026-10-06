@@ -38,7 +38,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _promoController = TextEditingController();
   final _paylinkDatasource = PaylinkDatasource();
   SavedCardModel? _selectedSavedCard;
-  bool _useHostedCheckout = true;
+  bool _useHostedCheckout = false;
   bool _isPickingLocation = false;
   bool _isProcessingOrder = false;
 
@@ -217,6 +217,59 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         _useHostedCheckout = val;
                         if (val) _selectedSavedCard = null;
                       }),
+                    ),
+                  ] else if (checkoutState.paymentMethod == PaymentMethodType.wallet) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFBBF7D0)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.account_balance_wallet_rounded,
+                                color: Colors.green, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  Localizations.localeOf(context).languageCode == 'ar'
+                                      ? 'الدفع بالمحافظ الإلكترونية (مصر)'
+                                      : 'Mobile Wallets Payment (Egypt)',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13.5,
+                                    color: Color(0xFF166534),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  Localizations.localeOf(context).languageCode == 'ar'
+                                      ? 'فودافون كاش، أورنج كاش، اتصالات كاش، وي باي والمحافظ الذكية. ستكتمل عملية الدفع عبر بوابة الدفع الآمنة.'
+                                      : 'Vodafone Cash, Orange Cash, Etisalat Cash, WE Pay & smart bank wallets. Fast & secure checkout.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade700,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
 
@@ -1557,15 +1610,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       : (state.paymentMethod == PaymentMethodType.card
                                           ? (_selectedSavedCard != null && !_useHostedCheckout
                                               ? (Localizations.localeOf(context).languageCode == 'ar'
-                                                  ? 'ادفع بالبطاقة المحفوظة (' + state.total.toStringAsFixed(2) + ' ج.م)'
-                                                  : 'Pay with Saved Card (' + state.total.toStringAsFixed(2) + ')')
-                                              : (Localizations.localeOf(context).languageCode == 'ar'
-                                                  ? 'ادفع بالكارت (' + state.total.toStringAsFixed(2) + ' ج.م)'
-                                                  : 'Pay with Card (' + state.total.toStringAsFixed(2) + ')'))
+                                                  ? 'ادفع بالبطاقة (${_selectedSavedCard!.brand} •••• ${_selectedSavedCard!.last4})'
+                                                  : 'Pay with Saved Card (•••• ${_selectedSavedCard!.last4})')
+                                              : (_useHostedCheckout
+                                                  ? (Localizations.localeOf(context).languageCode == 'ar'
+                                                      ? 'ادفع بالكارت (${state.total.toStringAsFixed(2)} ج.م)'
+                                                      : 'Pay with Card (${state.total.toStringAsFixed(2)})')
+                                                  : (Localizations.localeOf(context).languageCode == 'ar'
+                                                      ? 'إضافة بطاقة بنكية'
+                                                      : 'Add Payment Card')))
                                           : (state.paymentMethod == PaymentMethodType.wallet
                                               ? (Localizations.localeOf(context).languageCode == 'ar'
-                                                  ? 'ادفع بالمحفظة الإلكترونية (' + state.total.toStringAsFixed(2) + ' ج.م)'
-                                                  : 'Pay with Mobile Wallet (' + state.total.toStringAsFixed(2) + ')')
+                                                  ? 'ادفع بالمحفظة الإلكترونية (${state.total.toStringAsFixed(2)} ج.م)'
+                                                  : 'Pay with Mobile Wallet (${state.total.toStringAsFixed(2)})')
                                               : AppLocalizations.of(context)!
                                                   .placeOrderAmount(
                                                   state.total.toStringAsFixed(2),
@@ -1722,120 +1779,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         await context.read<AuthCubit>().updateUserPhone(phoneEntered.trim());
       }
 
+      // If user selected card but has no card selected and hasn't chosen hosted checkout, prompt to add a card
+      if (cubit.state.paymentMethod == PaymentMethodType.card &&
+          _selectedSavedCard == null &&
+          !_useHostedCheckout) {
+        final added = await AddCardBottomSheet.show(context, _paylinkDatasource);
+        if (added == true && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'تم حفظ البطاقة بنجاح، يمكنك الآن تأكيد الدفع.'
+                    : 'Card saved successfully! You can now place your order.',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        return;
+      }
+
       if (!mounted) return;
       final success = await cubit.placeOrder();
+      if (!success || !mounted) return;
 
-      if (success && mounted) {
-        // Clear cart immediately — order is now in the system
-        context.read<CartCubit>().clearCart();
+      final orderId = cubit.state.submittedOrderId;
+      if (orderId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order submission failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
 
-        // For card or wallet payments, process via PayLink
-        if (cubit.state.paymentMethod == PaymentMethodType.card ||
-            cubit.state.paymentMethod == PaymentMethodType.wallet) {
-          final orderId = cubit.state.submittedOrderId;
-          if (orderId == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Order ID missing. Please try again.'),
-                backgroundColor: Colors.red,
-              ),
-            );
-            return;
-          }
-
-          if (cubit.state.paymentMethod == PaymentMethodType.card &&
-              !_useHostedCheckout &&
-              _selectedSavedCard != null) {
-            // One-click charge with saved token
-            try {
-              final res = await _paylinkDatasource.chargeSavedCard(
-                cardId: _selectedSavedCard!.id,
-                orderId: orderId,
-              );
-              if (mounted) {
-                await PaymentStatusSheet.show(
-                  context: context,
-                  type: PaymentStatusType.success,
-                  transactionReference: res['invoiceId']?.toString(),
-                  onPrimaryAction: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => OrderTrackingScreen(orderId: orderId),
-                      ),
-                    );
-                  },
-                );
-              }
-              return;
-            } catch (e) {
-              if (mounted) {
-                await PaymentStatusSheet.show(
-                  context: context,
-                  type: PaymentStatusType.failure,
-                  rawReason: e.toString(),
-                );
-              }
-              return;
-            }
-          } else {
-            // Hosted checkout via PayLink webview
-            try {
-              final initRes = await _paylinkDatasource.initCheckout(
-                orderId: orderId,
-              );
-              final checkoutUrl = initRes['checkoutUrl'] as String;
-              final invoiceId = (initRes['invoiceId'] as num).toInt();
-
-              if (!mounted) return;
-              final result = await Navigator.of(context).push<PaylinkWebviewResult>(
-                MaterialPageRoute(
-                  builder: (_) => PaylinkWebviewPage(
-                    checkoutUrl: checkoutUrl,
-                    expectedInvoiceId: invoiceId,
-                  ),
-                ),
-              );
-
-              if (mounted) {
-                if (result != null && result.success) {
-                  await PaymentStatusSheet.show(
-                    context: context,
-                    type: PaymentStatusType.success,
-                    transactionReference: invoiceId.toString(),
-                    onPrimaryAction: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (_) => OrderTrackingScreen(orderId: orderId),
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  await PaymentStatusSheet.show(
-                    context: context,
-                    type: PaymentStatusType.failure,
-                    rawReason: result?.message ?? 'cancelled',
-                  );
-                }
-              }
-              return;
-            } catch (e) {
-              if (mounted) {
-                await PaymentStatusSheet.show(
-                  context: context,
-                  type: PaymentStatusType.failure,
-                  rawReason: e.toString(),
-                );
-              }
-              return;
-            }
-          }
-        }
-
-        // Show success dialog for cash/wallet payments
-        final orderId = cubit.state.submittedOrderId ?? '';
+      // ── 1. CASH ON DELIVERY FLOW ──
+      if (cubit.state.paymentMethod == PaymentMethodType.cash) {
         final shortOrderId = orderId.length > 8
             ? orderId.substring(0, 8).toUpperCase()
             : orderId.toUpperCase();
@@ -1856,9 +1836,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(
-                    dialogContext,
-                  )!.orderIdValue(shortOrderId),
+                  AppLocalizations.of(dialogContext)!.orderIdValue(shortOrderId),
                 ),
                 const SizedBox(height: 8),
                 Text(_estimateDeliveryTime(cubit.state)),
@@ -1867,20 +1845,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(dialogContext).pop(); // Close dialog
-                  Navigator.of(context).pop(); // Close checkout screen
+                  Navigator.of(dialogContext).pop();
+                  Navigator.of(context).pop();
                 },
                 child: Text(AppLocalizations.of(dialogContext)!.ok),
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(dialogContext).pop(); // Close dialog
-                  // Replace checkout screen with order tracking
+                  Navigator.of(dialogContext).pop();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => OrderTrackingScreen(
-                        orderId: cubit.state.submittedOrderId!,
-                      ),
+                      builder: (_) => OrderTrackingScreen(orderId: orderId),
                     ),
                   );
                 },
@@ -1895,16 +1870,104 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ],
           ),
         );
-      } else if (!success && mounted) {
-        // Show error snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              cubit.state.failure?.message ??
-                  AppLocalizations.of(context)!.failedToPlaceOrder,
+        return;
+      }
+
+      // ── 2. ONLINE PAYMENT FLOW (CARD OR WALLET) ──
+      bool paymentSuccess = false;
+      String? errorMessage;
+      String? transactionRef;
+
+      if (cubit.state.paymentMethod == PaymentMethodType.card &&
+          !_useHostedCheckout &&
+          _selectedSavedCard != null) {
+        // One-click charge with saved token
+        try {
+          final res = await _paylinkDatasource.chargeSavedCard(
+            cardId: _selectedSavedCard!.id,
+            orderId: orderId,
+          );
+          paymentSuccess = true;
+          transactionRef = res['invoiceId']?.toString();
+        } catch (e) {
+          paymentSuccess = false;
+          errorMessage = e.toString();
+        }
+      } else {
+        // Hosted checkout via PayLink (Card or Mobile Wallet)
+        try {
+          final initRes = await _paylinkDatasource.initCheckout(orderId: orderId);
+          final checkoutUrl = initRes['checkoutUrl'] as String;
+          final invoiceId = (initRes['invoiceId'] as num).toInt();
+
+          if (!mounted) return;
+          final result = await Navigator.of(context).push<PaylinkWebviewResult>(
+            MaterialPageRoute(
+              builder: (_) => PaylinkWebviewPage(
+                checkoutUrl: checkoutUrl,
+                expectedInvoiceId: invoiceId,
+              ),
             ),
-            backgroundColor: Colors.red,
-          ),
+          );
+
+          if (result != null && result.success) {
+            paymentSuccess = true;
+            transactionRef = invoiceId.toString();
+          } else {
+            paymentSuccess = false;
+            errorMessage = result?.message ?? 'Payment was cancelled or closed';
+          }
+        } catch (e) {
+          paymentSuccess = false;
+          errorMessage = e.toString();
+        }
+      }
+
+      if (!mounted) return;
+
+      if (paymentSuccess) {
+        // Payment verified! Now clear the cart atomically
+        await context.read<CartCubit>().clearCart();
+
+        try {
+          await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
+            'status': 'pending',
+            'paymentStatus': 'completed',
+            'paymentState': 'paid',
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        } catch (_) {}
+
+        await PaymentStatusSheet.show(
+          context: context,
+          type: PaymentStatusType.success,
+          transactionReference: transactionRef,
+          onPrimaryAction: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => OrderTrackingScreen(orderId: orderId),
+              ),
+            );
+          },
+        );
+      } else {
+        // Payment failed or was aborted by user: Cancel the order in Firestore immediately
+        try {
+          await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
+            'status': 'cancelled',
+            'paymentStatus': 'failed',
+            'paymentState': 'failed',
+            'cancellationReason': errorMessage ?? 'Online payment cancelled or failed',
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        } catch (_) {}
+
+        // Keep cart intact so user does not lose their selected food/items!
+        await PaymentStatusSheet.show(
+          context: context,
+          type: PaymentStatusType.failure,
+          rawReason: errorMessage,
         );
       }
     } finally {

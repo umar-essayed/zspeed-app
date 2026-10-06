@@ -413,8 +413,11 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       if (isClosed) return true;
       emit(state.copyWith(isSubmitting: false, submittedOrderId: orderId));
 
-      // Clear cart after successful order
-      await cartCubit.clearCart();
+      // Clear cart immediately ONLY for cash on delivery orders.
+      // For online payments (card, wallet), cart is preserved until payment succeeds!
+      if (state.paymentMethod == PaymentMethodType.cash) {
+        await cartCubit.clearCart();
+      }
 
       // Promo usage is now recorded atomically in the Cloud Function
       return true;

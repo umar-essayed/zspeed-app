@@ -352,6 +352,7 @@ export const placeOrder = onCall(
         const customerName = (userData?.name || userData?.displayName || userData?.fullName || userData?.userName || "").toString().trim();
         const customerPhone = (userData?.phone || userData?.phoneNumber || userData?.mobile || userData?.phone_number || "").toString().trim();
 
+        const isOnlinePayment = paymentMethod === "card" || paymentMethod === "wallet";
         const orderData: Record<string, any> = {
           id: orderRef.id,
           customerId: uid,
@@ -359,7 +360,7 @@ export const placeOrder = onCall(
           ...(customerPhone && { customerPhone }),
           vendorId,
           restaurantId: vendorId,
-          status: paymentMethod === "card" ? "pending_payment" : "pending",
+          status: isOnlinePayment ? "pending_payment" : "pending",
           paymentState: "unpaid",
           paymentStatus: "pending",
           paymentMethod,

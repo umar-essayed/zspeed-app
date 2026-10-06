@@ -104,12 +104,14 @@ class _PaylinkWebviewPageState extends State<PaylinkWebviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'PayLink Secure Checkout',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        title: Text(
+          isAr ? 'الدفع الإلكتروني الآمن' : 'Secure Payment',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
@@ -130,18 +132,18 @@ class _PaylinkWebviewPageState extends State<PaylinkWebviewPage> {
           if (_isLoading)
             Container(
               color: Colors.white.withValues(alpha: 0.8),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(
+                    const CircularProgressIndicator(
                       color: Color(0xFFF35535),
                       strokeWidth: 3,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      'Loading secure payment gateway...',
-                      style: TextStyle(
+                      isAr ? 'جاري فتح بوابة الدفع الآمنة...' : 'Loading secure checkout...',
+                      style: const TextStyle(
                         color: Colors.black87,
                         fontWeight: FontWeight.w600,
                       ),

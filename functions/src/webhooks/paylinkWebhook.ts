@@ -172,12 +172,13 @@ export const paylinkWebhook = onRequest(
             const vendorDoc = await db.collection("vendors").doc(vendorId).get();
             const ownerId = vendorDoc.data()?.ownerId;
             if (ownerId) {
+              const methodLabel = orderData?.paymentMethod === "wallet" ? "Wallet" : "Card";
               const title = "New Order (Paid)!";
-              const body = `${customerName} placed order #${orderId.substring(0, 8)} • Card`;
+              const body = `${customerName} placed order #${orderId.substring(0, 8)} • ${methodLabel}`;
               await sendPushToUser(ownerId, title, body, { orderId, screen: "restaurant_orders" });
               await storeNotification({
                 userId: ownerId,
-                type: "new_order_card_paid",
+                type: orderData?.paymentMethod === "wallet" ? "new_order_wallet_paid" : "new_order_card_paid",
                 title,
                 body,
                 data: { orderId },

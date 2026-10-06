@@ -95,17 +95,18 @@ export const onOrderCreated = onDocumentCreated(
         paymentMethod === "card" ? "Card" :
           paymentMethod === "wallet" ? "Wallet" : "COD";
 
-    // If card payment is still pending, DO NOT notify the vendor yet!
+    // If online payment (card or wallet) is still pending, DO NOT notify the vendor yet!
     // The vendor will be notified automatically once the payment succeeds (via webhook or charge).
+    const isOnlineMethod = paymentMethod === "card" || paymentMethod === "wallet";
     const isPaymentPending =
       order.status === "pending_payment" ||
-      (order.paymentMethod === "card" &&
+      (isOnlineMethod &&
         order.paymentStatus !== "completed" &&
         order.paymentState !== "paid");
 
     if (isPaymentPending) {
       logger.info(
-        `[onOrderCreated] Order ${orderId} is awaiting card payment. Skipping vendor notification until payment is confirmed.`
+        `[onOrderCreated] Order ${orderId} is awaiting online payment (${paymentMethod}). Skipping vendor notification until payment is confirmed.`
       );
       return;
     }

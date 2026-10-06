@@ -34,6 +34,16 @@ class PaylinkDatasource {
     return base64.encode(digest.bytes);
   }
 
+  Map<String, dynamic> _extractData(dynamic decodedJson) {
+    if (decodedJson is Map<String, dynamic>) {
+      if (decodedJson['data'] is Map<String, dynamic>) {
+        return decodedJson['data'] as Map<String, dynamic>;
+      }
+      return decodedJson;
+    }
+    return <String, dynamic>{};
+  }
+
   Future<Map<String, String>> _getCredentials() async {
     try {
       final doc = await _firestore.collection('sys_settings').doc('secrets').get();
@@ -153,17 +163,25 @@ class PaylinkDatasource {
     );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final checkoutUrl = data['checkout_url'] as String;
-      final invoiceId = (data['invoice_id'] as num).toInt();
-      final expiresAt = data['expires_at']?.toString() ?? '';
+      final resJson = jsonDecode(response.body);
+      final data = _extractData(resJson);
+      final checkoutUrl = (data['checkout_url'] ?? data['checkoutUrl'])?.toString() ?? '';
+      final invoiceId = (data['invoice_id'] ?? data['invoiceId'] as num?)?.toInt() ?? 0;
+      final expiresAt = (data['expires_at'] ?? data['expiresAt'])?.toString() ?? '';
+
+      if (checkoutUrl.isEmpty) {
+        String msg = 'PayLink returned empty checkout URL';
+        if (resJson is Map && resJson['message'] != null) {
+          msg = resJson['message'].toString();
+        }
+        throw Exception(msg);
+      }
 
       if (targetDocRef != null) {
         await targetDocRef.update({
           'paymentInvoiceId': invoiceId,
           'paymentInvoiceUrl': checkoutUrl,
           'paymentState': 'pending_gateway',
-          'paymentMethod': 'card',
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
@@ -174,7 +192,14 @@ class PaylinkDatasource {
         'expiresAt': expiresAt,
       };
     } else {
-      throw Exception('PayLink init error: ${response.statusCode} - ${response.body}');
+      String errMsg = 'PayLink init error: ${response.statusCode} - ${response.body}';
+      try {
+        final errJson = jsonDecode(response.body);
+        if (errJson is Map && errJson['message'] != null) {
+          errMsg = errJson['message'].toString();
+        }
+      } catch (_) {}
+      throw Exception(errMsg);
     }
   }
 
@@ -298,8 +323,18 @@ class PaylinkDatasource {
     );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final resData = jsonDecode(response.body) as Map<String, dynamic>;
-      final invoiceId = resData['invoice_id'] ?? DateTime.now().millisecondsSinceEpoch;
+      final resJson = jsonDecode(response.body);
+      final data = _extractData(resJson);
+      final invoiceId = (data['invoice_id'] ?? data['invoiceId'] as num?)?.toInt() ??
+          DateTime.now().millisecondsSinceEpoch;
+      final paidStatus = (data['paid_status'] ?? data['paidStatus'] ?? 'paid')
+          .toString()
+          .toUpperCase();
+
+      if (paidStatus != 'PAID') {
+        final reason = (data['message'] ?? data['reason_code'] ?? paidStatus).toString();
+        throw Exception('Payment not approved: $reason');
+      }
 
       if (targetDocRef != null) {
         await targetDocRef.update({
@@ -314,9 +349,17 @@ class PaylinkDatasource {
       return {
         'success': true,
         'invoiceId': invoiceId,
+        'paidStatus': paidStatus,
       };
     } else {
-      throw Exception('PayLink card charge error: ${response.statusCode} - ${response.body}');
+      String errMsg = 'PayLink card charge error: ${response.statusCode}';
+      try {
+        final errJson = jsonDecode(response.body);
+        if (errJson is Map && errJson['message'] != null) {
+          errMsg = errJson['message'].toString();
+        }
+      } catch (_) {}
+      throw Exception(errMsg);
     }
   }
 
@@ -438,21 +481,54 @@ class PaylinkDatasource {
     );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final resData = jsonDecode(response.body) as Map<String, dynamic>;
-      final token = resData['token'] as String;
+      final resJson = jsonDecode(response.body);
+      final data = _extractData(resJson);
 
-      final docRef = _firestore
+      final token = (data['token'] ??
+              data['card_token'] ??
+              (resJson is Map ? resJson['token'] : null))
+          ?.toString();
+
+      if (token == null || token.isEmpty) {
+        String msg = 'Card tokenization failed: Token not found in response';
+        if (resJson is Map && resJson['message'] != null) {
+          msg = resJson['message'].toString();
+        }
+        throw Exception(msg);
+      }
+
+      if (data['card'] is Map<String, dynamic>) {
+        final c = data['card'] as Map<String, dynamic>;
+        if (c['brand'] != null && c['brand'].toString().isNotEmpty) {
+          brand = c['brand'].toString();
+        }
+        if (c['last4'] != null && c['last4'].toString().isNotEmpty) {
+          last4 = c['last4'].toString();
+        }
+      }
+
+      final savedCardsCol = _firestore
           .collection('users')
           .doc(user.uid)
-          .collection('savedCards')
-          .doc();
+          .collection('savedCards');
+
+      if (setAsDefault) {
+        final existing = await savedCardsCol.where('isDefault', isEqualTo: true).get();
+        for (final doc in existing.docs) {
+          await doc.reference.update({'isDefault': false});
+        }
+      }
+
+      final docRef = savedCardsCol.doc();
 
       await docRef.set({
+        'id': docRef.id,
         'cardToken': token,
         'last4': last4,
         'brand': brand,
-        'expiryMonth': expMonth,
-        'expiryYear': expYear,
+        'expMonth': int.tryParse(expMonth) ?? 12,
+        'expYear': int.tryParse(expYear) ?? 2030,
+        'holderName': '$firstName $lastName'.trim(),
         'isDefault': setAsDefault,
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -465,7 +541,14 @@ class PaylinkDatasource {
         'brand': brand,
       };
     } else {
-      throw Exception('Card tokenization failed: ${response.statusCode} - ${response.body}');
+      String errMsg = 'Card tokenization failed: ${response.statusCode}';
+      try {
+        final errJson = jsonDecode(response.body);
+        if (errJson is Map && errJson['message'] != null) {
+          errMsg = errJson['message'].toString();
+        }
+      } catch (_) {}
+      throw Exception(errMsg);
     }
   }
 

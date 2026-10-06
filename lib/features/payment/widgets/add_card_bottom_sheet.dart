@@ -38,15 +38,44 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
     super.dispose();
   }
 
+  String _mapErrorMessage(String error, bool isAr) {
+    final lower = error.toLowerCase();
+    if (lower.contains('declined') || lower.contains('202')) {
+      return isAr
+          ? 'تم رفض البطاقة من قبل البنك المصدر. يرجى مراجعة البنك أو تجربة بطاقة أخرى.'
+          : 'Card was declined by issuing bank. Please contact your bank or try another card.';
+    }
+    if (lower.contains('unsupported') || lower.contains('brand')) {
+      return isAr
+          ? 'نوع هذه البطاقة غير مدعوم حالياً. يرجى استخدام فيزا، ماستركارد، أو ميزة.'
+          : 'This card brand is currently unsupported. Please use Visa, MasterCard, or Meeza.';
+    }
+    if (lower.contains('expired') || lower.contains('expiry')) {
+      return isAr
+          ? 'تاريخ انتهاء البطاقة غير صحيح أو البطاقة منتهية الصلاحية.'
+          : 'Invalid expiry date or card has expired.';
+    }
+    if (lower.contains('cvv') || lower.contains('security')) {
+      return isAr
+          ? 'رمز الأمان CVV غير صحيح.'
+          : 'Invalid CVV security code.';
+    }
+    return isAr
+        ? 'تعذر حفظ البطاقة. يرجى التحقق من صحة البيانات والمحاولة مجدداً.'
+        : 'Failed to save card. Please check details and try again.';
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
     setState(() => _isLoading = true);
 
     try {
       final nameParts = _nameController.text.trim().split(' ');
       final firstName = nameParts.first;
-      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Cardholder';
+      final lastName =
+          nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Cardholder';
 
       final expiryParts = _expiryController.text.trim().split('/');
       final expMonth = expiryParts[0].trim().padLeft(2, '0');
@@ -55,7 +84,8 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
         expYear = '20$expYear';
       }
 
-      final rawCardNumber = _cardNumberController.text.replaceAll(' ', '').trim();
+      final rawCardNumber =
+          _cardNumberController.text.replaceAll(' ', '').trim();
       final cvv = _cvvController.text.trim();
 
       await widget.datasource.saveCard(
@@ -73,10 +103,12 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
+        final friendlyMsg = _mapErrorMessage(e.toString(), isAr);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save card: $e'),
+            content: Text(friendlyMsg),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -90,6 +122,7 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
   @override
   Widget build(BuildContext context) {
     const orange = Color(0xFFF35535);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return Container(
       decoration: const BoxDecoration(
@@ -120,13 +153,13 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.credit_card, color: orange, size: 24),
-                  SizedBox(width: 10),
+                  const Icon(Icons.credit_card, color: orange, size: 24),
+                  const SizedBox(width: 10),
                   Text(
-                    'Add New Card',
-                    style: TextStyle(
+                    isAr ? 'إضافة بطاقة دفع جديدة' : 'Add New Card',
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF2D3748),
@@ -141,13 +174,15 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                  labelText: 'Cardholder Name',
-                  hintText: 'e.g. John Doe',
+                  labelText: isAr ? 'اسم صاحب البطاقة' : 'Cardholder Name',
+                  hintText: isAr ? 'مثال: محمد أحمد' : 'e.g. John Doe',
                   prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                validator: (val) =>
-                    (val == null || val.trim().isEmpty) ? 'Please enter cardholder name' : null,
+                validator: (val) => (val == null || val.trim().isEmpty)
+                    ? (isAr ? 'يرجى إدخال اسم صاحب البطاقة' : 'Please enter cardholder name')
+                    : null,
               ),
               const SizedBox(height: 14),
 
@@ -161,15 +196,18 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                   _CardNumberFormatter(),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Card Number',
+                  labelText: isAr ? 'رقم البطاقة' : 'Card Number',
                   hintText: '4111 1111 1111 1111',
                   prefixIcon: const Icon(Icons.payment_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 validator: (val) {
                   final digits = val?.replaceAll(' ', '') ?? '';
                   if (digits.length < 13 || digits.length > 19) {
-                    return 'Please enter a valid card number';
+                    return isAr
+                        ? 'يرجى إدخال رقم بطاقة صحيح'
+                        : 'Please enter a valid card number';
                   }
                   return null;
                 },
@@ -189,14 +227,15 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                         _ExpiryDateFormatter(),
                       ],
                       decoration: InputDecoration(
-                        labelText: 'Expiry (MM/YY)',
+                        labelText: isAr ? 'الانتهاء (MM/YY)' : 'Expiry (MM/YY)',
                         hintText: '12/28',
                         prefixIcon: const Icon(Icons.calendar_today_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (val) {
                         if (val == null || !val.contains('/') || val.length < 5) {
-                          return 'MM/YY required';
+                          return isAr ? 'تاريخ غير صالح' : 'MM/YY required';
                         }
                         return null;
                       },
@@ -213,14 +252,15 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                         LengthLimitingTextInputFormatter(4),
                       ],
                       decoration: InputDecoration(
-                        labelText: 'CVV',
+                        labelText: isAr ? 'رمز الأمان (CVV)' : 'CVV',
                         hintText: '123',
                         prefixIcon: const Icon(Icons.lock_outline),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (val) {
                         if (val == null || val.length < 3) {
-                          return 'CVV required';
+                          return isAr ? 'رمز CVV مطلوب' : 'CVV required';
                         }
                         return null;
                       },
@@ -236,11 +276,15 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                   Checkbox(
                     value: _setAsDefault,
                     activeColor: orange,
-                    onChanged: (val) => setState(() => _setAsDefault = val ?? false),
+                    onChanged: (val) =>
+                        setState(() => _setAsDefault = val ?? false),
                   ),
-                  const Text(
-                    'Set as default payment card',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  Text(
+                    isAr
+                        ? 'تعيين كبطاقة دفع افتراضية'
+                        : 'Set as default payment card',
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -255,17 +299,22 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: orange,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                   ),
                   child: _isLoading
                       ? const SizedBox(
                           width: 22,
                           height: 22,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2.5),
                         )
-                      : const Text(
-                          'Save & Use Card',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      : Text(
+                          isAr
+                              ? 'حفظ البطاقة واستخدامها'
+                              : 'Save & Use Card',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
@@ -279,7 +328,8 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
 
 class _CardNumberFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
     final text = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
     for (int i = 0; i < text.length; i++) {
@@ -296,7 +346,8 @@ class _CardNumberFormatter extends TextInputFormatter {
 
 class _ExpiryDateFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
     final text = newValue.text.replaceAll('/', '');
     final buffer = StringBuffer();
     for (int i = 0; i < text.length; i++) {
