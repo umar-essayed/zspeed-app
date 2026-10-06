@@ -428,7 +428,7 @@ class PaylinkDatasource {
     final hashToken = creds['hashToken']!;
 
     final cleanCard = cardNumber.replaceAll(RegExp(r'\D'), '');
-    final last4 = cleanCard.length >= 4 ? cleanCard.substring(cleanCard.length - 4) : cleanCard;
+    String last4 = cleanCard.length >= 4 ? cleanCard.substring(cleanCard.length - 4) : cleanCard;
     final expMonth = cardExpiryMonth.padLeft(2, '0');
     final expYear = cardExpiryYear.length == 2 ? '20$cardExpiryYear' : cardExpiryYear;
 
