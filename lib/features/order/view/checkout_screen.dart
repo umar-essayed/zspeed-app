@@ -2012,21 +2012,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // Clear the cart atomically now that payment and order are complete
       await context.read<CartCubit>().clearCart();
 
+      // Ensure user navigates to OrderTrackingScreen and CheckoutScreen is popped/replaced
+      bool navigated = false;
+      void navigateToTracking() {
+        if (navigated || !mounted) return;
+        navigated = true;
+        if (orderId != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => OrderTrackingScreen(orderId: orderId),
+            ),
+          );
+        } else {
+          Navigator.of(context).pop();
+        }
+      }
+
       await PaymentStatusSheet.show(
         context: context,
         type: PaymentStatusType.success,
         transactionReference: transactionRef,
         onPrimaryAction: () {
-          Navigator.of(context).pop();
-          if (orderId != null) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => OrderTrackingScreen(orderId: orderId),
-              ),
-            );
-          }
+          navigateToTracking();
         },
       );
+
+      // In case sheet was dismissed via swipe down or backdrop tap:
+      if (!navigated && mounted) {
+        navigateToTracking();
+      }
     } finally {
       if (mounted) {
         setState(() {

@@ -27,6 +27,15 @@ class PaylinkDatasource {
   })  : _functions = functions ?? FirebaseFunctions.instance,
         _firestore = firestore ?? FirebaseFirestore.instance;
 
+  String _sanitizeName(String? raw, String fallback) {
+    if (raw == null) return fallback;
+    final cleaned = raw
+        .replaceAll(RegExp(r'[^a-zA-Z\u0600-\u06FF\s]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return cleaned.isNotEmpty ? cleaned : fallback;
+  }
+
   String _buildSignature(List<String> values, String hashToken) {
     final concatenated = values.join();
     final hmac = Hmac(sha256, utf8.encode(hashToken));
@@ -194,8 +203,10 @@ class PaylinkDatasource {
     if (cAddress.isEmpty) cAddress = 'Cairo';
 
     final nameParts = cName.trim().split(RegExp(r'\s+'));
-    final firstName = nameParts.first.isNotEmpty ? nameParts.first : 'Valued';
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Customer';
+    final rawFirst = nameParts.first.isNotEmpty ? nameParts.first : 'Valued';
+    final rawLast = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Customer';
+    final firstName = _sanitizeName(rawFirst, 'Valued');
+    final lastName = _sanitizeName(rawLast, 'Customer');
     final orderAmountStr = finalAmount.toStringAsFixed(2);
 
     // Build signature according to PayLink v2 init spec:
@@ -486,8 +497,10 @@ class PaylinkDatasource {
     } catch (_) {}
 
     final nameParts = (customerName.isNotEmpty ? customerName : 'Valued Customer').trim().split(RegExp(r'\s+'));
-    final firstName = nameParts.first.isNotEmpty ? nameParts.first : 'Valued';
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Customer';
+    final rawFirst = nameParts.first.isNotEmpty ? nameParts.first : 'Valued';
+    final rawLast = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Customer';
+    final firstName = _sanitizeName(rawFirst, 'Valued');
+    final lastName = _sanitizeName(rawLast, 'Customer');
     final priceStr = finalAmount.toStringAsFixed(2);
     final refNum = (orderId ?? rideId ?? 'ref_${DateTime.now().millisecondsSinceEpoch}').substring(0, 16);
     final email = user.email ?? 'customer_${user.uid.substring(0, user.uid.length >= 6 ? 6 : user.uid.length)}@zspeed.app';
@@ -640,6 +653,8 @@ class PaylinkDatasource {
     final publicToken = creds['publicToken']!;
     final hashToken = creds['hashToken']!;
 
+    final cleanFirstName = _sanitizeName(firstName, 'Valued');
+    final cleanLastName = _sanitizeName(lastName, 'Customer');
     final cleanCard = cardNumber.replaceAll(RegExp(r'\D'), '');
     String last4 = cleanCard.length >= 4 ? cleanCard.substring(cleanCard.length - 4) : cleanCard;
     final expMonth = cardExpiryMonth.padLeft(2, '0');
@@ -658,8 +673,8 @@ class PaylinkDatasource {
 
     // Build signature according to CARD_TOKENIZE
     final signedValues = [
-      firstName,
-      lastName,
+      cleanFirstName,
+      cleanLastName,
       email,
       cleanCard,
       expMonth,
@@ -674,8 +689,8 @@ class PaylinkDatasource {
 
     final payload = {
       'token': publicToken,
-      'first_name': firstName,
-      'last_name': lastName,
+      'first_name': cleanFirstName,
+      'last_name': cleanLastName,
       'email': email,
       'card_number': cleanCard,
       'card_expiry_month': expMonth,
