@@ -559,6 +559,9 @@ class PaylinkDatasource {
               data['redirectUrl'] ??
               data['url'])
           ?.toString();
+      final paidStatus = (data['paid_status'] ?? data['paidStatus'] ?? 'paid')
+          .toString()
+          .toUpperCase();
 
       if (paidStatus != 'PAID') {
         if (checkoutUrl != null && checkoutUrl.isNotEmpty) {

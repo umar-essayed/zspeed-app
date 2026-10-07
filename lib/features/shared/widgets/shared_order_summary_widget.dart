@@ -1,5 +1,6 @@
 import 'package:z_speed/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:z_speed/core/enums/order_enums.dart';
 import 'package:z_speed/features/order/model/order.dart';
 import 'package:z_speed/features/order/model/order_item.dart';
 
