@@ -949,14 +949,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Expanded(
               child: _buildPaymentCardWrapper(
                 isSelected: state.paymentMethod == PaymentMethodType.wallet,
-                isEnabled: true,
+                isEnabled: false,
                 child: _buildHorizontalPaymentOption(
                   cubit,
                   state,
                   PaymentMethodType.wallet,
                   AppLocalizations.of(context)!.mobileWallet,
                   Icons.account_balance_wallet_outlined,
-                  enabled: true,
+                  enabled: false,
+                  badge: AppLocalizations.of(context)!.localeName == 'ar' ? 'قريباً' : 'Soon',
                 ),
               ),
             ),
@@ -1894,58 +1895,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               if (statusCheck['isPaid'] == true) {
                 paymentSuccess = true;
                 transactionRef = inv.toString();
+              } else {
+                paymentSuccess = false;
+                errorMessage = res['message']?.toString() ?? 'Card charge was not approved';
               }
+            } else {
+              paymentSuccess = false;
+              errorMessage = res['message']?.toString() ?? 'Card charge was not approved';
             }
           }
-        } catch (_) {
-          // Direct token charge failed or requires 3D Secure / OTP verification
+        } catch (e) {
           paymentSuccess = false;
-        }
-
-        // If direct token charge was not approved, seamlessly fall back to hosted checkout!
-        if (!paymentSuccess && mounted) {
-          try {
-            final initRes = await _paylinkDatasource.initCheckout(
-              amount: state.total,
-              orderTitle: 'Z-SPEED Order (${state.restaurantName})',
-            );
-            final checkoutUrl = initRes['checkoutUrl']?.toString() ?? '';
-            final rawInvoiceId = initRes['invoiceId'];
-            final invoiceId = rawInvoiceId is num
-                ? rawInvoiceId.toInt()
-                : (int.tryParse(rawInvoiceId?.toString() ?? '') ?? 0);
-
-            if (checkoutUrl.isNotEmpty && mounted) {
-              final result = await Navigator.of(context).push<PaylinkWebviewResult>(
-                MaterialPageRoute(
-                  builder: (_) => PaylinkWebviewPage(
-                    checkoutUrl: checkoutUrl,
-                    expectedInvoiceId: invoiceId,
-                  ),
-                ),
-              );
-
-              if (result != null && result.success) {
-                paymentSuccess = true;
-                transactionRef = (result.invoiceId != 0 ? result.invoiceId : invoiceId).toString();
-              } else if (invoiceId > 0) {
-                final statusCheck = await _paylinkDatasource.checkPaymentStatus(invoiceId);
-                if (statusCheck['isPaid'] == true) {
-                  paymentSuccess = true;
-                  transactionRef = invoiceId.toString();
-                } else {
-                  paymentSuccess = false;
-                  errorMessage = result?.message ??
-                      (Localizations.localeOf(context).languageCode == 'ar'
-                          ? 'تم إلغاء عملية الدفع أو لم تكتمل.'
-                          : 'Payment was cancelled or closed.');
-                }
-              }
-            }
-          } catch (e) {
-            paymentSuccess = false;
-            errorMessage = e.toString().replaceFirst('Exception: ', '');
-          }
+          errorMessage = e.toString().replaceFirst('Exception: ', '');
         }
       } else {
         // Hosted checkout via PayLink (Card or Mobile Wallet)
@@ -1953,6 +1914,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           final initRes = await _paylinkDatasource.initCheckout(
             amount: state.total,
             orderTitle: 'Z-SPEED Order (${state.restaurantName})',
+            customerAddress: state.deliveryAddress,
           );
           final checkoutUrl = initRes['checkoutUrl']?.toString() ?? '';
           final rawInvoiceId = initRes['invoiceId'];

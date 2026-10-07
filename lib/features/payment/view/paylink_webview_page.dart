@@ -245,32 +245,6 @@ class _PaylinkWebviewPageState extends State<PaylinkWebviewPage> {
               }
             },
           ),
-          actions: [
-            if (_isVerifying)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF35535)),
-                  ),
-                ),
-              )
-            else
-              TextButton.icon(
-                onPressed: () => _verifyAndPop(silent: false),
-                icon: const Icon(Icons.check_circle_outline, color: Color(0xFFF35535), size: 18),
-                label: Text(
-                  isAr ? 'تأكيد الدفع' : 'Verify',
-                  style: const TextStyle(
-                    color: Color(0xFFF35535),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-          ],
         ),
       body: Stack(
         children: [

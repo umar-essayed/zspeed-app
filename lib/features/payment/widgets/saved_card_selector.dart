@@ -248,7 +248,9 @@ class SavedCardSelector extends StatelessWidget {
                   size: 26,
                 ),
                 title: Text(
-                  isAr ? 'الدفع بالكارت' : 'Pay with Card',
+                  cards.isNotEmpty
+                      ? (isAr ? 'الدفع ببطاقة أخرى أو جديدة' : 'Pay with another card')
+                      : (isAr ? 'الدفع بالبطاقة البنكية' : 'Pay with Card'),
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 14),
                 ),
@@ -263,7 +265,9 @@ class SavedCardSelector extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        isAr ? 'دفع آمن ومحمي' : 'Secure Payment',
+                        cards.isNotEmpty
+                            ? (isAr ? 'إدخال بيانات بطاقة جديدة' : 'Enter new card details')
+                            : (isAr ? 'دفع آمن ومحمي' : 'Secure Payment'),
                         style: const TextStyle(
                           color: Colors.green,
                           fontSize: 12,

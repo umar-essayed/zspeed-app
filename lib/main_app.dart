@@ -398,46 +398,42 @@ class _MainAppState extends State<MainApp> {
                   ],
                 ),
               ),
-              bottomNavigationBar: ValueListenableBuilder<bool>(
-                valueListenable: _isScrollingNotifier,
-                builder: (context, isScrolling, _) => CustomerBottomBar(
-                  isScrolling: isScrolling,
-                  activeView: _activeViewString,
-                  cartItemCount: context.watch<CartCubit>().state.items.length,
-                  onHome: () {
-                    if (!_shouldShowBottomBar) {
-                      _goHome();
-                    } else {
-                      _onTabTapped(0);
-                    }
-                  },
-                  onBrowse: () => _onTabTapped(1),
-                  onCart: () {
-                    final authState = context.read<AuthCubit>().state;
-                    if (authState.isGuest) {
-                      GuestAuthPrompt.show(
-                        context,
-                        actionLabel: AppLocalizations.of(context)!.viewCart,
-                      );
-                    } else {
-                      _onTabTapped(2);
-                    }
-                  },
-                  onTrack: () {
-                    final authState = context.read<AuthCubit>().state;
-                    if (authState.isGuest) {
-                      GuestAuthPrompt.show(
-                        context,
-                        actionLabel: AppLocalizations.of(context)!.viewOrders,
-                      );
-                    } else {
-                      _onTabTapped(3);
-                    }
-                  },
-                  showOnlyHome: !_shouldShowBottomBar,
-                  hideBottomBar: _isTransportScreen,
-                ),
-              ),
+              bottomNavigationBar: !_shouldShowBottomBar
+                  ? null
+                  : ValueListenableBuilder<bool>(
+                      valueListenable: _isScrollingNotifier,
+                      builder: (context, isScrolling, _) => CustomerBottomBar(
+                        isScrolling: isScrolling,
+                        activeView: _activeViewString,
+                        cartItemCount: context.watch<CartCubit>().state.items.length,
+                        onHome: () => _onTabTapped(0),
+                        onBrowse: () => _onTabTapped(1),
+                        onCart: () {
+                          final authState = context.read<AuthCubit>().state;
+                          if (authState.isGuest) {
+                            GuestAuthPrompt.show(
+                              context,
+                              actionLabel: AppLocalizations.of(context)!.viewCart,
+                            );
+                          } else {
+                            _onTabTapped(2);
+                          }
+                        },
+                        onTrack: () {
+                          final authState = context.read<AuthCubit>().state;
+                          if (authState.isGuest) {
+                            GuestAuthPrompt.show(
+                              context,
+                              actionLabel: AppLocalizations.of(context)!.viewOrders,
+                            );
+                          } else {
+                            _onTabTapped(3);
+                          }
+                        },
+                        showOnlyHome: false,
+                        hideBottomBar: _isTransportScreen,
+                      ),
+                    ),
             ),
           );
         },
