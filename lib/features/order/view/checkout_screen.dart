@@ -1887,6 +1887,45 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           if (res['success'] == true || paidStatus == 'PAID') {
             paymentSuccess = true;
             transactionRef = res['invoiceId']?.toString();
+          } else if (res['requires3DS'] == true &&
+              res['checkoutUrl'] != null &&
+              res['checkoutUrl'].toString().isNotEmpty) {
+            // 3D Secure verification window (OTP / Bank SMS)
+            final invId = (res['invoiceId'] as num?)?.toInt() ?? 0;
+            if (!mounted) return;
+            final result = await Navigator.of(context).push<PaylinkWebviewResult>(
+              MaterialPageRoute(
+                builder: (_) => PaylinkWebviewPage(
+                  checkoutUrl: res['checkoutUrl'].toString(),
+                  expectedInvoiceId: invId,
+                ),
+              ),
+            );
+
+            if (result != null && result.success) {
+              paymentSuccess = true;
+              transactionRef = (result.invoiceId != 0 ? result.invoiceId : invId).toString();
+            } else {
+              if (invId > 0) {
+                final statusCheck = await _paylinkDatasource.checkPaymentStatus(invId);
+                if (statusCheck['isPaid'] == true) {
+                  paymentSuccess = true;
+                  transactionRef = invId.toString();
+                } else {
+                  paymentSuccess = false;
+                  errorMessage = result?.message ??
+                      (Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'لم تكتمل عملية التحقق من البطاقة.'
+                          : 'Card verification was not completed.');
+                }
+              } else {
+                paymentSuccess = false;
+                errorMessage = result?.message ??
+                    (Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'لم تكتمل عملية التحقق من البطاقة.'
+                        : 'Card verification was not completed.');
+              }
+            }
           } else {
             final rawInv = res['invoiceId'];
             final inv = rawInv is num ? rawInv.toInt() : (int.tryParse(rawInv?.toString() ?? '') ?? 0);

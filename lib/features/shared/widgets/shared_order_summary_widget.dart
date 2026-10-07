@@ -152,6 +152,74 @@ class SharedOrderSummaryWidget extends StatelessWidget {
                 ),
               ],
             ),
+            if (order.paymentStatus == PaymentStatus.completed &&
+                (order.paymentMethod == PaymentMethodType.card ||
+                    order.paymentMethod == PaymentMethodType.wallet)) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        order.paymentMethod == PaymentMethodType.card
+                            ? Icons.credit_card_rounded
+                            : Icons.account_balance_wallet_rounded,
+                        size: 16,
+                        color: const Color(0xFF16A34A),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? (order.paymentMethod == PaymentMethodType.card
+                                ? 'المدفوع إلكترونياً بالبطاقة'
+                                : 'المدفوع من المحفظة')
+                            : (order.paymentMethod == PaymentMethodType.card
+                                ? 'Paid by Card'
+                                : 'Paid by Wallet'),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF16A34A),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '-${AppLocalizations.of(context)!.egpAmount(order.total.toStringAsFixed(2))}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF16A34A),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'المتبقي للدفع عند الاستلام'
+                        : 'Remaining on Delivery',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.egpAmount('0.00'),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             if (order.customerNote != null &&
                 order.customerNote!.isNotEmpty) ...[
               const SizedBox(height: 16),

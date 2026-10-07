@@ -553,11 +553,24 @@ class PaylinkDatasource {
       final invoiceId = rawInvoiceId is num
           ? rawInvoiceId.toInt()
           : (int.tryParse(rawInvoiceId?.toString() ?? '') ?? DateTime.now().millisecondsSinceEpoch);
-      final paidStatus = (data['paid_status'] ?? data['paidStatus'] ?? 'paid')
-          .toString()
-          .toUpperCase();
+      final checkoutUrl = (data['checkout_url'] ??
+              data['checkoutUrl'] ??
+              data['redirect_url'] ??
+              data['redirectUrl'] ??
+              data['url'])
+          ?.toString();
 
       if (paidStatus != 'PAID') {
+        if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+          // 3DS Verification required!
+          return {
+            'success': false,
+            'requires3DS': true,
+            'checkoutUrl': checkoutUrl,
+            'invoiceId': invoiceId,
+            'paidStatus': paidStatus,
+          };
+        }
         final reason = (data['message'] ?? data['reason_code'] ?? paidStatus).toString();
         throw Exception('Payment not approved: $reason');
       }

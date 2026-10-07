@@ -215,33 +215,6 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                   return null;
                 },
               ),
-              const SizedBox(height: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        isAr
-                            ? 'كروت الفحص المقبولة فورياً: 4111 1111 1111 1111 أو 4242 4242 4242 4242'
-                            : 'Test cards for instant approval: 4111 1111 1111 1111 or 4242 4242 4242 4242',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.blue.shade800,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 12),
 
               // Expiry & CVV

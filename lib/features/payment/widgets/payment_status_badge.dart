@@ -48,7 +48,7 @@ class PaymentStatusBadge extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           Text(
-            _getStatusText(status),
+            _getStatusText(context, status),
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.w600,
@@ -60,16 +60,17 @@ class PaymentStatusBadge extends StatelessWidget {
     );
   }
 
-  String _getStatusText(PaymentStatus status) {
+  String _getStatusText(BuildContext context, PaymentStatus status) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
     switch (status) {
       case PaymentStatus.pending:
-        return 'Pending';
+        return isAr ? 'معلق' : 'Pending';
       case PaymentStatus.completed:
-        return 'Paid';
+        return isAr ? 'مدفوع' : 'Paid';
       case PaymentStatus.failed:
-        return 'Failed';
+        return isAr ? 'فشل الدفع' : 'Failed';
       case PaymentStatus.refunded:
-        return 'Refunded';
+        return isAr ? 'مسترد' : 'Refunded';
     }
   }
 
